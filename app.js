@@ -286,8 +286,9 @@ const nightEvents = [
 function initGame() {
 console.log('Initializing Dice & Castle...');
 try {
-loadGame();
-updateUI();
+    loadGame();
+    setupResourceBar();
+    updateUI();
 setupEventListeners();
 console.log('Game initialized successfully!');
 
@@ -942,6 +943,7 @@ document.getElementById('season').textContent = `${seasons[gameState.season].ico
 Object.keys(gameState.resources).forEach(resource => {
     document.getElementById(resource).textContent = gameState.resources[resource];
 });
+updateResourceBar();
 
 const prod = calculateDailyProduction();
 const prodParts = [`+${prod.food} food`, `+${prod.stone} stone`, `+${prod.metal} metal`, `+${prod.tools} tools`];
@@ -1123,6 +1125,22 @@ gameState.eventLog.forEach(entry => {
     logContent.appendChild(div);
 });
 
+}
+
+function setupResourceBar() {
+    const bar = document.getElementById('resource-bar');
+    if (!bar) return;
+    bar.innerHTML = Object.keys(gameState.resources).map(r => {
+        const icon = getResourceIcon(r);
+        return `<div class="resource"><span class="resource-icon">${icon}</span><span class="resource-amount" id="bar-${r}">${gameState.resources[r]}</span></div>`;
+    }).join('');
+}
+
+function updateResourceBar() {
+    Object.keys(gameState.resources).forEach(r => {
+        const el = document.getElementById(`bar-${r}`);
+        if (el) el.textContent = gameState.resources[r];
+    });
 }
 
 function getResourceIcon(resource) {
