@@ -102,6 +102,143 @@ master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
 }
 };
 
+const nightEvents = [
+    {
+        name: 'Peaceful night',
+        type: 'neutral',
+        effect: () => ({ message: '🌙 A peaceful night passes without incident.', type: 'neutral' })
+    },
+    {
+        name: 'Strange noises',
+        type: 'neutral',
+        effect: () => ({ message: '👻 Strange noises kept you awake, but nothing happened.', type: 'neutral' })
+    },
+    {
+        name: 'Friendly neighbor',
+        type: 'good',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '🤝 Met a friendly neighbor, but nothing came of it.', type: 'neutral' };
+            }
+            const gain = Math.ceil(severity / 5);
+            gameState.resources.wood += gain;
+            gameState.resources.food += gain;
+            return { message: `🤝 Friendly neighbor shared supplies (+${gain} wood, +${gain} food).`, type: 'success' };
+        }
+    },
+    {
+        name: 'Hidden cache',
+        type: 'good',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '🧰 You found signs of a cache, but it was empty.', type: 'neutral' };
+            }
+            const gain = Math.ceil(severity / 5);
+            gameState.resources.wood += gain;
+            gameState.resources.stone += gain;
+            gameState.resources.metal += Math.floor(gain / 2);
+            return { message: `🧰 Discovered a hidden cache: +${gain} wood, +${gain} stone, +${Math.floor(gain / 2)} metal.`, type: 'success' };
+        }
+    },
+    {
+        name: 'Traveling merchant',
+        type: 'good',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '🧑‍💼 A traveling merchant passed by but had nothing to trade.', type: 'neutral' };
+            }
+            const gain = Math.ceil(severity / 5);
+            gameState.resources.food += gain;
+            gameState.resources.stone += gain;
+            return { message: `🧑‍💼 A traveling merchant traded goods: +${gain} food, +${gain} stone.`, type: 'success' };
+        }
+    },
+    {
+        name: 'Skilled builder',
+        type: 'good',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '👷‍♂️ A skilled builder offered no help.', type: 'neutral' };
+            }
+            const gain = Math.ceil(severity / 5);
+            gameState.resources.wood += gain;
+            gameState.resources.stone += gain;
+            return { message: `👷‍♂️ A skilled builder assisted you (+${gain} wood, +${gain} stone).`, type: 'success' };
+        }
+    },
+    {
+        name: 'Thieves',
+        type: 'bad',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '🦹 Thieves tried to rob you but were caught.', type: 'neutral' };
+            }
+            const loss = Math.ceil(severity / 5);
+            gameState.resources.wood = Math.max(0, gameState.resources.wood - loss);
+            gameState.resources.food = Math.max(0, gameState.resources.food - loss);
+            return { message: `🦹 Thieves stole ${loss} wood and ${loss} food.`, type: 'failure' };
+        }
+    },
+    {
+        name: 'Enemy raid',
+        type: 'bad',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '⚔️ An enemy raid was easily repelled.', type: 'neutral' };
+            }
+            const loss = Math.ceil(severity / 4);
+            gameState.resources.food = Math.max(0, gameState.resources.food - loss);
+            gameState.resources.stone = Math.max(0, gameState.resources.stone - loss);
+            return { message: `⚔️ Enemies raided your camp, costing ${loss} food and ${loss} stone.`, type: 'failure' };
+        }
+    },
+    {
+        name: 'Fire',
+        type: 'bad',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '🔥 A small fire caused no real harm.', type: 'neutral' };
+            }
+            const loss = Math.ceil(severity / 4);
+            gameState.resources.wood = Math.max(0, gameState.resources.wood - loss);
+            return { message: `🔥 Fire damaged supplies: -${loss} wood.`, type: 'failure' };
+        }
+    },
+    {
+        name: 'Disease outbreak',
+        type: 'bad',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '🤒 A mild sickness passed quickly.', type: 'neutral' };
+            }
+            const loss = Math.ceil(severity / 4);
+            gameState.resources.food = Math.max(0, gameState.resources.food - loss);
+            return { message: `🤒 Disease swept the camp, using ${loss} food for medicine.`, type: 'failure' };
+        }
+    },
+    {
+        name: 'Dragon attack',
+        type: 'bad',
+        effect: (severity) => {
+            if (severity === 1) {
+                return { message: '🐉 A dragon appeared but was driven off with minimal damage.', type: 'neutral' };
+            }
+            const loss = Math.ceil(severity / 3);
+            gameState.resources.wood = Math.max(0, gameState.resources.wood - loss);
+            gameState.resources.stone = Math.max(0, gameState.resources.stone - loss);
+            if (severity === 20) {
+                if (gameState.settlement.farms.length > 0) {
+                    gameState.settlement.farms.pop();
+                    return { message: '🐉 The dragon destroyed one of your farms!', type: 'failure' };
+                }
+                damageWalls();
+                return { message: '🐉 The dragon obliterated your walls!', type: 'failure' };
+            }
+            return { message: `🐉 Dragon attack! Lost ${loss} wood and ${loss} stone.`, type: 'failure' };
+        }
+    }
+];
+
 // Initialize game
 function initGame() {
 console.log('Initializing Dice & Castle...');
@@ -330,38 +467,21 @@ return { rewards, xp, message, type };
 
 // Sleep and day progression
 function sleep() {
-// Overnight event
-const eventRoll = rollDice();
-let eventMessage = '';
-let eventType = 'neutral';
+    // Overnight event using 2d6 for event and d20 for severity
+    const d1 = rollDice(6);
+    const d2 = rollDice(6);
+    const eventIndex = (((d1 - 1) * 6 + (d2 - 1)) % nightEvents.length);
+    const severity = rollDice(20);
 
-if (eventRoll <= 5) {
-    // Bad event
-    const badEvents = [
-        { message: '🌧️ Heavy rain damaged your supplies!', effect: () => { gameState.resources.wood = Math.max(0, gameState.resources.wood - 2); } },
-        { message: '🐺 Wolves attacked your settlement!', effect: () => { gameState.resources.food = Math.max(0, gameState.resources.food - 3); } },
-        { message: '⛈️ A storm scattered your materials!', effect: () => { gameState.resources.stone = Math.max(0, gameState.resources.stone - 1); } }
-    ];
-    const event = badEvents[Math.floor(Math.random() * badEvents.length)];
-    event.effect();
-    eventMessage = event.message;
-    eventType = 'failure';
-} else if (eventRoll >= 16) {
-    // Good event
-    const goodEvents = [
-        { message: '🌟 Friendly travelers shared supplies!', effect: () => { gameState.resources.food += 2; gameState.resources.wood += 1; } },
-        { message: '💎 You found precious materials!', effect: () => { gameState.resources.metal += 1; gameState.resources.stone += 2; } },
-        { message: '🎁 A merchant gave you gifts!', effect: () => { gameState.resources.wood += 3; gainXP(25); } }
-    ];
-    const event = goodEvents[Math.floor(Math.random() * goodEvents.length)];
-    event.effect();
-    eventMessage = event.message;
-    eventType = 'success';
-} else {
-    // Neutral event
-    eventMessage = '🌙 You had a peaceful night\'s rest.';
-    eventType = 'neutral';
-}
+    let eventMessage = '';
+    let eventType = 'neutral';
+
+    const nightEvent = nightEvents[eventIndex];
+    if (nightEvent && typeof nightEvent.effect === 'function') {
+        const result = nightEvent.effect(severity);
+        eventMessage = result.message;
+        eventType = result.type || nightEvent.type;
+    }
 
 // Daily production from buildings
 let totalFoodProduction = 0;
@@ -505,8 +625,8 @@ saveGame();
 }
 
 // Helper functions
-function rollDice() {
-return Math.floor(Math.random() * 20) + 1;
+function rollDice(sides = 20) {
+    return Math.floor(Math.random() * sides) + 1;
 }
 
 function canAfford(cost) {
@@ -519,6 +639,14 @@ function spendResources(cost) {
 Object.keys(cost).forEach(resource => {
 gameState.resources[resource] -= cost[resource];
 });
+}
+
+function damageWalls() {
+    const order = ['none', 'earthen', 'wood', 'stone'];
+    const idx = order.indexOf(gameState.settlement.walls);
+    if (idx > 0) {
+        gameState.settlement.walls = order[idx - 1];
+    }
 }
 
 function gainXP(amount) {
