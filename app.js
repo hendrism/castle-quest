@@ -423,7 +423,7 @@ showDiceRoll((roll) => {
         .filter(Boolean)
         .join(' ');
 
-    let logMsg = `🎲 Rolled ${roll}: ${result.message}`;
+    let logMsg = `🎲 Rolled ${result.roll}: ${result.message}`;
     if (rewardsText) {
         logMsg += ` Rewards: ${rewardsText}`;
     }
