@@ -104,16 +104,30 @@ master: { name: ‘Master’, upgradeTo: null, cost: null, production: 5 }
 
 // Initialize game
 function initGame() {
+console.log(‘Initializing Dice & Castle…’);
+try {
 loadGame();
 updateUI();
 setupEventListeners();
+console.log(‘Game initialized successfully!’);
 
 ```
+    // Test that buttons exist
+    const testBtn = document.querySelector('.location-btn');
+    if (testBtn) {
+        console.log('Location buttons found');
+    } else {
+        console.error('Location buttons not found!');
+    }
+} catch (error) {
+    console.error('Error initializing game:', error);
+}
+
 // Register service worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
         .then(registration => console.log('SW registered'))
-        .catch(error => console.log('SW registration failed'));
+        .catch(error => console.log('SW registration failed:', error));
 }
 ```
 
@@ -121,35 +135,103 @@ if ('serviceWorker' in navigator) {
 
 // Event listeners
 function setupEventListeners() {
-// Location exploration
-document.querySelectorAll(’.location-btn’).forEach(btn => {
-btn.addEventListener(‘click’, () => {
-const location = btn.dataset.location;
-exploreLocation(location);
-});
-});
+console.log(‘Setting up event listeners…’);
 
 ```
+// Location exploration
+const locationBtns = document.querySelectorAll('.location-btn');
+console.log('Found', locationBtns.length, 'location buttons');
+
+locationBtns.forEach((btn, index) => {
+    console.log('Setting up button', index, 'for location:', btn.dataset.location);
+    btn.addEventListener('click', (e) => {
+        console.log('Location button clicked:', btn.dataset.location);
+        const location = btn.dataset.location;
+        exploreLocation(location);
+    });
+});
+
 // Sleep button
-document.getElementById('sleep-btn').addEventListener('click', sleep);
+const sleepBtn = document.getElementById('sleep-btn');
+if (sleepBtn) {
+    sleepBtn.addEventListener('click', (e) => {
+        console.log('Sleep button clicked');
+        sleep();
+    });
+} else {
+    console.error('Sleep button not found!');
+}
 
 // Settlement upgrades
-document.getElementById('home-upgrade-btn').addEventListener('click', upgradeHome);
-document.getElementById('walls-upgrade-btn').addEventListener('click', upgradeWalls);
+const homeUpgradeBtn = document.getElementById('home-upgrade-btn');
+const wallsUpgradeBtn = document.getElementById('walls-upgrade-btn');
+
+if (homeUpgradeBtn) {
+    homeUpgradeBtn.addEventListener('click', (e) => {
+        console.log('Home upgrade clicked');
+        upgradeHome();
+    });
+}
+
+if (wallsUpgradeBtn) {
+    wallsUpgradeBtn.addEventListener('click', (e) => {
+        console.log('Walls upgrade clicked');
+        upgradeWalls();
+    });
+}
 
 // Building construction
-document.getElementById('build-farm-btn').addEventListener('click', () => buildBuilding('farm'));
-document.getElementById('build-quarry-btn').addEventListener('click', () => buildBuilding('quarry'));
+const buildFarmBtn = document.getElementById('build-farm-btn');
+const buildQuarryBtn = document.getElementById('build-quarry-btn');
+
+if (buildFarmBtn) {
+    buildFarmBtn.addEventListener('click', () => {
+        console.log('Build farm clicked');
+        buildBuilding('farm');
+    });
+}
+
+if (buildQuarryBtn) {
+    buildQuarryBtn.addEventListener('click', () => {
+        console.log('Build quarry clicked');
+        buildBuilding('quarry');
+    });
+}
 
 // Crafting
-document.getElementById('craft-lucky-charm').addEventListener('click', craftLuckyCharm);
+const craftBtn = document.getElementById('craft-lucky-charm');
+if (craftBtn) {
+    craftBtn.addEventListener('click', () => {
+        console.log('Craft lucky charm clicked');
+        craftLuckyCharm();
+    });
+}
 
 // Event log controls
-document.getElementById('clear-log-btn').addEventListener('click', clearEventLog);
-document.getElementById('text-size-select').addEventListener('change', changeTextSize);
+const clearLogBtn = document.getElementById('clear-log-btn');
+const textSizeSelect = document.getElementById('text-size-select');
+
+if (clearLogBtn) {
+    clearLogBtn.addEventListener('click', () => {
+        console.log('Clear log clicked');
+        clearEventLog();
+    });
+}
+
+if (textSizeSelect) {
+    textSizeSelect.addEventListener('change', changeTextSize);
+}
 
 // Modal controls
-document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+const closeModalBtn = document.getElementById('close-modal-btn');
+if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+        console.log('Close modal clicked');
+        closeModal();
+    });
+}
+
+console.log('Event listeners setup complete');
 ```
 
 }
