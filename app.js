@@ -28,10 +28,17 @@ let gameState = {
         luckyCharm: 0,
         magicScroll: 0
     },
-dailyChallenge: {
-explored: new Set(),
-completed: false
-},
+    dailyChallenge: {
+        type: 'explore',
+        description: 'Explore all unlocked locations',
+        target: 0,
+        progress: 0,
+        explored: new Set(),
+        resource: null,
+        startAmount: 0,
+        reward: 50,
+        completed: false
+    },
     eventLog: []
 };
 
@@ -322,6 +329,7 @@ console.log('Initializing Dice & Castle...');
 try {
     loadGame();
     setupResourceBar();
+    generateDailyChallenge();
     updateUI();
 setupEventListeners();
 console.log('Game initialized successfully!');
@@ -519,15 +527,13 @@ if (gameState.level < (location.requiredLevel || 1)) {
     updateUI();
     return;
 }
-gameState.explorationsLeft--;
-gameState.dailyChallenge.explored.add(locationKey);
+    gameState.explorationsLeft--;
 
-// Check daily challenge completion
-if (gameState.dailyChallenge.explored.size === 4 && !gameState.dailyChallenge.completed) {
-    gameState.dailyChallenge.completed = true;
-    addEventLog('🎯 Daily Challenge completed! Bonus XP gained.', 'success');
-    gainXP(50);
-}
+    if (gameState.dailyChallenge.type === 'explore' && gameState.dailyChallenge.exploreTargets && gameState.dailyChallenge.exploreTargets.has(locationKey)) {
+        gameState.dailyChallenge.explored.add(locationKey);
+        gameState.dailyChallenge.progress = gameState.dailyChallenge.explored.size;
+    }
+    checkDailyChallengeCompletion();
 
 // Roll dice and show modal
 showDiceRoll((roll) => {
@@ -671,8 +677,7 @@ function sleep() {
         // Progress day
         gameState.day++;
         gameState.explorationsLeft = 5;
-        gameState.dailyChallenge.explored.clear();
-        gameState.dailyChallenge.completed = false;
+        generateDailyChallenge();
 
         // Change season every 4 days
         const seasonKeys = Object.keys(seasons);
@@ -765,6 +770,11 @@ gameState.settlement[key].push(newBuilding);
 addEventLog(`${buildingType.icon} Built new ${buildingType.name}!`, 'success');
 gainXP(50);
 
+    if (gameState.dailyChallenge.type === 'build') {
+        gameState.dailyChallenge.progress++;
+    }
+    checkDailyChallengeCompletion();
+
 updateUI();
 saveGame();
 
@@ -786,6 +796,11 @@ building.level = currentLevel.upgradeTo;
 const newLevel = buildingTypes[type].levels[building.level];
 addEventLog(`⬆️ Upgraded ${buildingTypes[type].name} to ${newLevel.name}!`, 'success');
 gainXP(25);
+
+    if (gameState.dailyChallenge.type === 'upgrade') {
+        gameState.dailyChallenge.progress++;
+    }
+    checkDailyChallengeCompletion();
 
 updateUI();
 saveGame();
@@ -1025,8 +1040,13 @@ document.getElementById('xp').textContent = gameState.xp;
 document.getElementById('xp-next').textContent = gameState.xpToNext;
 document.getElementById('season').textContent = `${seasons[gameState.season].icon} ${seasons[gameState.season].name}`;
 
-// Update resources bar
-updateResourceBar();
+    // Update resources bar
+    updateResourceBar();
+
+    if (gameState.dailyChallenge.type === 'gather') {
+        const res = gameState.dailyChallenge.resource;
+        gameState.dailyChallenge.progress = Math.max(0, gameState.resources[res] - gameState.dailyChallenge.startAmount);
+    }
 
 
 // Update exploration
@@ -1051,7 +1071,9 @@ document.getElementById('sleep-btn').disabled = gameState.explorationsLeft > 0;
 updateSettlementUI();
 
 // Update event log
-updateEventLogUI();
+    updateEventLogUI();
+    updateDailyChallengeUI();
+    checkDailyChallengeCompletion();
 
 }
 
@@ -1299,13 +1321,85 @@ gems: '💎'
 return icons[resource] || resource;
 }
 
+function getAccessibleLocations() {
+    return Object.keys(locations).filter(key => {
+        const loc = locations[key];
+        return gameState.level >= (loc.requiredLevel || 1);
+    });
+}
+
+function generateDailyChallenge() {
+    const types = ['explore', 'build', 'upgrade', 'gather'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const challenge = gameState.dailyChallenge;
+
+    challenge.type = type;
+    challenge.progress = 0;
+    challenge.completed = false;
+    challenge.explored.clear();
+    challenge.reward = 50;
+
+    if (type === 'explore') {
+        const locs = getAccessibleLocations();
+        challenge.target = locs.length;
+        challenge.description = `Explore all ${locs.length} unlocked locations`;
+        challenge.exploreTargets = new Set(locs);
+    } else if (type === 'build') {
+        challenge.target = 2 + Math.floor(Math.random() * 3);
+        challenge.description = `Construct ${challenge.target} building${challenge.target > 1 ? 's' : ''}`;
+    } else if (type === 'upgrade') {
+        challenge.target = 1 + Math.floor(Math.random() * 3);
+        challenge.description = `Upgrade buildings ${challenge.target} time${challenge.target > 1 ? 's' : ''}`;
+    } else if (type === 'gather') {
+        const resources = Object.keys(gameState.resources);
+        const res = resources[Math.floor(Math.random() * resources.length)];
+        challenge.resource = res;
+        challenge.target = 5 + Math.floor(Math.random() * 6);
+        challenge.description = `Collect ${challenge.target} ${res}`;
+        challenge.startAmount = gameState.resources[res];
+    }
+}
+
+function updateDailyChallengeUI() {
+    const textEl = document.getElementById('daily-challenge-text');
+    const progEl = document.getElementById('daily-challenge-progress');
+    if (!textEl || !progEl) return;
+    textEl.textContent = gameState.dailyChallenge.description;
+    const target = gameState.dailyChallenge.target;
+    const progress = gameState.dailyChallenge.type === 'explore'
+        ? gameState.dailyChallenge.explored.size
+        : gameState.dailyChallenge.progress;
+    progEl.textContent = `${progress}/${target}`;
+}
+
+function checkDailyChallengeCompletion() {
+    const challenge = gameState.dailyChallenge;
+    if (challenge.completed) return;
+    let progress = challenge.progress;
+    if (challenge.type === 'explore') {
+        progress = challenge.explored.size;
+    }
+    if (progress >= challenge.target) {
+        challenge.completed = true;
+        addEventLog('🎯 Daily Challenge completed! Bonus XP gained.', 'success');
+        gainXP(challenge.reward);
+    }
+}
+
 // Save/Load
 function saveGame() {
 const saveData = {
 ...gameState,
 dailyChallenge: {
-explored: Array.from(gameState.dailyChallenge.explored),
-completed: gameState.dailyChallenge.completed
+    type: gameState.dailyChallenge.type,
+    description: gameState.dailyChallenge.description,
+    target: gameState.dailyChallenge.target,
+    progress: gameState.dailyChallenge.progress,
+    resource: gameState.dailyChallenge.resource,
+    startAmount: gameState.dailyChallenge.startAmount,
+    reward: gameState.dailyChallenge.reward,
+    explored: Array.from(gameState.dailyChallenge.explored),
+    completed: gameState.dailyChallenge.completed
 }
 };
 
@@ -1328,8 +1422,10 @@ if (savedData) {
 const loadedState = JSON.parse(savedData);
 
         // Restore Set from array
-        if (loadedState.dailyChallenge && loadedState.dailyChallenge.explored) {
-            loadedState.dailyChallenge.explored = new Set(loadedState.dailyChallenge.explored);
+        if (loadedState.dailyChallenge) {
+            if (loadedState.dailyChallenge.explored) {
+                loadedState.dailyChallenge.explored = new Set(loadedState.dailyChallenge.explored);
+            }
         }
         
         gameState = { ...gameState, ...loadedState };
