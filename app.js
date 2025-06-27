@@ -40,28 +40,32 @@ const LUCKY_CHARM_MAX_USES = 3;
 // Game data
 const locations = {
 forest: {
-name: 'Deep Forest',
-icon: '🌲',
-description: 'Rich in wood and wildlife',
-rewards: { wood: [1, 4], food: [0, 2] }
+    name: 'Deep Forest',
+    icon: '🌲',
+    description: 'Rich in wood and wildlife',
+    rewards: { wood: [1, 4], food: [0, 2] },
+    requiredLevel: 1
 },
 quarry: {
-name: 'Stone Quarry',
-icon: '⛰️',
-description: 'Source of stone and metal',
-rewards: { stone: [1, 3], metal: [0, 1] }
+    name: 'Stone Quarry',
+    icon: '⛰️',
+    description: 'Source of stone and metal',
+    rewards: { stone: [1, 3], metal: [0, 1] },
+    requiredLevel: 1
 },
 ruins: {
     name: 'Ancient Ruins',
     icon: '🏛️',
     description: 'Mysterious treasures await',
-    rewards: { wood: [0, 2], stone: [0, 2], metal: [0, 2], food: [0, 1], gems: [0, 1] }
+    rewards: { wood: [0, 2], stone: [0, 2], metal: [0, 2], food: [0, 1], gems: [0, 1] },
+    requiredLevel: 2
 },
 plains: {
-name: 'Fertile Plains',
-icon: '🌾',
-description: 'Food and farming supplies',
-rewards: { food: [1, 3], wood: [0, 1] }
+    name: 'Fertile Plains',
+    icon: '🌾',
+    description: 'Food and farming supplies',
+    rewards: { food: [1, 3], wood: [0, 1] },
+    requiredLevel: 1
 }
 };
 
@@ -102,9 +106,10 @@ const homeBonuses = {
 
 const buildingTypes = {
 farm: {
-name: 'Farm',
-icon: '🌾',
-buildCost: { wood: 1, stone: 1 },
+    name: 'Farm',
+    icon: '🌾',
+    buildCost: { wood: 1, stone: 1 },
+    requiredLevel: 1,
 levels: {
 basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
 improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
@@ -114,8 +119,9 @@ advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, m
 },
 quarry: {
     name: 'Quarry',
-icon: '⛏️',
-buildCost: { wood: 1, stone: 2 },
+    icon: '⛏️',
+    buildCost: { wood: 1, stone: 2 },
+    requiredLevel: 1,
 levels: {
 basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
 improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
@@ -127,6 +133,7 @@ mine: {
     name: 'Mine',
     icon: '⚒️',
     buildCost: { wood: 2, stone: 2 },
+    requiredLevel: 2,
     levels: {
         basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1 },
         improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 3 }, production: 2 },
@@ -138,6 +145,7 @@ mine: {
         name: 'Workshop',
         icon: '🔧',
         buildCost: { wood: 2, stone: 1 },
+        requiredLevel: 3,
         levels: {
             basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1, woodCost: 1 },
             improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 2 }, production: 2, woodCost: 1 },
@@ -149,6 +157,7 @@ mine: {
         name: 'Forester Hut',
         icon: '🌳',
         buildCost: { wood: 2, stone: 1 },
+        requiredLevel: 2,
         levels: {
             basic: { name: 'Basic', upgradeTo: 'improved', cost: { stone: 1 }, production: 1 },
             improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 4, stone: 2 }, production: 2 },
@@ -160,6 +169,7 @@ mine: {
         name: 'Gem Mine',
         icon: '💎',
         buildCost: { wood: 2, stone: 2, metal: 1 },
+        requiredLevel: 4,
         levels: {
             basic: { name: 'Basic', upgradeTo: 'improved', cost: { metal: 1 }, production: 1 },
             improved: { name: 'Improved', upgradeTo: 'advanced', cost: { stone: 3, metal: 2 }, production: 2 },
@@ -504,6 +514,11 @@ function exploreLocation(locationKey) {
 if (gameState.explorationsLeft <= 0) return;
 
 const location = locations[locationKey];
+if (gameState.level < (location.requiredLevel || 1)) {
+    addEventLog(`🔒 ${location.name} requires level ${location.requiredLevel}.`, 'failure');
+    updateUI();
+    return;
+}
 gameState.explorationsLeft--;
 gameState.dailyChallenge.explored.add(locationKey);
 
@@ -735,6 +750,7 @@ const key = getBuildingKey(type);
 const maxBuildings = homeTypes[gameState.settlement.home].maxBuildings;
 const currentCount = gameState.settlement[key].length;
 
+if (gameState.level < (buildingType.requiredLevel || 1)) return;
 if (currentCount >= maxBuildings) return;
 if (!canAfford(buildingType.buildCost)) return;
 
@@ -885,6 +901,14 @@ function calculateDailyProduction() {
         }
     });
 
+    const multiplier = getLevelMultiplier();
+    food = Math.floor(food * multiplier);
+    wood = Math.floor(wood * multiplier);
+    stone = Math.floor(stone * multiplier);
+    metal = Math.floor(metal * multiplier);
+    tools = Math.floor(tools * multiplier);
+    gems = Math.floor(gems * multiplier);
+
     return { food, wood, stone, metal, tools, gems };
 }
 
@@ -902,6 +926,10 @@ function getWallBonus() {
 
 function getHomeBonus() {
     return homeBonuses[gameState.settlement.home] || 0;
+}
+
+function getLevelMultiplier() {
+    return 1 + (gameState.level - 1) * 0.05;
 }
 
 function gainXP(amount) {
@@ -1006,7 +1034,14 @@ document.getElementById('explorations-left').textContent = gameState.exploration
 
 // Enable/disable location buttons
 document.querySelectorAll('.location-btn').forEach(btn => {
-    btn.disabled = gameState.explorationsLeft <= 0;
+    const loc = locations[btn.dataset.location];
+    const locked = gameState.level < (loc.requiredLevel || 1);
+    btn.disabled = gameState.explorationsLeft <= 0 || locked;
+    if (locked) {
+        btn.title = `Requires level ${loc.requiredLevel}`;
+    } else {
+        btn.removeAttribute('title');
+    }
 });
 
 // Enable/disable sleep button
@@ -1080,9 +1115,13 @@ const maxBuildings = homeTypes[gameState.settlement.home].maxBuildings;
 // Farms
 document.getElementById('farm-count').textContent = gameState.settlement.farms.length;
 document.getElementById('farm-max').textContent = maxBuildings;
-document.getElementById('build-farm-btn').disabled = 
-    gameState.settlement.farms.length >= maxBuildings || 
+document.getElementById('build-farm-btn').disabled =
+    gameState.level < buildingTypes.farm.requiredLevel ||
+    gameState.settlement.farms.length >= maxBuildings ||
     !canAfford(buildingTypes.farm.buildCost);
+document.getElementById('build-farm-btn').title =
+    gameState.level < buildingTypes.farm.requiredLevel ?
+    `Requires level ${buildingTypes.farm.requiredLevel}` : '';
 
 const farmsContainer = document.getElementById('farms-container');
 farmsContainer.innerHTML = '';
@@ -1095,8 +1134,12 @@ gameState.settlement.farms.forEach(farm => {
 document.getElementById('forester-count').textContent = gameState.settlement.foresters.length;
 document.getElementById('forester-max').textContent = maxBuildings;
 document.getElementById('build-forester-btn').disabled =
+    gameState.level < buildingTypes.forester.requiredLevel ||
     gameState.settlement.foresters.length >= maxBuildings ||
     !canAfford(buildingTypes.forester.buildCost);
+document.getElementById('build-forester-btn').title =
+    gameState.level < buildingTypes.forester.requiredLevel ?
+    `Requires level ${buildingTypes.forester.requiredLevel}` : '';
 
 const forestersContainer = document.getElementById('foresters-container');
 forestersContainer.innerHTML = '';
@@ -1108,9 +1151,13 @@ gameState.settlement.foresters.forEach(f => {
 // Quarries
 document.getElementById('quarry-count').textContent = gameState.settlement.quarries.length;
 document.getElementById('quarry-max').textContent = maxBuildings;
-document.getElementById('build-quarry-btn').disabled = 
-    gameState.settlement.quarries.length >= maxBuildings || 
+document.getElementById('build-quarry-btn').disabled =
+    gameState.level < buildingTypes.quarry.requiredLevel ||
+    gameState.settlement.quarries.length >= maxBuildings ||
     !canAfford(buildingTypes.quarry.buildCost);
+document.getElementById('build-quarry-btn').title =
+    gameState.level < buildingTypes.quarry.requiredLevel ?
+    `Requires level ${buildingTypes.quarry.requiredLevel}` : '';
 
 const quarriesContainer = document.getElementById('quarries-container');
 quarriesContainer.innerHTML = '';
@@ -1123,8 +1170,12 @@ gameState.settlement.quarries.forEach(quarry => {
 document.getElementById('mine-count').textContent = gameState.settlement.mines.length;
 document.getElementById('mine-max').textContent = maxBuildings;
 document.getElementById('build-mine-btn').disabled =
+    gameState.level < buildingTypes.mine.requiredLevel ||
     gameState.settlement.mines.length >= maxBuildings ||
     !canAfford(buildingTypes.mine.buildCost);
+document.getElementById('build-mine-btn').title =
+    gameState.level < buildingTypes.mine.requiredLevel ?
+    `Requires level ${buildingTypes.mine.requiredLevel}` : '';
 
 const minesContainer = document.getElementById('mines-container');
 minesContainer.innerHTML = '';
@@ -1137,8 +1188,12 @@ gameState.settlement.mines.forEach(mine => {
 document.getElementById('gemMine-count').textContent = gameState.settlement.gemMines.length;
 document.getElementById('gemMine-max').textContent = maxBuildings;
 document.getElementById('build-gemMine-btn').disabled =
+    gameState.level < buildingTypes.gemMine.requiredLevel ||
     gameState.settlement.gemMines.length >= maxBuildings ||
     !canAfford(buildingTypes.gemMine.buildCost);
+document.getElementById('build-gemMine-btn').title =
+    gameState.level < buildingTypes.gemMine.requiredLevel ?
+    `Requires level ${buildingTypes.gemMine.requiredLevel}` : '';
 
 const gemMinesContainer = document.getElementById('gemMines-container');
 gemMinesContainer.innerHTML = '';
@@ -1151,8 +1206,12 @@ gameState.settlement.gemMines.forEach(gm => {
 document.getElementById('workshop-count').textContent = gameState.settlement.workshops.length;
 document.getElementById('workshop-max').textContent = maxBuildings;
 document.getElementById('build-workshop-btn').disabled =
+    gameState.level < buildingTypes.workshop.requiredLevel ||
     gameState.settlement.workshops.length >= maxBuildings ||
     !canAfford(buildingTypes.workshop.buildCost);
+document.getElementById('build-workshop-btn').title =
+    gameState.level < buildingTypes.workshop.requiredLevel ?
+    `Requires level ${buildingTypes.workshop.requiredLevel}` : '';
 
 const workshopsContainer = document.getElementById('workshops-container');
 workshopsContainer.innerHTML = '';
