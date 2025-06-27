@@ -1,0 +1,13 @@
+{
+“name”: “Dice & Castle”,
+“short_name”: “DiceCastle”,
+“description”: “A minimalist browser-based RPG where you explore regions using dice rolls to gather resources and build your settlement.”,
+“start_url”: “/”,
+“display”: “standalone”,
+“background_color”: “#667eea”,
+“theme_color”: “#2c3e50”,
+“orientation”: “portrait”,
+“scope”: “/”,
+“categories”: [“games”, “entertainment”],
+“lang”: “en-US”
+}
