@@ -523,6 +523,12 @@ main {
     gap: 0.6rem;
 }
 
+.production-info {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
 .location-btn {
     padding: 0.8rem;
 }

@@ -35,46 +35,6 @@
         </header>
 
     <main>
-        <!-- Event Log -->
-        <section class="event-log">
-            <h2>Event Log</h2>
-            <div class="log-controls">
-                <button id="clear-log-btn">Clear Log</button>
-                <select id="text-size-select">
-                    <option value="small">Small Text</option>
-                    <option value="medium" selected>Medium Text</option>
-                    <option value="large">Large Text</option>
-                </select>
-            </div>
-            <div id="event-log-content" class="log-content"></div>
-        </section>
-        <!-- Resources -->
-        <section class="resources">
-            <h2>Resources</h2>
-            <div class="resource-grid">
-                <div class="resource">
-                    <span class="resource-icon">🪵</span>
-                    <span class="resource-name">Wood</span>
-                    <span class="resource-amount" id="wood">0</span>
-                </div>
-                <div class="resource">
-                    <span class="resource-icon">🗿</span>
-                    <span class="resource-name">Stone</span>
-                    <span class="resource-amount" id="stone">0</span>
-                </div>
-                <div class="resource">
-                    <span class="resource-icon">⚔️</span>
-                    <span class="resource-name">Metal</span>
-                    <span class="resource-amount" id="metal">0</span>
-                </div>
-                <div class="resource">
-                    <span class="resource-icon">🌾</span>
-                    <span class="resource-name">Food</span>
-                    <span class="resource-amount" id="food">0</span>
-                </div>
-            </div>
-        </section>
-
         <!-- Exploration -->
         <section class="exploration">
             <h2>Exploration</h2>
@@ -82,7 +42,7 @@
                 <p>Explorations remaining today: <span id="explorations-left">5</span>/5</p>
                 <p>Daily Challenge: <span id="daily-challenge">Explore all 4 locations</span></p>
             </div>
-            
+
             <div class="locations">
                 <button class="location-btn" data-location="forest">
                     <span class="location-icon">🌲</span>
@@ -112,6 +72,48 @@
                     Sleep (End Day)
                 </button>
             </div>
+        </section>
+
+        <!-- Event Log -->
+        <section class="event-log">
+            <h2>Event Log</h2>
+            <div class="log-controls">
+                <button id="clear-log-btn">Clear Log</button>
+                <select id="text-size-select">
+                    <option value="small">Small Text</option>
+                    <option value="medium" selected>Medium Text</option>
+                    <option value="large">Large Text</option>
+                </select>
+            </div>
+            <div id="event-log-content" class="log-content"></div>
+        </section>
+
+        <!-- Resources -->
+        <section class="resources">
+            <h2>Resources</h2>
+            <div class="resource-grid">
+                <div class="resource">
+                    <span class="resource-icon">🪵</span>
+                    <span class="resource-name">Wood</span>
+                    <span class="resource-amount" id="wood">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🗿</span>
+                    <span class="resource-name">Stone</span>
+                    <span class="resource-amount" id="stone">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⚔️</span>
+                    <span class="resource-name">Metal</span>
+                    <span class="resource-amount" id="metal">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🌾</span>
+                    <span class="resource-name">Food</span>
+                    <span class="resource-amount" id="food">0</span>
+                </div>
+            </div>
+            <div id="production-info" class="production-info"></div>
         </section>
 
         <!-- Settlement -->

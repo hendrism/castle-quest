@@ -71,10 +71,17 @@ fortress: { name: 'Fortress', upgradeTo: null, cost: null, maxBuildings: 5 }
 };
 
 const wallTypes = {
-none: { name: 'None', upgradeTo: 'earthen', cost: { wood: 5 } },
-earthen: { name: 'Earthen', upgradeTo: 'wood', cost: { wood: 10 } },
-wood: { name: 'Wood', upgradeTo: 'stone', cost: { stone: 20 } },
-stone: { name: 'Stone', upgradeTo: null, cost: null }
+    none: { name: 'None', upgradeTo: 'earthen', cost: { wood: 5 } },
+    earthen: { name: 'Earthen', upgradeTo: 'wood', cost: { wood: 10 } },
+    wood: { name: 'Wood', upgradeTo: 'stone', cost: { stone: 20 } },
+    stone: { name: 'Stone', upgradeTo: null, cost: null }
+};
+
+const wallBonuses = {
+    none: 0,
+    earthen: 1,
+    wood: 2,
+    stone: 3
 };
 
 const buildingTypes = {
@@ -484,38 +491,32 @@ function sleep() {
     const d1 = rollDice(6);
     const d2 = rollDice(6);
     const eventIndex = (((d1 - 1) * 6 + (d2 - 1)) % nightEvents.length);
-    const severity = rollDice(20);
+    const nightEvent = nightEvents[eventIndex];
+
+    const wallBonus = getWallBonus();
+    let severityRoll = rollDice(20);
+    if (nightEvent.type === 'bad') {
+        severityRoll = Math.max(1, severityRoll - wallBonus);
+    } else if (nightEvent.type === 'good') {
+        severityRoll = Math.min(20, severityRoll + wallBonus);
+    }
 
     let eventMessage = '';
     let eventType = 'neutral';
 
-    const nightEvent = nightEvents[eventIndex];
     if (nightEvent && typeof nightEvent.effect === 'function') {
-        const result = nightEvent.effect(severity);
+        const result = nightEvent.effect(severityRoll);
         eventMessage = result.message;
         eventType = result.type || nightEvent.type;
     }
 
 // Daily production from buildings
-let totalFoodProduction = 0;
-let totalStoneProduction = 0;
+const production = calculateDailyProduction();
+gameState.resources.food += production.food;
+gameState.resources.stone += production.stone;
 
-gameState.settlement.farms.forEach(farm => {
-    const production = buildingTypes.farm.levels[farm.level].production;
-    const seasonMultiplier = seasons[gameState.season].farmMultiplier;
-    totalFoodProduction += Math.floor(production * seasonMultiplier);
-});
-
-gameState.settlement.quarries.forEach(quarry => {
-    const production = buildingTypes.quarry.levels[quarry.level].production;
-    totalStoneProduction += production;
-});
-
-gameState.resources.food += totalFoodProduction;
-gameState.resources.stone += totalStoneProduction;
-
-if (totalFoodProduction > 0 || totalStoneProduction > 0) {
-    addEventLog(`🏭 Daily production: +${totalFoodProduction} food, +${totalStoneProduction} stone`, 'success');
+if (production.food > 0 || production.stone > 0) {
+    addEventLog(`🏭 Daily production: +${production.food} food, +${production.stone} stone`, 'success');
 }
 
 // Progress day
@@ -579,8 +580,9 @@ saveGame();
 
 function buildBuilding(type) {
 const buildingType = buildingTypes[type];
+const key = getBuildingKey(type);
 const maxBuildings = homeTypes[gameState.settlement.home].maxBuildings;
-const currentCount = gameState.settlement[type + 's'].length;
+const currentCount = gameState.settlement[key].length;
 
 if (currentCount >= maxBuildings) return;
 if (!canAfford(buildingType.buildCost)) return;
@@ -592,7 +594,7 @@ const newBuilding = {
     level: 'basic'
 };
 
-gameState.settlement[type + 's'].push(newBuilding);
+gameState.settlement[key].push(newBuilding);
 addEventLog(`${buildingType.icon} Built new ${buildingType.name}!`, 'success');
 gainXP(50);
 
@@ -602,7 +604,8 @@ saveGame();
 }
 
 function upgradeBuilding(type, buildingId) {
-const buildings = gameState.settlement[type + 's'];
+const key = getBuildingKey(type);
+const buildings = gameState.settlement[key];
 const building = buildings.find(b => b.id === buildingId);
 if (!building) return;
 
@@ -654,12 +657,38 @@ gameState.resources[resource] -= cost[resource];
 });
 }
 
+function getBuildingKey(type) {
+    return type === 'quarry' ? 'quarries' : type + 's';
+}
+
+function calculateDailyProduction() {
+    let food = 0;
+    let stone = 0;
+
+    gameState.settlement.farms.forEach(farm => {
+        const production = buildingTypes.farm.levels[farm.level].production;
+        const seasonMultiplier = seasons[gameState.season].farmMultiplier;
+        food += Math.floor(production * seasonMultiplier);
+    });
+
+    gameState.settlement.quarries.forEach(quarry => {
+        const production = buildingTypes.quarry.levels[quarry.level].production;
+        stone += production;
+    });
+
+    return { food, stone };
+}
+
 function damageWalls() {
     const order = ['none', 'earthen', 'wood', 'stone'];
     const idx = order.indexOf(gameState.settlement.walls);
     if (idx > 0) {
         gameState.settlement.walls = order[idx - 1];
     }
+}
+
+function getWallBonus() {
+    return wallBonuses[gameState.settlement.walls] || 0;
 }
 
 function gainXP(amount) {
@@ -754,6 +783,10 @@ document.getElementById('season').textContent = `${seasons[gameState.season].ico
 Object.keys(gameState.resources).forEach(resource => {
     document.getElementById(resource).textContent = gameState.resources[resource];
 });
+
+const prod = calculateDailyProduction();
+document.getElementById('production-info').textContent =
+    `Daily Production: +${prod.food} food, +${prod.stone} stone`;
 
 // Update exploration
 document.getElementById('explorations-left').textContent = gameState.explorationsLeft;
