@@ -4,7 +4,7 @@ day: 1,
 level: 1,
 xp: 0,
 xpToNext: 100,
-season: ‘spring’,
+season: 'spring',
 explorationsLeft: 5,
 resources: {
 wood: 0,
@@ -13,8 +13,8 @@ metal: 0,
 food: 0
 },
 settlement: {
-home: ‘camp’,
-walls: ‘none’,
+home: 'camp',
+walls: 'none',
 farms: [],
 quarries: []
 },
@@ -31,87 +31,86 @@ eventLog: []
 // Game data
 const locations = {
 forest: {
-name: ‘Deep Forest’,
-icon: ‘🌲’,
-description: ‘Rich in wood and wildlife’,
+name: 'Deep Forest',
+icon: '🌲',
+description: 'Rich in wood and wildlife',
 rewards: { wood: [1, 4], food: [0, 2] }
 },
 quarry: {
-name: ‘Stone Quarry’,
-icon: ‘⛰️’,
-description: ‘Source of stone and metal’,
+name: 'Stone Quarry',
+icon: '⛰️',
+description: 'Source of stone and metal',
 rewards: { stone: [1, 3], metal: [0, 1] }
 },
 ruins: {
-name: ‘Ancient Ruins’,
-icon: ‘🏛️’,
-description: ‘Mysterious treasures await’,
+name: 'Ancient Ruins',
+icon: '🏛️',
+description: 'Mysterious treasures await',
 rewards: { wood: [0, 2], stone: [0, 2], metal: [0, 2], food: [0, 1] }
 },
 plains: {
-name: ‘Fertile Plains’,
-icon: ‘🌾’,
-description: ‘Food and farming supplies’,
+name: 'Fertile Plains',
+icon: '🌾',
+description: 'Food and farming supplies',
 rewards: { food: [1, 3], wood: [0, 1] }
 }
 };
 
 const seasons = {
-spring: { name: ‘Spring’, icon: ‘🌸’, farmMultiplier: 1.2 },
-summer: { name: ‘Summer’, icon: ‘☀️’, farmMultiplier: 1.5 },
-autumn: { name: ‘Autumn’, icon: ‘🍂’, farmMultiplier: 1.0 },
-winter: { name: ‘Winter’, icon: ‘❄️’, farmMultiplier: 0.8 }
+spring: { name: 'Spring', icon: '🌸', farmMultiplier: 1.2 },
+summer: { name: 'Summer', icon: '☀️', farmMultiplier: 1.5 },
+autumn: { name: 'Autumn', icon: '🍂', farmMultiplier: 1.0 },
+winter: { name: 'Winter', icon: '❄️', farmMultiplier: 0.8 }
 };
 
 const homeTypes = {
-camp: { name: ‘Camp’, upgradeTo: ‘house’, cost: { wood: 5 }, maxBuildings: 2 },
-house: { name: ‘House’, upgradeTo: ‘hall’, cost: { wood: 10, stone: 5 }, maxBuildings: 3 },
-hall: { name: ‘Hall’, upgradeTo: ‘fortress’, cost: { stone: 20, metal: 5 }, maxBuildings: 4 },
-fortress: { name: ‘Fortress’, upgradeTo: null, cost: null, maxBuildings: 5 }
+camp: { name: 'Camp', upgradeTo: 'house', cost: { wood: 5 }, maxBuildings: 2 },
+house: { name: 'House', upgradeTo: 'hall', cost: { wood: 10, stone: 5 }, maxBuildings: 3 },
+hall: { name: 'Hall', upgradeTo: 'fortress', cost: { stone: 20, metal: 5 }, maxBuildings: 4 },
+fortress: { name: 'Fortress', upgradeTo: null, cost: null, maxBuildings: 5 }
 };
 
 const wallTypes = {
-none: { name: ‘None’, upgradeTo: ‘earthen’, cost: { wood: 5 } },
-earthen: { name: ‘Earthen’, upgradeTo: ‘wood’, cost: { wood: 10 } },
-wood: { name: ‘Wood’, upgradeTo: ‘stone’, cost: { stone: 20 } },
-stone: { name: ‘Stone’, upgradeTo: null, cost: null }
+none: { name: 'None', upgradeTo: 'earthen', cost: { wood: 5 } },
+earthen: { name: 'Earthen', upgradeTo: 'wood', cost: { wood: 10 } },
+wood: { name: 'Wood', upgradeTo: 'stone', cost: { stone: 20 } },
+stone: { name: 'Stone', upgradeTo: null, cost: null }
 };
 
 const buildingTypes = {
 farm: {
-name: ‘Farm’,
-icon: ‘🌾’,
+name: 'Farm',
+icon: '🌾',
 buildCost: { wood: 1, stone: 1 },
 levels: {
-basic: { name: ‘Basic’, upgradeTo: ‘improved’, cost: { wood: 2 }, production: 1 },
-improved: { name: ‘Improved’, upgradeTo: ‘advanced’, cost: { wood: 5, stone: 2 }, production: 2 },
-advanced: { name: ‘Advanced’, upgradeTo: ‘master’, cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
-master: { name: ‘Master’, upgradeTo: null, cost: null, production: 5 }
+basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
+improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
+advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
+master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
 }
 },
 quarry: {
-name: ‘Quarry’,
-icon: ‘⛏️’,
+name: 'Quarry',
+icon: '⛏️',
 buildCost: { wood: 1, stone: 2 },
 levels: {
-basic: { name: ‘Basic’, upgradeTo: ‘improved’, cost: { wood: 2 }, production: 1 },
-improved: { name: ‘Improved’, upgradeTo: ‘advanced’, cost: { wood: 5, stone: 2 }, production: 2 },
-advanced: { name: ‘Advanced’, upgradeTo: ‘master’, cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
-master: { name: ‘Master’, upgradeTo: null, cost: null, production: 5 }
+basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
+improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
+advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
+master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
 }
 }
 };
 
 // Initialize game
 function initGame() {
-console.log(‘Initializing Dice & Castle…’);
+console.log('Initializing Dice & Castle...');
 try {
 loadGame();
 updateUI();
 setupEventListeners();
-console.log(‘Game initialized successfully!’);
+console.log('Game initialized successfully!');
 
-```
     // Test that buttons exist
     const testBtn = document.querySelector('.location-btn');
     if (testBtn) {
@@ -129,15 +128,13 @@ if ('serviceWorker' in navigator) {
         .then(registration => console.log('SW registered'))
         .catch(error => console.log('SW registration failed:', error));
 }
-```
 
 }
 
 // Event listeners
 function setupEventListeners() {
-console.log(‘Setting up event listeners…’);
+console.log('Setting up event listeners...');
 
-```
 // Location exploration
 const locationBtns = document.querySelectorAll('.location-btn');
 console.log('Found', locationBtns.length, 'location buttons');
@@ -241,7 +238,6 @@ if (closeModalBtn) {
 }
 
 console.log('Event listeners setup complete');
-```
 
 }
 
@@ -249,7 +245,6 @@ console.log('Event listeners setup complete');
 function exploreLocation(locationKey) {
 if (gameState.explorationsLeft <= 0) return;
 
-```
 const location = locations[locationKey];
 gameState.explorationsLeft--;
 gameState.dailyChallenge.explored.add(locationKey);
@@ -280,7 +275,6 @@ showDiceRoll(() => {
     updateUI();
     saveGame();
 });
-```
 
 }
 
@@ -289,7 +283,6 @@ const location = locations[locationKey];
 const luckyCharmBonus = gameState.items.luckyCharm > 0 ? 2 : 0;
 const effectiveRoll = Math.min(20, roll + luckyCharmBonus);
 
-```
 let multiplier = 1;
 let type = 'neutral';
 let message = '';
@@ -332,7 +325,6 @@ Object.keys(location.rewards).forEach(resource => {
 const xp = 10 + (effectiveRoll >= 15 ? 10 : 0);
 
 return { rewards, xp, message, type };
-```
 
 }
 
@@ -340,10 +332,9 @@ return { rewards, xp, message, type };
 function sleep() {
 // Overnight event
 const eventRoll = rollDice();
-let eventMessage = ‘’;
-let eventType = ‘neutral’;
+let eventMessage = '';
+let eventType = 'neutral';
 
-```
 if (eventRoll <= 5) {
     // Bad event
     const badEvents = [
@@ -411,7 +402,6 @@ addEventLog(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.seaso
 
 updateUI();
 saveGame();
-```
 
 }
 
@@ -420,7 +410,6 @@ function upgradeHome() {
 const currentHome = homeTypes[gameState.settlement.home];
 if (!currentHome.upgradeTo) return;
 
-```
 const upgradeCost = currentHome.cost;
 if (!canAfford(upgradeCost)) return;
 
@@ -433,7 +422,6 @@ gainXP(100);
 
 updateUI();
 saveGame();
-```
 
 }
 
@@ -441,7 +429,6 @@ function upgradeWalls() {
 const currentWalls = wallTypes[gameState.settlement.walls];
 if (!currentWalls.upgradeTo) return;
 
-```
 const upgradeCost = currentWalls.cost;
 if (!canAfford(upgradeCost)) return;
 
@@ -454,16 +441,14 @@ gainXP(75);
 
 updateUI();
 saveGame();
-```
 
 }
 
 function buildBuilding(type) {
 const buildingType = buildingTypes[type];
 const maxBuildings = homeTypes[gameState.settlement.home].maxBuildings;
-const currentCount = gameState.settlement[type + ‘s’].length;
+const currentCount = gameState.settlement[type + 's'].length;
 
-```
 if (currentCount >= maxBuildings) return;
 if (!canAfford(buildingType.buildCost)) return;
 
@@ -480,16 +465,14 @@ gainXP(50);
 
 updateUI();
 saveGame();
-```
 
 }
 
 function upgradeBuilding(type, buildingId) {
-const buildings = gameState.settlement[type + ‘s’];
+const buildings = gameState.settlement[type + 's'];
 const building = buildings.find(b => b.id === buildingId);
 if (!building) return;
 
-```
 const currentLevel = buildingTypes[type].levels[building.level];
 if (!currentLevel.upgradeTo) return;
 if (!canAfford(currentLevel.cost)) return;
@@ -503,7 +486,6 @@ gainXP(25);
 
 updateUI();
 saveGame();
-```
 
 }
 
@@ -512,7 +494,6 @@ function craftLuckyCharm() {
 const cost = { wood: 3, stone: 2 };
 if (!canAfford(cost)) return;
 
-```
 spendResources(cost);
 gameState.items.luckyCharm++;
 addEventLog('🍀 Crafted a Lucky Charm! (+2 to exploration rolls)', 'success');
@@ -520,7 +501,6 @@ gainXP(30);
 
 updateUI();
 saveGame();
-```
 
 }
 
@@ -544,18 +524,16 @@ gameState.resources[resource] -= cost[resource];
 function gainXP(amount) {
 gameState.xp += amount;
 
-```
 while (gameState.xp >= gameState.xpToNext) {
     gameState.xp -= gameState.xpToNext;
     gameState.level++;
     gameState.xpToNext = Math.floor(gameState.xpToNext * 1.2);
     addEventLog(`🎉 Level up! You are now level ${gameState.level}!`, 'success');
 }
-```
 
 }
 
-function addEventLog(message, type = ‘neutral’) {
+function addEventLog(message, type = 'neutral') {
 const timestamp = new Date().toLocaleTimeString();
 gameState.eventLog.unshift({
 message,
@@ -564,12 +542,10 @@ timestamp,
 day: gameState.day
 });
 
-```
 // Keep only last 50 entries
 if (gameState.eventLog.length > 50) {
     gameState.eventLog = gameState.eventLog.slice(0, 50);
 }
-```
 
 }
 
@@ -580,19 +556,18 @@ saveGame();
 }
 
 function changeTextSize() {
-const size = document.getElementById(‘text-size-select’).value;
-const logContent = document.getElementById(‘event-log-content’);
+const size = document.getElementById('text-size-select').value;
+const logContent = document.getElementById('event-log-content');
 logContent.className = `log-content ${size}`;
 }
 
 // Modal functions
 function showDiceRoll(callback) {
-const modal = document.getElementById(‘dice-modal’);
-const dice = document.getElementById(‘dice’);
-const diceFace = dice.querySelector(’.dice-face’);
-const result = document.getElementById(‘roll-result’);
+const modal = document.getElementById('dice-modal');
+const dice = document.getElementById('dice');
+const diceFace = dice.querySelector('.dice-face');
+const result = document.getElementById('roll-result');
 
-```
 modal.classList.add('show');
 dice.classList.add('rolling');
 diceFace.textContent = '?';
@@ -618,24 +593,22 @@ setTimeout(() => {
     
     if (callback) callback();
 }, 1000);
-```
 
 }
 
 function closeModal() {
-document.getElementById(‘dice-modal’).classList.remove(‘show’);
+document.getElementById('dice-modal').classList.remove('show');
 }
 
 // UI Updates
 function updateUI() {
 // Update header
-document.getElementById(‘day’).textContent = gameState.day;
-document.getElementById(‘level’).textContent = gameState.level;
-document.getElementById(‘xp’).textContent = gameState.xp;
-document.getElementById(‘xp-next’).textContent = gameState.xpToNext;
-document.getElementById(‘season’).textContent = `${seasons[gameState.season].icon} ${seasons[gameState.season].name}`;
+document.getElementById('day').textContent = gameState.day;
+document.getElementById('level').textContent = gameState.level;
+document.getElementById('xp').textContent = gameState.xp;
+document.getElementById('xp-next').textContent = gameState.xpToNext;
+document.getElementById('season').textContent = `${seasons[gameState.season].icon} ${seasons[gameState.season].name}`;
 
-```
 // Update resources
 Object.keys(gameState.resources).forEach(resource => {
     document.getElementById(resource).textContent = gameState.resources[resource];
@@ -657,17 +630,15 @@ updateSettlementUI();
 
 // Update event log
 updateEventLogUI();
-```
 
 }
 
 function updateSettlementUI() {
 // Home upgrade
 const currentHome = homeTypes[gameState.settlement.home];
-const homeUpgradeBtn = document.getElementById(‘home-upgrade-btn’);
-document.getElementById(‘home-level’).textContent = currentHome.name;
+const homeUpgradeBtn = document.getElementById('home-upgrade-btn');
+document.getElementById('home-level').textContent = currentHome.name;
 
-```
 if (currentHome.upgradeTo) {
     const nextHome = homeTypes[currentHome.upgradeTo];
     const costText = Object.keys(currentHome.cost).map(r => 
@@ -707,14 +678,12 @@ updateBuildingsUI();
 // Items
 document.getElementById('lucky-charm-count').textContent = gameState.items.luckyCharm;
 document.getElementById('craft-lucky-charm').disabled = !canAfford({ wood: 3, stone: 2 });
-```
 
 }
 
 function updateBuildingsUI() {
 const maxBuildings = homeTypes[gameState.settlement.home].maxBuildings;
 
-```
 // Farms
 document.getElementById('farm-count').textContent = gameState.settlement.farms.length;
 document.getElementById('farm-max').textContent = maxBuildings;
@@ -742,7 +711,6 @@ gameState.settlement.quarries.forEach(quarry => {
     const quarryElement = createBuildingElement('quarry', quarry);
     quarriesContainer.appendChild(quarryElement);
 });
-```
 
 }
 
@@ -750,7 +718,6 @@ function createBuildingElement(type, building) {
 const buildingType = buildingTypes[type];
 const currentLevel = buildingType.levels[building.level];
 
-```
 const div = document.createElement('div');
 div.className = 'building-item';
 
@@ -771,15 +738,13 @@ div.innerHTML = `
 `;
 
 return div;
-```
 
 }
 
 function updateEventLogUI() {
-const logContent = document.getElementById(‘event-log-content’);
-logContent.innerHTML = ‘’;
+const logContent = document.getElementById('event-log-content');
+logContent.innerHTML = '';
 
-```
 gameState.eventLog.forEach(entry => {
     const div = document.createElement('div');
     div.className = `log-entry ${entry.type}`;
@@ -789,16 +754,15 @@ gameState.eventLog.forEach(entry => {
     `;
     logContent.appendChild(div);
 });
-```
 
 }
 
 function getResourceIcon(resource) {
 const icons = {
-wood: ‘🪵’,
-stone: ‘🗿’,
-metal: ‘⚔️’,
-food: ‘🌾’
+wood: '🪵',
+stone: '🗿',
+metal: '⚔️',
+food: '🌾'
 };
 return icons[resource] || resource;
 }
@@ -806,14 +770,13 @@ return icons[resource] || resource;
 // Save/Load
 function saveGame() {
 const saveData = {
-…gameState,
+...gameState,
 dailyChallenge: {
 explored: Array.from(gameState.dailyChallenge.explored),
 completed: gameState.dailyChallenge.completed
 }
 };
 
-```
 try {
     const gameData = JSON.stringify(saveData);
     // Store in memory instead of localStorage for Claude.ai compatibility
@@ -822,7 +785,6 @@ try {
 } catch (error) {
     console.error('Failed to save game:', error);
 }
-```
 
 }
 
@@ -833,7 +795,6 @@ const savedData = window.dicecastleGameData;
 if (savedData) {
 const loadedState = JSON.parse(savedData);
 
-```
         // Restore Set from array
         if (loadedState.dailyChallenge && loadedState.dailyChallenge.explored) {
             loadedState.dailyChallenge.explored = new Set(loadedState.dailyChallenge.explored);
@@ -845,16 +806,15 @@ const loadedState = JSON.parse(savedData);
 } catch (error) {
     console.error('Failed to load game:', error);
 }
-```
 
 }
 
 // Initialize when page loads
-document.addEventListener(‘DOMContentLoaded’, initGame);
+document.addEventListener('DOMContentLoaded', initGame);
 
 // Also try to init if DOM is already loaded
-if (document.readyState === ‘loading’) {
-document.addEventListener(‘DOMContentLoaded’, initGame);
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', initGame);
 } else {
 initGame();
 }

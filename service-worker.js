@@ -1,28 +1,28 @@
-const CACHE_NAME = ‘dice-castle-v1’;
+const CACHE_NAME = 'dice-castle-v1';
 const urlsToCache = [
-‘/’,
-‘/index.html’,
-‘/styles.css’,
-‘/app.js’,
-‘/manifest.json’
+'/',
+'/index.html',
+'/styles.css',
+'/app.js',
+'/manifest.json'
 ];
 
 // Install event - cache resources
-self.addEventListener(‘install’, event => {
+self.addEventListener('install', event => {
 event.waitUntil(
 caches.open(CACHE_NAME)
 .then(cache => {
-console.log(‘Opened cache’);
+console.log('Opened cache');
 return cache.addAll(urlsToCache);
 })
 .catch(error => {
-console.error(‘Failed to cache resources:’, error);
+console.error('Failed to cache resources:', error);
 })
 );
 });
 
 // Fetch event - serve cached content when offline
-self.addEventListener(‘fetch’, event => {
+self.addEventListener('fetch', event => {
 event.respondWith(
 caches.match(event.request)
 .then(response => {
@@ -31,7 +31,6 @@ if (response) {
 return response;
 }
 
-```
     // Clone the request because it's a stream
     const fetchRequest = event.request.clone();
 
@@ -55,19 +54,18 @@ return response;
       return caches.match('/index.html');
     });
   })
-```
 
 );
 });
 
 // Activate event - clean up old caches
-self.addEventListener(‘activate’, event => {
+self.addEventListener('activate', event => {
 event.waitUntil(
 caches.keys().then(cacheNames => {
 return Promise.all(
 cacheNames.map(cacheName => {
 if (cacheName !== CACHE_NAME) {
-console.log(‘Deleting old cache:’, cacheName);
+console.log('Deleting old cache:', cacheName);
 return caches.delete(cacheName);
 }
 })
@@ -77,17 +75,17 @@ return caches.delete(cacheName);
 });
 
 // Handle background sync for saving game data (optional enhancement)
-self.addEventListener(‘sync’, event => {
-if (event.tag === ‘background-sync’) {
+self.addEventListener('sync', event => {
+if (event.tag === 'background-sync') {
 event.waitUntil(
 // Could implement background save sync here if needed
-console.log(‘Background sync triggered’)
+console.log('Background sync triggered')
 );
 }
 });
 
 // Handle push notifications (for future features)
-self.addEventListener(‘push’, event => {
+self.addEventListener('push', event => {
 if (event.data) {
 const data = event.data.json();
 const options = {
@@ -95,17 +93,15 @@ body: data.body,
 data: data.url
 };
 
-```
 event.waitUntil(
   self.registration.showNotification(data.title, options)
 );
-```
 
 }
 });
 
 // Handle notification clicks
-self.addEventListener(‘notificationclick’, event => {
+self.addEventListener('notificationclick', event => {
 event.notification.close();
 
 if (event.notification.data) {
