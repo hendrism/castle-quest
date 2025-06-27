@@ -431,6 +431,8 @@ showDiceRoll((roll) => {
 
     updateUI();
     saveGame();
+
+    return logMsg;
 });
 
 }
@@ -487,56 +489,67 @@ return { rewards, xp, message, type, roll: effectiveRoll };
 
 // Sleep and day progression
 function sleep() {
-    // Overnight event using 2d6 for event and d20 for severity
-    const d1 = rollDice(6);
-    const d2 = rollDice(6);
-    const eventIndex = (((d1 - 1) * 6 + (d2 - 1)) % nightEvents.length);
-    const nightEvent = nightEvents[eventIndex];
+    showDiceRoll((roll) => {
+        // Overnight event using 2d6 for event and provided d20 roll for severity
+        const d1 = rollDice(6);
+        const d2 = rollDice(6);
+        const eventIndex = (((d1 - 1) * 6 + (d2 - 1)) % nightEvents.length);
+        const nightEvent = nightEvents[eventIndex];
 
-    const wallBonus = getWallBonus();
-    let severityRoll = rollDice(20);
-    if (nightEvent.type === 'bad') {
-        severityRoll = Math.max(1, severityRoll - wallBonus);
-    } else if (nightEvent.type === 'good') {
-        severityRoll = Math.min(20, severityRoll + wallBonus);
-    }
+        const wallBonus = getWallBonus();
+        let severityRoll = roll;
+        if (nightEvent.type === 'bad') {
+            severityRoll = Math.max(1, roll - wallBonus);
+        } else if (nightEvent.type === 'good') {
+            severityRoll = Math.min(20, roll + wallBonus);
+        }
 
-    let eventMessage = '';
-    let eventType = 'neutral';
+        let eventMessage = '';
+        let eventType = 'neutral';
 
-    if (nightEvent && typeof nightEvent.effect === 'function') {
-        const result = nightEvent.effect(severityRoll);
-        eventMessage = result.message;
-        eventType = result.type || nightEvent.type;
-    }
+        if (nightEvent && typeof nightEvent.effect === 'function') {
+            const result = nightEvent.effect(severityRoll);
+            eventMessage = result.message;
+            eventType = result.type || nightEvent.type;
+        }
 
-// Daily production from buildings
-const production = calculateDailyProduction();
-gameState.resources.food += production.food;
-gameState.resources.stone += production.stone;
+        // Daily production from buildings
+        const production = calculateDailyProduction();
+        gameState.resources.food += production.food;
+        gameState.resources.stone += production.stone;
 
-if (production.food > 0 || production.stone > 0) {
-    addEventLog(`🏭 Daily production: +${production.food} food, +${production.stone} stone`, 'success');
-}
+        if (production.food > 0 || production.stone > 0) {
+            addEventLog(`🏭 Daily production: +${production.food} food, +${production.stone} stone`, 'success');
+        }
 
-// Progress day
-gameState.day++;
-gameState.explorationsLeft = 5;
-gameState.dailyChallenge.explored.clear();
-gameState.dailyChallenge.completed = false;
+        // Progress day
+        gameState.day++;
+        gameState.explorationsLeft = 5;
+        gameState.dailyChallenge.explored.clear();
+        gameState.dailyChallenge.completed = false;
 
-// Change season every 4 days
-const seasonKeys = Object.keys(seasons);
-const seasonIndex = Math.floor((gameState.day - 1) / 4) % seasonKeys.length;
-gameState.season = seasonKeys[seasonIndex];
+        // Change season every 4 days
+        const seasonKeys = Object.keys(seasons);
+        const seasonIndex = Math.floor((gameState.day - 1) / 4) % seasonKeys.length;
+        gameState.season = seasonKeys[seasonIndex];
 
-// Add event log
-addEventLog(eventMessage, eventType);
-addEventLog(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
+        // Add event log
+        addEventLog(eventMessage, eventType);
+        addEventLog(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
 
-updateUI();
-saveGame();
+        updateUI();
+        saveGame();
 
+        // Build detail text for modal
+        const details = [];
+        details.push(eventMessage);
+        if (production.food > 0 || production.stone > 0) {
+            details.push(`🏭 Daily production: +${production.food} food, +${production.stone} stone`);
+        }
+        details.push(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
+
+        return details.join('<br>');
+    });
 }
 
 // Settlement management
@@ -733,37 +746,42 @@ logContent.className = `log-content ${size}`;
 
 // Modal functions
 function showDiceRoll(callback) {
-const modal = document.getElementById('dice-modal');
-const dice = document.getElementById('dice');
-const diceFace = dice.querySelector('.dice-face');
-const result = document.getElementById('roll-result');
+    const modal = document.getElementById('dice-modal');
+    const dice = document.getElementById('dice');
+    const diceFace = dice.querySelector('.dice-face');
+    const result = document.getElementById('roll-result');
 
-modal.classList.add('show');
-dice.classList.add('rolling');
-diceFace.textContent = '?';
-result.textContent = 'Rolling...';
+    modal.classList.add('show');
+    dice.classList.add('rolling');
+    diceFace.textContent = '?';
+    result.textContent = 'Rolling...';
 
-setTimeout(() => {
-    dice.classList.remove('rolling');
-    const roll = rollDice();
-    diceFace.textContent = roll;
-    
-    let resultText = `You rolled a ${roll}!`;
-    if (roll === 1) resultText += ' Critical failure!';
-    else if (roll === 20) resultText += ' Critical success!';
-    else if (roll >= 18) resultText += ' Amazing!';
-    else if (roll >= 12) resultText += ' Good roll!';
-    else if (roll <= 5) resultText += ' Poor roll...';
-    
-    if (gameState.items.luckyCharm > 0) {
-        resultText += ` (Lucky Charm: +2 = ${Math.min(20, roll + 2)})`;
-    }
-    
-    result.textContent = resultText;
+    setTimeout(() => {
+        dice.classList.remove('rolling');
+        const roll = rollDice();
+        diceFace.textContent = roll;
 
-    if (callback) callback(roll);
-}, 1000);
+        let resultText = `You rolled a ${roll}!`;
+        if (roll === 1) resultText += ' Critical failure!';
+        else if (roll === 20) resultText += ' Critical success!';
+        else if (roll >= 18) resultText += ' Amazing!';
+        else if (roll >= 12) resultText += ' Good roll!';
+        else if (roll <= 5) resultText += ' Poor roll...';
 
+        if (gameState.items.luckyCharm > 0) {
+            resultText += ` (Lucky Charm: +2 = ${Math.min(20, roll + 2)})`;
+        }
+
+        // Allow callback to provide additional detail text
+        let detailText = '';
+        if (callback) {
+            detailText = callback(roll) || '';
+        }
+
+        result.innerHTML = detailText
+            ? `${resultText}<br>${detailText}`
+            : resultText;
+    }, 1000);
 }
 
 function closeModal() {
