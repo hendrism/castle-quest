@@ -146,6 +146,15 @@ locationBtns.forEach((btn, index) => {
     console.log('Setting up button', index, 'for location:', btn.dataset.location);
     btn.addEventListener('click', (e) => {
         console.log('Location button clicked:', btn.dataset.location);
+        
+        // Visual feedback for phone users
+        btn.style.background = '#e74c3c';
+        btn.style.color = 'white';
+        setTimeout(() => {
+            btn.style.background = '';
+            btn.style.color = '';
+        }, 200);
+        
         const location = btn.dataset.location;
         exploreLocation(location);
     });
