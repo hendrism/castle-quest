@@ -1,13 +1,13 @@
 /* Reset and base styles */
 
-- {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   }
 
 body {
-font-family: -apple-system, BlinkMacSystemFont, ‘Segoe UI’, Roboto, sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 color: #2c3e50;
 min-height: 100vh;
@@ -514,7 +514,6 @@ to { transform: translateY(0); opacity: 1; }
 max-width: 100%;
 }
 
-```
 main {
     padding: 0.8rem;
 }
@@ -532,7 +531,6 @@ main {
     font-size: 1.5rem;
     margin-right: 0.8rem;
 }
-```
 
 }
 
