@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Dice & Castle</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>🛡️ Dice & Castle</h1>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Day:</span>
+                    <span id="day">1</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Level:</span>
+                    <span id="level">1</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">XP:</span>
+                    <span id="xp">0</span>/<span id="xp-next">100</span>
+                </div>
+            </div>
+            <div class="season">
+                <span id="season">🌸 Spring</span>
+            </div>
+        </header>
+
+```
+    <main>
+        <!-- Resources -->
+        <section class="resources">
+            <h2>Resources</h2>
+            <div class="resource-grid">
+                <div class="resource">
+                    <span class="resource-icon">🪵</span>
+                    <span class="resource-name">Wood</span>
+                    <span class="resource-amount" id="wood">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🗿</span>
+                    <span class="resource-name">Stone</span>
+                    <span class="resource-amount" id="stone">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⚔️</span>
+                    <span class="resource-name">Metal</span>
+                    <span class="resource-amount" id="metal">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🌾</span>
+                    <span class="resource-name">Food</span>
+                    <span class="resource-amount" id="food">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exploration -->
+        <section class="exploration">
+            <h2>Exploration</h2>
+            <div class="exploration-info">
+                <p>Explorations remaining today: <span id="explorations-left">5</span>/5</p>
+                <p>Daily Challenge: <span id="daily-challenge">Explore all 4 locations</span></p>
+            </div>
+            
+            <div class="locations">
+                <button class="location-btn" data-location="forest">
+                    <span class="location-icon">🌲</span>
+                    <span class="location-name">Deep Forest</span>
+                    <span class="location-desc">Rich in wood and wildlife</span>
+                </button>
+                <button class="location-btn" data-location="quarry">
+                    <span class="location-icon">⛰️</span>
+                    <span class="location-name">Stone Quarry</span>
+                    <span class="location-desc">Source of stone and metal</span>
+                </button>
+                <button class="location-btn" data-location="ruins">
+                    <span class="location-icon">🏛️</span>
+                    <span class="location-name">Ancient Ruins</span>
+                    <span class="location-desc">Mysterious treasures await</span>
+                </button>
+                <button class="location-btn" data-location="plains">
+                    <span class="location-icon">🌾</span>
+                    <span class="location-name">Fertile Plains</span>
+                    <span class="location-desc">Food and farming supplies</span>
+                </button>
+            </div>
+
+            <div class="sleep-section">
+                <button id="sleep-btn" class="sleep-btn" disabled>
+                    <span class="sleep-icon">😴</span>
+                    Sleep (End Day)
+                </button>
+            </div>
+        </section>
+
+        <!-- Settlement -->
+        <section class="settlement">
+            <h2>Your Settlement</h2>
+            
+            <div class="settlement-overview">
+                <div class="settlement-item">
+                    <span class="settlement-icon">🏠</span>
+                    <div class="settlement-info">
+                        <div class="settlement-name">Home: <span id="home-level">Camp</span></div>
+                        <button class="upgrade-btn" id="home-upgrade-btn">
+                            <span class="upgrade-text">Upgrade to House</span>
+                            <span class="upgrade-cost">5 🪵</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settlement-item">
+                    <span class="settlement-icon">🛡️</span>
+                    <div class="settlement-info">
+                        <div class="settlement-name">Walls: <span id="walls-level">None</span></div>
+                        <button class="upgrade-btn" id="walls-upgrade-btn">
+                            <span class="upgrade-text">Build Earthen Walls</span>
+                            <span class="upgrade-cost">5 🪵</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buildings">
+                <div class="building-section">
+                    <h3>Farms (<span id="farm-count">0</span>/<span id="farm-max">2</span>)</h3>
+                    <div id="farms-container"></div>
+                    <button class="build-btn" id="build-farm-btn">
+                        <span class="build-text">Build Farm</span>
+                        <span class="build-cost">1 🪵 1 🗿</span>
+                    </button>
+                </div>
+
+                <div class="building-section">
+                    <h3>Quarries (<span id="quarry-count">0</span>/<span id="quarry-max">2</span>)</h3>
+                    <div id="quarries-container"></div>
+                    <button class="build-btn" id="build-quarry-btn">
+                        <span class="build-text">Build Quarry</span>
+                        <span class="build-cost">1 🪵 2 🗿</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="crafting">
+                <h3>Crafting</h3>
+                <div class="craft-items">
+                    <div class="craft-item">
+                        <span class="craft-icon">🍀</span>
+                        <span class="craft-name">Lucky Charm</span>
+                        <span class="craft-owned" id="lucky-charm-count">0</span>
+                        <button class="craft-btn" id="craft-lucky-charm">
+                            <span class="craft-cost">3 🪵 2 🗿</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Event Log -->
+        <section class="event-log">
+            <h2>Event Log</h2>
+            <div class="log-controls">
+                <button id="clear-log-btn">Clear Log</button>
+                <select id="text-size-select">
+                    <option value="small">Small Text</option>
+                    <option value="medium" selected>Medium Text</option>
+                    <option value="large">Large Text</option>
+                </select>
+            </div>
+            <div id="event-log-content" class="log-content"></div>
+        </section>
+    </main>
+
+    <!-- Dice Roll Modal -->
+    <div id="dice-modal" class="modal">
+        <div class="modal-content">
+            <div class="dice-container">
+                <div class="dice" id="dice">
+                    <div class="dice-face">?</div>
+                </div>
+            </div>
+            <div class="roll-result" id="roll-result"></div>
+            <button id="close-modal-btn" class="modal-btn">Continue</button>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+```
+
+</body>
+</html>
