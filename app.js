@@ -997,10 +997,7 @@ document.getElementById('xp').textContent = gameState.xp;
 document.getElementById('xp-next').textContent = gameState.xpToNext;
 document.getElementById('season').textContent = `${seasons[gameState.season].icon} ${seasons[gameState.season].name}`;
 
-// Update resources
-Object.keys(gameState.resources).forEach(resource => {
-    document.getElementById(resource).textContent = gameState.resources[resource];
-});
+// Update resources bar
 updateResourceBar();
 
 
