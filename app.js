@@ -1,32 +1,39 @@
 // Game state
 let gameState = {
-day: 1,
-level: 1,
-xp: 0,
-xpToNext: 100,
-season: 'spring',
-explorationsLeft: 5,
-resources: {
-wood: 0,
-stone: 0,
-metal: 0,
-food: 0
-},
-settlement: {
-home: 'camp',
-walls: 'none',
-farms: [],
-quarries: []
-},
-items: {
-luckyCharm: 0
-},
+    day: 1,
+    level: 1,
+    xp: 0,
+    xpToNext: 100,
+    season: 'spring',
+    explorationsLeft: 5,
+    resources: {
+        wood: 0,
+        stone: 0,
+        metal: 0,
+        food: 0,
+        tools: 0,
+        gems: 0
+    },
+    settlement: {
+        home: 'camp',
+        walls: 'none',
+        farms: [],
+        quarries: [],
+        mines: [],
+        workshops: []
+    },
+    items: {
+        luckyCharm: 0,
+        magicScroll: 0
+    },
 dailyChallenge: {
 explored: new Set(),
 completed: false
 },
-eventLog: []
+    eventLog: []
 };
+
+const LUCKY_CHARM_MAX_USES = 3;
 
 // Game data
 const locations = {
@@ -43,10 +50,10 @@ description: 'Source of stone and metal',
 rewards: { stone: [1, 3], metal: [0, 1] }
 },
 ruins: {
-name: 'Ancient Ruins',
-icon: '🏛️',
-description: 'Mysterious treasures await',
-rewards: { wood: [0, 2], stone: [0, 2], metal: [0, 2], food: [0, 1] }
+    name: 'Ancient Ruins',
+    icon: '🏛️',
+    description: 'Mysterious treasures await',
+    rewards: { wood: [0, 2], stone: [0, 2], metal: [0, 2], food: [0, 1], gems: [0, 1] }
 },
 plains: {
 name: 'Fertile Plains',
@@ -100,19 +107,41 @@ levels: {
 basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
 improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
 advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
-master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
-}
+    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+    }
 },
 quarry: {
-name: 'Quarry',
+    name: 'Quarry',
 icon: '⛏️',
 buildCost: { wood: 1, stone: 2 },
 levels: {
 basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
 improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
 advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
-master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
-}
+    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+    }
+},
+mine: {
+    name: 'Mine',
+    icon: '⚒️',
+    buildCost: { wood: 2, stone: 2 },
+    levels: {
+        basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1 },
+        improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 3 }, production: 2 },
+        advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 2 }, production: 3 },
+        master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+    }
+},
+workshop: {
+    name: 'Workshop',
+    icon: '🔧',
+    buildCost: { wood: 2, stone: 1 },
+    levels: {
+        basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1, woodCost: 1 },
+        improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 2 }, production: 2, woodCost: 1 },
+        advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 2 }, production: 3, woodCost: 2 },
+        master: { name: 'Master', upgradeTo: null, cost: null, production: 5, woodCost: 2 }
+    }
 }
 };
 
@@ -340,6 +369,8 @@ if (wallsUpgradeBtn) {
 // Building construction
 const buildFarmBtn = document.getElementById('build-farm-btn');
 const buildQuarryBtn = document.getElementById('build-quarry-btn');
+const buildMineBtn = document.getElementById('build-mine-btn');
+const buildWorkshopBtn = document.getElementById('build-workshop-btn');
 
 if (buildFarmBtn) {
     buildFarmBtn.addEventListener('click', () => {
@@ -355,12 +386,47 @@ if (buildQuarryBtn) {
     });
 }
 
+if (buildMineBtn) {
+    buildMineBtn.addEventListener('click', () => {
+        console.log('Build mine clicked');
+        buildBuilding('mine');
+    });
+}
+
+if (buildWorkshopBtn) {
+    buildWorkshopBtn.addEventListener('click', () => {
+        console.log('Build workshop clicked');
+        buildBuilding('workshop');
+    });
+}
+
 // Crafting
 const craftBtn = document.getElementById('craft-lucky-charm');
+const repairCharmBtn = document.getElementById('repair-lucky-charm');
+const craftScrollBtn = document.getElementById('craft-magic-scroll');
+const useScrollBtn = document.getElementById('use-magic-scroll');
 if (craftBtn) {
     craftBtn.addEventListener('click', () => {
         console.log('Craft lucky charm clicked');
         craftLuckyCharm();
+    });
+}
+if (repairCharmBtn) {
+    repairCharmBtn.addEventListener('click', () => {
+        console.log('Repair lucky charm clicked');
+        repairLuckyCharm();
+    });
+}
+if (craftScrollBtn) {
+    craftScrollBtn.addEventListener('click', () => {
+        console.log('Craft magic scroll clicked');
+        craftMagicScroll();
+    });
+}
+if (useScrollBtn) {
+    useScrollBtn.addEventListener('click', () => {
+        console.log('Use magic scroll clicked');
+        useMagicScroll();
     });
 }
 
@@ -446,7 +512,11 @@ showDiceRoll((roll) => {
 
 function calculateExplorationResult(locationKey, roll) {
 const location = locations[locationKey];
-const luckyCharmBonus = gameState.items.luckyCharm > 0 ? 2 : 0;
+let luckyCharmBonus = 0;
+if (gameState.items.luckyCharm > 0) {
+    luckyCharmBonus = 2;
+    gameState.items.luckyCharm--;
+}
 const effectiveRoll = Math.min(20, roll + luckyCharmBonus);
 
 let multiplier = 1;
@@ -526,9 +596,16 @@ function sleep() {
         const production = calculateDailyProduction();
         gameState.resources.food += production.food;
         gameState.resources.stone += production.stone;
+        gameState.resources.metal += production.metal;
+        gameState.resources.tools += production.tools;
 
-        if (production.food > 0 || production.stone > 0) {
-            addEventLog(`🏭 Daily production: +${production.food} food, +${production.stone} stone`, 'success');
+        if (production.food > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0) {
+            const parts = [];
+            if (production.food) parts.push(`+${production.food} food`);
+            if (production.stone) parts.push(`+${production.stone} stone`);
+            if (production.metal) parts.push(`+${production.metal} metal`);
+            if (production.tools) parts.push(`+${production.tools} tools`);
+            addEventLog(`🏭 Daily production: ${parts.join(', ')}`, 'success');
         }
 
         // Progress day
@@ -552,8 +629,13 @@ function sleep() {
         // Build detail text for modal
         const details = [];
         details.push(eventMessage);
-        if (production.food > 0 || production.stone > 0) {
-            details.push(`🏭 Daily production: +${production.food} food, +${production.stone} stone`);
+        if (production.food > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0) {
+            const parts = [];
+            if (production.food) parts.push(`+${production.food} food`);
+            if (production.stone) parts.push(`+${production.stone} stone`);
+            if (production.metal) parts.push(`+${production.metal} metal`);
+            if (production.tools) parts.push(`+${production.tools} tools`);
+            details.push(`🏭 Daily production: ${parts.join(', ')}`);
         }
         details.push(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
 
@@ -653,13 +735,43 @@ const cost = { wood: 3, stone: 2 };
 if (!canAfford(cost)) return;
 
 spendResources(cost);
-gameState.items.luckyCharm++;
-addEventLog('🍀 Crafted a Lucky Charm! (+2 to exploration rolls)', 'success');
+gameState.items.luckyCharm += LUCKY_CHARM_MAX_USES;
+addEventLog(`🍀 Crafted a Lucky Charm! (${LUCKY_CHARM_MAX_USES} uses)`, 'success');
 gainXP(30);
 
 updateUI();
 saveGame();
 
+}
+
+function repairLuckyCharm() {
+if (gameState.items.luckyCharm >= LUCKY_CHARM_MAX_USES) return;
+if (gameState.resources.tools < 1) return;
+gameState.resources.tools -= 1;
+gameState.items.luckyCharm = LUCKY_CHARM_MAX_USES;
+addEventLog('🔧 Repaired Lucky Charm to full uses.', 'success');
+updateUI();
+saveGame();
+}
+
+function craftMagicScroll() {
+const cost = { wood: 2, gems: 1 };
+if (!canAfford(cost)) return;
+spendResources(cost);
+gameState.items.magicScroll++;
+addEventLog('📜 Crafted a Magic Scroll!', 'success');
+gainXP(15);
+updateUI();
+saveGame();
+}
+
+function useMagicScroll() {
+if (gameState.items.magicScroll <= 0) return;
+gameState.items.magicScroll--;
+gainXP(20);
+addEventLog('✨ Used a Magic Scroll for bonus XP!', 'success');
+updateUI();
+saveGame();
 }
 
 // Helper functions
@@ -686,6 +798,8 @@ function getBuildingKey(type) {
 function calculateDailyProduction() {
     let food = 0;
     let stone = 0;
+    let metal = 0;
+    let tools = 0;
 
     gameState.settlement.farms.forEach(farm => {
         const production = buildingTypes.farm.levels[farm.level].production;
@@ -698,7 +812,21 @@ function calculateDailyProduction() {
         stone += production;
     });
 
-    return { food, stone };
+    gameState.settlement.mines.forEach(mine => {
+        const production = buildingTypes.mine.levels[mine.level].production;
+        metal += production;
+    });
+
+    gameState.settlement.workshops.forEach(ws => {
+        const levelData = buildingTypes.workshop.levels[ws.level];
+        const woodCost = levelData.woodCost || 1;
+        if (gameState.resources.wood >= woodCost) {
+            gameState.resources.wood -= woodCost;
+            tools += levelData.production;
+        }
+    });
+
+    return { food, stone, metal, tools };
 }
 
 function damageWalls() {
@@ -816,8 +944,9 @@ Object.keys(gameState.resources).forEach(resource => {
 });
 
 const prod = calculateDailyProduction();
+const prodParts = [`+${prod.food} food`, `+${prod.stone} stone`, `+${prod.metal} metal`, `+${prod.tools} tools`];
 document.getElementById('production-info').textContent =
-    `Daily Production: +${prod.food} food, +${prod.stone} stone`;
+    `Daily Production: ${prodParts.join(', ')}`;
 
 // Update exploration
 document.getElementById('explorations-left').textContent = gameState.explorationsLeft;
@@ -883,6 +1012,12 @@ updateBuildingsUI();
 // Items
 document.getElementById('lucky-charm-count').textContent = gameState.items.luckyCharm;
 document.getElementById('craft-lucky-charm').disabled = !canAfford({ wood: 3, stone: 2 });
+document.getElementById('repair-lucky-charm').disabled =
+    gameState.items.luckyCharm >= LUCKY_CHARM_MAX_USES || gameState.resources.tools < 1;
+
+document.getElementById('magic-scroll-count').textContent = gameState.items.magicScroll;
+document.getElementById('craft-magic-scroll').disabled = !canAfford({ wood: 2, gems: 1 });
+document.getElementById('use-magic-scroll').disabled = gameState.items.magicScroll <= 0;
 
 }
 
@@ -915,6 +1050,34 @@ quarriesContainer.innerHTML = '';
 gameState.settlement.quarries.forEach(quarry => {
     const quarryElement = createBuildingElement('quarry', quarry);
     quarriesContainer.appendChild(quarryElement);
+});
+
+// Mines
+document.getElementById('mine-count').textContent = gameState.settlement.mines.length;
+document.getElementById('mine-max').textContent = maxBuildings;
+document.getElementById('build-mine-btn').disabled =
+    gameState.settlement.mines.length >= maxBuildings ||
+    !canAfford(buildingTypes.mine.buildCost);
+
+const minesContainer = document.getElementById('mines-container');
+minesContainer.innerHTML = '';
+gameState.settlement.mines.forEach(mine => {
+    const mineElement = createBuildingElement('mine', mine);
+    minesContainer.appendChild(mineElement);
+});
+
+// Workshops
+document.getElementById('workshop-count').textContent = gameState.settlement.workshops.length;
+document.getElementById('workshop-max').textContent = maxBuildings;
+document.getElementById('build-workshop-btn').disabled =
+    gameState.settlement.workshops.length >= maxBuildings ||
+    !canAfford(buildingTypes.workshop.buildCost);
+
+const workshopsContainer = document.getElementById('workshops-container');
+workshopsContainer.innerHTML = '';
+gameState.settlement.workshops.forEach(ws => {
+    const wsElement = createBuildingElement('workshop', ws);
+    workshopsContainer.appendChild(wsElement);
 });
 
 }
@@ -967,7 +1130,9 @@ const icons = {
 wood: '🪵',
 stone: '🗿',
 metal: '⚔️',
-food: '🌾'
+food: '🌾',
+tools: '🔧',
+gems: '💎'
 };
 return icons[resource] || resource;
 }
