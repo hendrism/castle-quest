@@ -461,31 +461,17 @@ if (buildWorkshopBtn) {
 
 // Crafting
 const craftBtn = document.getElementById('craft-lucky-charm');
-const repairCharmBtn = document.getElementById('repair-lucky-charm');
 const craftScrollBtn = document.getElementById('craft-magic-scroll');
-const useScrollBtn = document.getElementById('use-magic-scroll');
 if (craftBtn) {
     craftBtn.addEventListener('click', () => {
         console.log('Craft lucky charm clicked');
         craftLuckyCharm();
     });
 }
-if (repairCharmBtn) {
-    repairCharmBtn.addEventListener('click', () => {
-        console.log('Repair lucky charm clicked');
-        repairLuckyCharm();
-    });
-}
 if (craftScrollBtn) {
     craftScrollBtn.addEventListener('click', () => {
         console.log('Craft magic scroll clicked');
         craftMagicScroll();
-    });
-}
-if (useScrollBtn) {
-    useScrollBtn.addEventListener('click', () => {
-        console.log('Use magic scroll clicked');
-        useMagicScroll();
     });
 }
 
@@ -827,34 +813,18 @@ saveGame();
 
 }
 
-function repairLuckyCharm() {
-if (gameState.items.luckyCharm >= LUCKY_CHARM_MAX_USES) return;
-if (gameState.resources.tools < 1) return;
-gameState.resources.tools -= 1;
-gameState.items.luckyCharm = LUCKY_CHARM_MAX_USES;
-addEventLog('🔧 Repaired Lucky Charm to full uses.', 'success');
-updateUI();
-saveGame();
-}
 
 function craftMagicScroll() {
-const cost = { wood: 2, gems: 1 };
-if (!canAfford(cost)) return;
-spendResources(cost);
-gameState.items.magicScroll++;
-addEventLog('📜 Crafted a Magic Scroll!', 'success');
-gainXP(15);
-updateUI();
-saveGame();
-}
-
-function useMagicScroll() {
-if (gameState.items.magicScroll <= 0) return;
-gameState.items.magicScroll--;
-gainXP(20);
-addEventLog('✨ Used a Magic Scroll for bonus XP!', 'success');
-updateUI();
-saveGame();
+    const cost = { wood: 2, gems: 1 };
+    if (!canAfford(cost)) return;
+    spendResources(cost);
+    addEventLog('📜 Crafted a Magic Scroll!', 'success');
+    gainXP(15);
+    // Automatically gain the scroll's XP when crafted
+    gainXP(20);
+    addEventLog('✨ Magic Scroll activated for bonus XP!', 'success');
+    updateUI();
+    saveGame();
 }
 
 // Helper functions
@@ -1128,12 +1098,10 @@ updateBuildingsUI();
 // Items
 document.getElementById('lucky-charm-count').textContent = gameState.items.luckyCharm;
 document.getElementById('craft-lucky-charm').disabled = !canAfford({ wood: 3, stone: 2 });
-document.getElementById('repair-lucky-charm').disabled =
-    gameState.items.luckyCharm >= LUCKY_CHARM_MAX_USES || gameState.resources.tools < 1;
+
 
 document.getElementById('magic-scroll-count').textContent = gameState.items.magicScroll;
 document.getElementById('craft-magic-scroll').disabled = !canAfford({ wood: 2, gems: 1 });
-document.getElementById('use-magic-scroll').disabled = gameState.items.magicScroll <= 0;
 
 }
 
