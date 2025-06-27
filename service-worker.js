@@ -1,4 +1,6 @@
-const CACHE_NAME = 'dice-castle-v1';
+// Update the cache name whenever static assets change so users get the
+// latest files rather than a stale cached version.
+const CACHE_NAME = 'dice-castle-v2';
 const urlsToCache = [
 '/',
 '/index.html',
