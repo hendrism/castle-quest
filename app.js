@@ -662,8 +662,11 @@ function sleep() {
         gameState.resources.metal += production.metal;
         gameState.resources.tools += production.tools;
         gameState.resources.gems += production.gems;
+        if (production.woodConsumed) {
+            gameState.resources.wood = Math.max(0, gameState.resources.wood - production.woodConsumed);
+        }
 
-        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0) {
+        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0 || production.woodConsumed > 0) {
             const parts = [];
             if (production.food) parts.push(`+${production.food} food`);
             if (production.wood) parts.push(`+${production.wood} wood`);
@@ -671,6 +674,7 @@ function sleep() {
             if (production.metal) parts.push(`+${production.metal} metal`);
             if (production.tools) parts.push(`+${production.tools} tools`);
             if (production.gems) parts.push(`+${production.gems} gems`);
+            if (production.woodConsumed) parts.push(`-${production.woodConsumed} wood`);
             addEventLog(`🏭 Daily production: ${parts.join(', ')}`, 'success');
         }
 
@@ -694,7 +698,7 @@ function sleep() {
         // Build detail text for modal
         const details = [];
         details.push(eventMessage);
-        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0) {
+        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0 || production.woodConsumed > 0) {
             const parts = [];
             if (production.food) parts.push(`+${production.food} food`);
             if (production.wood) parts.push(`+${production.wood} wood`);
@@ -702,6 +706,7 @@ function sleep() {
             if (production.metal) parts.push(`+${production.metal} metal`);
             if (production.tools) parts.push(`+${production.tools} tools`);
             if (production.gems) parts.push(`+${production.gems} gems`);
+            if (production.woodConsumed) parts.push(`-${production.woodConsumed} wood`);
             details.push(`🏭 Daily production: ${parts.join(', ')}`);
         }
         details.push(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
@@ -907,11 +912,12 @@ function calculateDailyProduction() {
         gems += production;
     });
 
+    let woodConsumed = 0;
     gameState.settlement.workshops.forEach(ws => {
         const levelData = buildingTypes.workshop.levels[ws.level];
         const woodCost = levelData.woodCost || 1;
-        if (gameState.resources.wood >= woodCost) {
-            gameState.resources.wood -= woodCost;
+        if (gameState.resources.wood - woodConsumed >= woodCost) {
+            woodConsumed += woodCost;
             tools += levelData.production;
         }
     });
@@ -924,7 +930,7 @@ function calculateDailyProduction() {
     tools = Math.floor(tools * multiplier);
     gems = Math.floor(gems * multiplier);
 
-    return { food, wood, stone, metal, tools, gems };
+    return { food, wood, stone, metal, tools, gems, woodConsumed };
 }
 
 function damageWalls() {
@@ -1303,8 +1309,11 @@ function updateResourceBar() {
         if (el) el.textContent = gameState.resources[r];
         const prodEl = document.getElementById(`bar-prod-${r}`);
         if (prodEl) {
-            const val = prod[r] || 0;
-            prodEl.textContent = val > 0 ? `(+${val})` : '';
+            let val = prod[r] || 0;
+            if (r === 'wood') {
+                val -= prod.woodConsumed || 0;
+            }
+            prodEl.textContent = val > 0 ? `(+${val})` : val < 0 ? `(${val})` : '';
         }
     });
 }
