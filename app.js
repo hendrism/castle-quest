@@ -760,3 +760,10 @@ const loadedState = JSON.parse(savedData);
 
 // Initialize when page loads
 document.addEventListener(‘DOMContentLoaded’, initGame);
+
+// Also try to init if DOM is already loaded
+if (document.readyState === ‘loading’) {
+document.addEventListener(‘DOMContentLoaded’, initGame);
+} else {
+initGame();
+}
