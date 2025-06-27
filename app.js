@@ -84,6 +84,13 @@ const wallBonuses = {
     stone: 3
 };
 
+const homeBonuses = {
+    camp: 0,
+    house: 1,
+    hall: 2,
+    fortress: 3
+};
+
 const buildingTypes = {
 farm: {
 name: 'Farm',
@@ -497,11 +504,13 @@ function sleep() {
         const nightEvent = nightEvents[eventIndex];
 
         const wallBonus = getWallBonus();
+        const homeBonus = getHomeBonus();
         let severityRoll = roll;
         if (nightEvent.type === 'bad') {
-            severityRoll = Math.max(1, roll - wallBonus);
+            const savingThrow = roll + wallBonus + homeBonus;
+            severityRoll = Math.max(1, 21 - savingThrow);
         } else if (nightEvent.type === 'good') {
-            severityRoll = Math.min(20, roll + wallBonus);
+            severityRoll = Math.min(20, roll + wallBonus + homeBonus);
         }
 
         let eventMessage = '';
@@ -702,6 +711,10 @@ function damageWalls() {
 
 function getWallBonus() {
     return wallBonuses[gameState.settlement.walls] || 0;
+}
+
+function getHomeBonus() {
+    return homeBonuses[gameState.settlement.home] || 0;
 }
 
 function gainXP(amount) {
