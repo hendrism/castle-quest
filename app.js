@@ -394,8 +394,7 @@ if (gameState.dailyChallenge.explored.size === 4 && !gameState.dailyChallenge.co
 }
 
 // Roll dice and show modal
-showDiceRoll(() => {
-    const roll = rollDice();
+showDiceRoll((roll) => {
     const result = calculateExplorationResult(locationKey, roll);
     
     // Apply rewards
@@ -406,8 +405,22 @@ showDiceRoll(() => {
     // Gain XP
     gainXP(result.xp);
 
-    // Log event
-    addEventLog(result.message, result.type);
+    // Log event with roll and rewards
+    const rewardsText = Object.keys(result.rewards)
+        .map(r => {
+            const amt = result.rewards[r];
+            if (amt === 0) return null;
+            const icon = getResourceIcon(r);
+            return `${amt > 0 ? '+' : ''}${amt} ${icon}`;
+        })
+        .filter(Boolean)
+        .join(' ');
+
+    let logMsg = `🎲 Rolled ${roll}: ${result.message}`;
+    if (rewardsText) {
+        logMsg += ` Rewards: ${rewardsText}`;
+    }
+    addEventLog(logMsg, result.type);
 
     updateUI();
     saveGame();
@@ -461,7 +474,7 @@ Object.keys(location.rewards).forEach(resource => {
 
 const xp = 10 + (effectiveRoll >= 15 ? 10 : 0);
 
-return { rewards, xp, message, type };
+return { rewards, xp, message, type, roll: effectiveRoll };
 
 }
 
@@ -718,8 +731,8 @@ setTimeout(() => {
     }
     
     result.textContent = resultText;
-    
-    if (callback) callback();
+
+    if (callback) callback(roll);
 }, 1000);
 
 }

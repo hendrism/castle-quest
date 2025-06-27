@@ -15,10 +15,6 @@
     <div id="app">
         <header>
             <h1>🛡️ Dice & Castle</h1>
-            <button onclick="alert('JavaScript is working! Game state: ' + JSON.stringify({day: gameState.day, wood: gameState.resources.wood}))" 
-                    style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin: 5px;">
-                🔧 Test JS
-            </button>
             <div class="stats">
                 <div class="stat">
                     <span class="stat-label">Day:</span>
@@ -39,6 +35,19 @@
         </header>
 
     <main>
+        <!-- Event Log -->
+        <section class="event-log">
+            <h2>Event Log</h2>
+            <div class="log-controls">
+                <button id="clear-log-btn">Clear Log</button>
+                <select id="text-size-select">
+                    <option value="small">Small Text</option>
+                    <option value="medium" selected>Medium Text</option>
+                    <option value="large">Large Text</option>
+                </select>
+            </div>
+            <div id="event-log-content" class="log-content"></div>
+        </section>
         <!-- Resources -->
         <section class="resources">
             <h2>Resources</h2>
@@ -168,19 +177,6 @@
             </div>
         </section>
 
-        <!-- Event Log -->
-        <section class="event-log">
-            <h2>Event Log</h2>
-            <div class="log-controls">
-                <button id="clear-log-btn">Clear Log</button>
-                <select id="text-size-select">
-                    <option value="small">Small Text</option>
-                    <option value="medium" selected>Medium Text</option>
-                    <option value="large">Large Text</option>
-                </select>
-            </div>
-            <div id="event-log-content" class="log-content"></div>
-        </section>
     </main>
 
     <!-- Dice Roll Modal -->
