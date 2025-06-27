@@ -89,43 +89,6 @@
             <div id="event-log-content" class="log-content"></div>
         </section>
 
-        <!-- Resources -->
-        <section class="resources" id="resources">
-            <h2>Resources</h2>
-            <div class="resource-grid">
-                <div class="resource">
-                    <span class="resource-icon">🪵</span>
-                    <span class="resource-name">Wood</span>
-                    <span class="resource-amount" id="wood">0</span>
-                </div>
-                <div class="resource">
-                    <span class="resource-icon">🗿</span>
-                    <span class="resource-name">Stone</span>
-                    <span class="resource-amount" id="stone">0</span>
-                </div>
-                <div class="resource">
-                    <span class="resource-icon">⚔️</span>
-                    <span class="resource-name">Metal</span>
-                    <span class="resource-amount" id="metal">0</span>
-                </div>
-                <div class="resource">
-                    <span class="resource-icon">🌾</span>
-                    <span class="resource-name">Food</span>
-                    <span class="resource-amount" id="food">0</span>
-                </div>
-                <div class="resource">
-                    <span class="resource-icon">🔧</span>
-                    <span class="resource-name">Tools</span>
-                    <span class="resource-amount" id="tools">0</span>
-                </div>
-                <div class="resource">
-                    <span class="resource-icon">💎</span>
-                    <span class="resource-name">Gems</span>
-                    <span class="resource-amount" id="gems">0</span>
-                </div>
-            </div>
-            <div id="production-info" class="production-info"></div>
-        </section>
 
         <!-- Settlement -->
         <section class="settlement" id="settlement">
@@ -166,6 +129,15 @@
                 </div>
 
                 <div class="building-section">
+                    <h3>Forester Huts (<span id="forester-count">0</span>/<span id="forester-max">2</span>)</h3>
+                    <div id="foresters-container"></div>
+                    <button class="build-btn" id="build-forester-btn">
+                        <span class="build-text">Build Forester Hut</span>
+                        <span class="build-cost">2 🪵 1 🗿</span>
+                    </button>
+                </div>
+
+                <div class="building-section">
                     <h3>Quarries (<span id="quarry-count">0</span>/<span id="quarry-max">2</span>)</h3>
                     <div id="quarries-container"></div>
                     <button class="build-btn" id="build-quarry-btn">
@@ -179,6 +151,15 @@
                     <button class="build-btn" id="build-mine-btn">
                         <span class="build-text">Build Mine</span>
                         <span class="build-cost">2 🪵 2 🗿</span>
+                    </button>
+                </div>
+
+                <div class="building-section">
+                    <h3>Gem Mines (<span id="gemMine-count">0</span>/<span id="gemMine-max">2</span>)</h3>
+                    <div id="gemMines-container"></div>
+                    <button class="build-btn" id="build-gemMine-btn">
+                        <span class="build-text">Build Gem Mine</span>
+                        <span class="build-cost">2 🪵 2 🗿 1 ⚔️</span>
                     </button>
                 </div>
                 <div class="building-section">
@@ -198,6 +179,7 @@
                         <span class="craft-icon">🍀</span>
                         <span class="craft-name">Lucky Charm</span>
                         <span class="craft-owned" id="lucky-charm-count">0</span>
+                        <div class="craft-desc">Adds +2 to your next exploration rolls (3 uses).</div>
                         <button class="craft-btn" id="craft-lucky-charm">
                             <span class="craft-cost">3 🪵 2 🗿</span>
                         </button>
@@ -209,6 +191,7 @@
                         <span class="craft-icon">📜</span>
                         <span class="craft-name">Magic Scroll</span>
                         <span class="craft-owned" id="magic-scroll-count">0</span>
+                        <div class="craft-desc">Use to gain 20 XP instantly.</div>
                         <button class="craft-btn" id="craft-magic-scroll">
                             <span class="craft-cost">2 🪵 1 💎</span>
                         </button>

@@ -20,7 +20,9 @@ let gameState = {
         farms: [],
         quarries: [],
         mines: [],
-        workshops: []
+        workshops: [],
+        foresters: [],
+        gemMines: []
     },
     items: {
         luckyCharm: 0,
@@ -132,17 +134,39 @@ mine: {
         master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
     }
 },
-workshop: {
-    name: 'Workshop',
-    icon: '🔧',
-    buildCost: { wood: 2, stone: 1 },
-    levels: {
-        basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1, woodCost: 1 },
-        improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 2 }, production: 2, woodCost: 1 },
-        advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 2 }, production: 3, woodCost: 2 },
-        master: { name: 'Master', upgradeTo: null, cost: null, production: 5, woodCost: 2 }
+    workshop: {
+        name: 'Workshop',
+        icon: '🔧',
+        buildCost: { wood: 2, stone: 1 },
+        levels: {
+            basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1, woodCost: 1 },
+            improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 2 }, production: 2, woodCost: 1 },
+            advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 2 }, production: 3, woodCost: 2 },
+            master: { name: 'Master', upgradeTo: null, cost: null, production: 5, woodCost: 2 }
+        }
+    },
+    forester: {
+        name: 'Forester Hut',
+        icon: '🌳',
+        buildCost: { wood: 2, stone: 1 },
+        levels: {
+            basic: { name: 'Basic', upgradeTo: 'improved', cost: { stone: 1 }, production: 1 },
+            improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 4, stone: 2 }, production: 2 },
+            advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 8, stone: 4, metal: 2 }, production: 3 },
+            master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+        }
+    },
+    gemMine: {
+        name: 'Gem Mine',
+        icon: '💎',
+        buildCost: { wood: 2, stone: 2, metal: 1 },
+        levels: {
+            basic: { name: 'Basic', upgradeTo: 'improved', cost: { metal: 1 }, production: 1 },
+            improved: { name: 'Improved', upgradeTo: 'advanced', cost: { stone: 3, metal: 2 }, production: 2 },
+            advanced: { name: 'Advanced', upgradeTo: 'master', cost: { stone: 6, metal: 4 }, production: 3 },
+            master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+        }
     }
-}
 };
 
 const nightEvents = [
@@ -372,6 +396,8 @@ const buildFarmBtn = document.getElementById('build-farm-btn');
 const buildQuarryBtn = document.getElementById('build-quarry-btn');
 const buildMineBtn = document.getElementById('build-mine-btn');
 const buildWorkshopBtn = document.getElementById('build-workshop-btn');
+const buildForesterBtn = document.getElementById('build-forester-btn');
+const buildGemMineBtn = document.getElementById('build-gemMine-btn');
 
 if (buildFarmBtn) {
     buildFarmBtn.addEventListener('click', () => {
@@ -391,6 +417,20 @@ if (buildMineBtn) {
     buildMineBtn.addEventListener('click', () => {
         console.log('Build mine clicked');
         buildBuilding('mine');
+    });
+}
+
+if (buildForesterBtn) {
+    buildForesterBtn.addEventListener('click', () => {
+        console.log('Build forester clicked');
+        buildBuilding('forester');
+    });
+}
+
+if (buildGemMineBtn) {
+    buildGemMineBtn.addEventListener('click', () => {
+        console.log('Build gem mine clicked');
+        buildBuilding('gemMine');
     });
 }
 
@@ -596,16 +636,20 @@ function sleep() {
         // Daily production from buildings
         const production = calculateDailyProduction();
         gameState.resources.food += production.food;
+        gameState.resources.wood += production.wood;
         gameState.resources.stone += production.stone;
         gameState.resources.metal += production.metal;
         gameState.resources.tools += production.tools;
+        gameState.resources.gems += production.gems;
 
-        if (production.food > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0) {
+        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0) {
             const parts = [];
             if (production.food) parts.push(`+${production.food} food`);
+            if (production.wood) parts.push(`+${production.wood} wood`);
             if (production.stone) parts.push(`+${production.stone} stone`);
             if (production.metal) parts.push(`+${production.metal} metal`);
             if (production.tools) parts.push(`+${production.tools} tools`);
+            if (production.gems) parts.push(`+${production.gems} gems`);
             addEventLog(`🏭 Daily production: ${parts.join(', ')}`, 'success');
         }
 
@@ -630,12 +674,14 @@ function sleep() {
         // Build detail text for modal
         const details = [];
         details.push(eventMessage);
-        if (production.food > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0) {
+        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0) {
             const parts = [];
             if (production.food) parts.push(`+${production.food} food`);
+            if (production.wood) parts.push(`+${production.wood} wood`);
             if (production.stone) parts.push(`+${production.stone} stone`);
             if (production.metal) parts.push(`+${production.metal} metal`);
             if (production.tools) parts.push(`+${production.tools} tools`);
+            if (production.gems) parts.push(`+${production.gems} gems`);
             details.push(`🏭 Daily production: ${parts.join(', ')}`);
         }
         details.push(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
@@ -798,9 +844,11 @@ function getBuildingKey(type) {
 
 function calculateDailyProduction() {
     let food = 0;
+    let wood = 0;
     let stone = 0;
     let metal = 0;
     let tools = 0;
+    let gems = 0;
 
     gameState.settlement.farms.forEach(farm => {
         const production = buildingTypes.farm.levels[farm.level].production;
@@ -818,6 +866,16 @@ function calculateDailyProduction() {
         metal += production;
     });
 
+    gameState.settlement.foresters.forEach(forester => {
+        const production = buildingTypes.forester.levels[forester.level].production;
+        wood += production;
+    });
+
+    gameState.settlement.gemMines.forEach(gm => {
+        const production = buildingTypes.gemMine.levels[gm.level].production;
+        gems += production;
+    });
+
     gameState.settlement.workshops.forEach(ws => {
         const levelData = buildingTypes.workshop.levels[ws.level];
         const woodCost = levelData.woodCost || 1;
@@ -827,7 +885,7 @@ function calculateDailyProduction() {
         }
     });
 
-    return { food, stone, metal, tools };
+    return { food, wood, stone, metal, tools, gems };
 }
 
 function damageWalls() {
@@ -945,10 +1003,6 @@ Object.keys(gameState.resources).forEach(resource => {
 });
 updateResourceBar();
 
-const prod = calculateDailyProduction();
-const prodParts = [`+${prod.food} food`, `+${prod.stone} stone`, `+${prod.metal} metal`, `+${prod.tools} tools`];
-document.getElementById('production-info').textContent =
-    `Daily Production: ${prodParts.join(', ')}`;
 
 // Update exploration
 document.getElementById('explorations-left').textContent = gameState.explorationsLeft;
@@ -1040,6 +1094,20 @@ gameState.settlement.farms.forEach(farm => {
     farmsContainer.appendChild(farmElement);
 });
 
+// Foresters
+document.getElementById('forester-count').textContent = gameState.settlement.foresters.length;
+document.getElementById('forester-max').textContent = maxBuildings;
+document.getElementById('build-forester-btn').disabled =
+    gameState.settlement.foresters.length >= maxBuildings ||
+    !canAfford(buildingTypes.forester.buildCost);
+
+const forestersContainer = document.getElementById('foresters-container');
+forestersContainer.innerHTML = '';
+gameState.settlement.foresters.forEach(f => {
+    const el = createBuildingElement('forester', f);
+    forestersContainer.appendChild(el);
+});
+
 // Quarries
 document.getElementById('quarry-count').textContent = gameState.settlement.quarries.length;
 document.getElementById('quarry-max').textContent = maxBuildings;
@@ -1066,6 +1134,20 @@ minesContainer.innerHTML = '';
 gameState.settlement.mines.forEach(mine => {
     const mineElement = createBuildingElement('mine', mine);
     minesContainer.appendChild(mineElement);
+});
+
+// Gem Mines
+document.getElementById('gemMine-count').textContent = gameState.settlement.gemMines.length;
+document.getElementById('gemMine-max').textContent = maxBuildings;
+document.getElementById('build-gemMine-btn').disabled =
+    gameState.settlement.gemMines.length >= maxBuildings ||
+    !canAfford(buildingTypes.gemMine.buildCost);
+
+const gemMinesContainer = document.getElementById('gemMines-container');
+gemMinesContainer.innerHTML = '';
+gameState.settlement.gemMines.forEach(gm => {
+    const el = createBuildingElement('gemMine', gm);
+    gemMinesContainer.appendChild(el);
 });
 
 // Workshops
@@ -1132,14 +1214,20 @@ function setupResourceBar() {
     if (!bar) return;
     bar.innerHTML = Object.keys(gameState.resources).map(r => {
         const icon = getResourceIcon(r);
-        return `<div class="resource"><span class="resource-icon">${icon}</span><span class="resource-amount" id="bar-${r}">${gameState.resources[r]}</span></div>`;
+        return `<div class="resource"><span class="resource-icon">${icon}</span><span class="resource-amount" id="bar-${r}">${gameState.resources[r]}</span><span class="resource-production" id="bar-prod-${r}"></span></div>`;
     }).join('');
 }
 
 function updateResourceBar() {
+    const prod = calculateDailyProduction();
     Object.keys(gameState.resources).forEach(r => {
         const el = document.getElementById(`bar-${r}`);
         if (el) el.textContent = gameState.resources[r];
+        const prodEl = document.getElementById(`bar-prod-${r}`);
+        if (prodEl) {
+            const val = prod[r] || 0;
+            prodEl.textContent = val > 0 ? `(+${val})` : '';
+        }
     });
 }
 
