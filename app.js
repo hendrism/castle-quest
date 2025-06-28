@@ -591,7 +591,18 @@ showDiceRoll((roll) => {
     updateUI();
     saveGame();
 
-    return logMsg;
+    // Build detail lines for the modal
+    const details = [];
+    details.push(result.message);
+    Object.keys(result.rewards).forEach(r => {
+        const amt = result.rewards[r];
+        if (amt !== 0) {
+            details.push(`${amt > 0 ? '+' : ''}${amt} ${getResourceIcon(r)} ${r}`);
+        }
+    });
+    if (result.xp) details.push(`+${result.xp} XP`);
+
+    return details;
 });
 
 }
@@ -760,7 +771,7 @@ function sleep() {
         }
         details.push(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
 
-        return details.join('<br>');
+        return details;
     });
 }
 
@@ -1050,26 +1061,36 @@ function showDiceRoll(callback) {
         const roll = rollDice();
         diceFace.textContent = roll;
 
-        let resultText = `You rolled a ${roll}!`;
-        if (roll === 1) resultText += ' Critical failure!';
-        else if (roll === 20) resultText += ' Critical success!';
-        else if (roll >= 18) resultText += ' Amazing!';
-        else if (roll >= 12) resultText += ' Good roll!';
-        else if (roll <= 5) resultText += ' Poor roll...';
+        const lines = [];
+        lines.push(`You rolled a ${roll}.`);
+
+        let quality = '';
+        if (roll === 1) quality = 'Critical failure!';
+        else if (roll === 20) quality = 'Critical success!';
+        else if (roll >= 18) quality = 'Amazing!';
+        else if (roll >= 12) quality = 'Good roll!';
+        else if (roll <= 5) quality = 'Poor roll...';
+        else quality = 'Decent roll.';
 
         if (gameState.items.luckyCharm > 0) {
-            resultText += ` (Lucky Charm: +2 = ${Math.min(20, roll + 2)})`;
+            quality += ` (Lucky Charm: +2 = ${Math.min(20, roll + 2)})`;
         }
+
+        if (quality) lines.push(quality);
 
         // Allow callback to provide additional detail text
-        let detailText = '';
+        let detail = '';
         if (callback) {
-            detailText = callback(roll) || '';
+            detail = callback(roll) || '';
         }
 
-        result.innerHTML = detailText
-            ? `${resultText}<br>${detailText}`
-            : resultText;
+        if (Array.isArray(detail)) {
+            lines.push(...detail);
+        } else if (detail) {
+            lines.push(detail);
+        }
+
+        result.innerHTML = lines.join('<br>');
     }, 1000);
 }
 
