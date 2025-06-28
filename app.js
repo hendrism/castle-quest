@@ -1062,21 +1062,11 @@ function showDiceRoll(callback) {
         diceFace.textContent = roll;
 
         const lines = [];
-        lines.push(`You rolled a ${roll}.`);
-
-        let quality = '';
-        if (roll === 1) quality = 'Critical failure!';
-        else if (roll === 20) quality = 'Critical success!';
-        else if (roll >= 18) quality = 'Amazing!';
-        else if (roll >= 12) quality = 'Good roll!';
-        else if (roll <= 5) quality = 'Poor roll...';
-        else quality = 'Decent roll.';
-
+        let rollLine = `You rolled a ${roll}.`;
         if (gameState.items.luckyCharm > 0) {
-            quality += ` (Lucky Charm: +2 = ${Math.min(20, roll + 2)})`;
+            rollLine += ` (Lucky Charm: +2 = ${Math.min(20, roll + 2)})`;
         }
-
-        if (quality) lines.push(quality);
+        lines.push(rollLine);
 
         // Allow callback to provide additional detail text
         let detail = '';
