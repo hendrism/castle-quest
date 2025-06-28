@@ -1280,16 +1280,14 @@ document.getElementById('build-farm-btn').disabled =
 document.getElementById('build-farm-btn').title =
     gameState.level < buildingTypes.farm.requiredLevel ?
     `Requires level ${buildingTypes.farm.requiredLevel}` : '';
-const farmCostText = Object.keys(buildingTypes.farm.buildCost).map(r => `${buildingTypes.farm.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const farmCostText = Object.keys(buildingTypes.farm.buildCost)
+    .map(r => `${buildingTypes.farm.buildCost[r]} ${getResourceIcon(r)}`)
+    .join(' ');
 const farmBtn = document.getElementById('build-farm-btn');
-if (gameState.settlement.constructionQueue.some(b=>b.type==='farm')) {
-    farmBtn.querySelector('.build-text').textContent = 'Building...';
-    farmBtn.querySelector('.build-cost').textContent = '';
-    farmBtn.disabled = true;
-} else {
-    farmBtn.querySelector('.build-text').textContent = 'Build Farm';
-    farmBtn.querySelector('.build-cost').textContent = farmCostText;
-}
+const farmInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'farm').length;
+farmBtn.querySelector('.build-text').textContent =
+    farmInProgress > 0 ? `Build Farm (${farmInProgress} in progress)` : 'Build Farm';
+farmBtn.querySelector('.build-cost').textContent = farmCostText;
 
 const farmsContainer = document.getElementById('farms-container');
 farmsContainer.innerHTML = '';
@@ -1314,16 +1312,14 @@ document.getElementById('build-forester-btn').disabled =
 document.getElementById('build-forester-btn').title =
     gameState.level < buildingTypes.forester.requiredLevel ?
     `Requires level ${buildingTypes.forester.requiredLevel}` : '';
-const foresterCostText = Object.keys(buildingTypes.forester.buildCost).map(r => `${buildingTypes.forester.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const foresterCostText = Object.keys(buildingTypes.forester.buildCost)
+    .map(r => `${buildingTypes.forester.buildCost[r]} ${getResourceIcon(r)}`)
+    .join(' ');
 const foresterBtn = document.getElementById('build-forester-btn');
-if (gameState.settlement.constructionQueue.some(b=>b.type==='forester')) {
-    foresterBtn.querySelector('.build-text').textContent = 'Building...';
-    foresterBtn.querySelector('.build-cost').textContent = '';
-    foresterBtn.disabled = true;
-} else {
-    foresterBtn.querySelector('.build-text').textContent = 'Build Forester Hut';
-    foresterBtn.querySelector('.build-cost').textContent = foresterCostText;
-}
+const foresterInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'forester').length;
+foresterBtn.querySelector('.build-text').textContent =
+    foresterInProgress > 0 ? `Build Forester Hut (${foresterInProgress} in progress)` : 'Build Forester Hut';
+foresterBtn.querySelector('.build-cost').textContent = foresterCostText;
 
 const forestersContainer = document.getElementById('foresters-container');
 forestersContainer.innerHTML = '';
@@ -1348,16 +1344,14 @@ document.getElementById('build-quarry-btn').disabled =
 document.getElementById('build-quarry-btn').title =
     gameState.level < buildingTypes.quarry.requiredLevel ?
     `Requires level ${buildingTypes.quarry.requiredLevel}` : '';
-const quarryCostText = Object.keys(buildingTypes.quarry.buildCost).map(r => `${buildingTypes.quarry.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const quarryCostText = Object.keys(buildingTypes.quarry.buildCost)
+    .map(r => `${buildingTypes.quarry.buildCost[r]} ${getResourceIcon(r)}`)
+    .join(' ');
 const quarryBtn = document.getElementById('build-quarry-btn');
-if (gameState.settlement.constructionQueue.some(b=>b.type==='quarry')) {
-    quarryBtn.querySelector('.build-text').textContent = 'Building...';
-    quarryBtn.querySelector('.build-cost').textContent = '';
-    quarryBtn.disabled = true;
-} else {
-    quarryBtn.querySelector('.build-text').textContent = 'Build Quarry';
-    quarryBtn.querySelector('.build-cost').textContent = quarryCostText;
-}
+const quarryInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'quarry').length;
+quarryBtn.querySelector('.build-text').textContent =
+    quarryInProgress > 0 ? `Build Quarry (${quarryInProgress} in progress)` : 'Build Quarry';
+quarryBtn.querySelector('.build-cost').textContent = quarryCostText;
 
 const quarriesContainer = document.getElementById('quarries-container');
 quarriesContainer.innerHTML = '';
@@ -1382,16 +1376,14 @@ document.getElementById('build-mine-btn').disabled =
 document.getElementById('build-mine-btn').title =
     gameState.level < buildingTypes.mine.requiredLevel ?
     `Requires level ${buildingTypes.mine.requiredLevel}` : '';
-const mineCostText = Object.keys(buildingTypes.mine.buildCost).map(r => `${buildingTypes.mine.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const mineCostText = Object.keys(buildingTypes.mine.buildCost)
+    .map(r => `${buildingTypes.mine.buildCost[r]} ${getResourceIcon(r)}`)
+    .join(' ');
 const mineBtn = document.getElementById('build-mine-btn');
-if (gameState.settlement.constructionQueue.some(b=>b.type==='mine')) {
-    mineBtn.querySelector('.build-text').textContent = 'Building...';
-    mineBtn.querySelector('.build-cost').textContent = '';
-    mineBtn.disabled = true;
-} else {
-    mineBtn.querySelector('.build-text').textContent = 'Build Mine';
-    mineBtn.querySelector('.build-cost').textContent = mineCostText;
-}
+const mineInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'mine').length;
+mineBtn.querySelector('.build-text').textContent =
+    mineInProgress > 0 ? `Build Mine (${mineInProgress} in progress)` : 'Build Mine';
+mineBtn.querySelector('.build-cost').textContent = mineCostText;
 
 const minesContainer = document.getElementById('mines-container');
 minesContainer.innerHTML = '';
@@ -1416,16 +1408,14 @@ document.getElementById('build-gemMine-btn').disabled =
 document.getElementById('build-gemMine-btn').title =
     gameState.level < buildingTypes.gemMine.requiredLevel ?
     `Requires level ${buildingTypes.gemMine.requiredLevel}` : '';
-const gemMineCostText = Object.keys(buildingTypes.gemMine.buildCost).map(r => `${buildingTypes.gemMine.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const gemMineCostText = Object.keys(buildingTypes.gemMine.buildCost)
+    .map(r => `${buildingTypes.gemMine.buildCost[r]} ${getResourceIcon(r)}`)
+    .join(' ');
 const gemMineBtn = document.getElementById('build-gemMine-btn');
-if (gameState.settlement.constructionQueue.some(b=>b.type==='gemMine')) {
-    gemMineBtn.querySelector('.build-text').textContent = 'Building...';
-    gemMineBtn.querySelector('.build-cost').textContent = '';
-    gemMineBtn.disabled = true;
-} else {
-    gemMineBtn.querySelector('.build-text').textContent = 'Build Gem Mine';
-    gemMineBtn.querySelector('.build-cost').textContent = gemMineCostText;
-}
+const gemMineInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'gemMine').length;
+gemMineBtn.querySelector('.build-text').textContent =
+    gemMineInProgress > 0 ? `Build Gem Mine (${gemMineInProgress} in progress)` : 'Build Gem Mine';
+gemMineBtn.querySelector('.build-cost').textContent = gemMineCostText;
 
 const gemMinesContainer = document.getElementById('gemMines-container');
 gemMinesContainer.innerHTML = '';
@@ -1450,16 +1440,14 @@ document.getElementById('build-workshop-btn').disabled =
 document.getElementById('build-workshop-btn').title =
     gameState.level < buildingTypes.workshop.requiredLevel ?
     `Requires level ${buildingTypes.workshop.requiredLevel}` : '';
-const workshopCostText = Object.keys(buildingTypes.workshop.buildCost).map(r => `${buildingTypes.workshop.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const workshopCostText = Object.keys(buildingTypes.workshop.buildCost)
+    .map(r => `${buildingTypes.workshop.buildCost[r]} ${getResourceIcon(r)}`)
+    .join(' ');
 const workshopBtn = document.getElementById('build-workshop-btn');
-if (gameState.settlement.constructionQueue.some(b=>b.type==='workshop')) {
-    workshopBtn.querySelector('.build-text').textContent = 'Building...';
-    workshopBtn.querySelector('.build-cost').textContent = '';
-    workshopBtn.disabled = true;
-} else {
-    workshopBtn.querySelector('.build-text').textContent = 'Build Workshop';
-    workshopBtn.querySelector('.build-cost').textContent = workshopCostText;
-}
+const workshopInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'workshop').length;
+workshopBtn.querySelector('.build-text').textContent =
+    workshopInProgress > 0 ? `Build Workshop (${workshopInProgress} in progress)` : 'Build Workshop';
+workshopBtn.querySelector('.build-cost').textContent = workshopCostText;
 
 const workshopsContainer = document.getElementById('workshops-container');
 workshopsContainer.innerHTML = '';
