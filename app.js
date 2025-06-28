@@ -26,6 +26,13 @@ let gameState = {
         pendingHome: null,
         constructionQueue: []
     },
+    ruler: {
+        name: '',
+        age: 20,
+        yearsRemaining: 20,
+        traits: []
+    },
+    pastRulers: [],
     population: 5,
     items: {
         luckyCharm: 0,
@@ -80,11 +87,14 @@ plains: {
 };
 
 const seasons = {
-spring: { name: 'Spring', icon: '🌸', farmMultiplier: 1.2 },
-summer: { name: 'Summer', icon: '☀️', farmMultiplier: 1.5 },
-autumn: { name: 'Autumn', icon: '🍂', farmMultiplier: 1.0 },
-winter: { name: 'Winter', icon: '❄️', farmMultiplier: 0.8 }
+    spring: { name: 'Spring', icon: '🌸', farmMultiplier: 1.2 },
+    summer: { name: 'Summer', icon: '☀️', farmMultiplier: 1.5 },
+    autumn: { name: 'Autumn', icon: '🍂', farmMultiplier: 1.0 },
+    winter: { name: 'Winter', icon: '❄️', farmMultiplier: 0.8 }
 };
+
+const rulerNames = ['Arthur', 'Beatrice', 'Cedric', 'Diana', 'Edmund', 'Fiona'];
+const rulerTraits = ['builder', 'explorer', 'wealthy', 'lucky', 'charismatic'];
 
 const homeTypes = {
     camp: {
@@ -365,6 +375,9 @@ try {
     loadGame();
     if (!gameState.population) {
         gameState.population = homeTypes[gameState.settlement.home].population;
+    }
+    if (!gameState.ruler || !gameState.ruler.name) {
+        createNewRuler();
     }
     setupResourceBar();
     generateDailyChallenge();
@@ -722,6 +735,17 @@ function sleep() {
         gameState.explorationsLeft = 5;
         generateDailyChallenge();
 
+        // Age ruler
+        if (gameState.ruler) {
+            gameState.ruler.age++;
+            gameState.ruler.yearsRemaining--;
+            if (gameState.ruler.yearsRemaining <= 0) {
+                endCurrentRuler();
+            }
+        } else {
+            createNewRuler();
+        }
+
         if (gameState.settlement.pendingHome) {
             gameState.settlement.home = gameState.settlement.pendingHome;
             gameState.settlement.pendingHome = null;
@@ -988,6 +1012,29 @@ function damageWalls() {
     }
 }
 
+function createNewRuler() {
+    const name = rulerNames[Math.floor(Math.random() * rulerNames.length)];
+    const traits = [];
+    const pool = [...rulerTraits];
+    while (traits.length < 2 && pool.length > 0) {
+        const idx = Math.floor(Math.random() * pool.length);
+        traits.push(pool.splice(idx, 1)[0]);
+    }
+    gameState.ruler = {
+        name,
+        age: 20,
+        yearsRemaining: 20,
+        traits
+    };
+    addEventLog(`👑 ${name} begins their reign.`, 'success');
+}
+
+function endCurrentRuler() {
+    gameState.pastRulers.push({ ...gameState.ruler });
+    addEventLog(`⚰️ ${gameState.ruler.name}'s reign has ended.`, 'neutral');
+    createNewRuler();
+}
+
 function getWallBonus() {
     return wallBonuses[gameState.settlement.walls] || 0;
 }
@@ -1096,6 +1143,10 @@ document.getElementById('level').textContent = gameState.level;
 document.getElementById('xp').textContent = gameState.xp;
 document.getElementById('xp-next').textContent = gameState.xpToNext;
 document.getElementById('season').textContent = `${seasons[gameState.season].icon} ${seasons[gameState.season].name}`;
+if (gameState.ruler) {
+    document.getElementById('ruler-name').textContent = gameState.ruler.name;
+    document.getElementById('ruler-age').textContent = gameState.ruler.age;
+}
 
     // Update resources bar
     updateResourceBar();
