@@ -26,6 +26,7 @@ let gameState = {
         pendingHome: null,
         constructionQueue: []
     },
+    population: 5,
     items: {
         luckyCharm: 0,
         magicScroll: 0
@@ -90,25 +91,29 @@ const homeTypes = {
         name: 'Camp',
         upgradeTo: 'house',
         cost: { wood: 5 },
-        buildingLimits: { farm: 2, forester: 2, quarry: 2, mine: 0, workshop: 0, gemMine: 0 }
+        buildingLimits: { farm: 2, forester: 2, quarry: 2, mine: 0, workshop: 0, gemMine: 0 },
+        population: 5
     },
     house: {
         name: 'House',
         upgradeTo: 'hall',
         cost: { wood: 10, stone: 5 },
-        buildingLimits: { farm: 4, forester: 3, quarry: 3, mine: 1, workshop: 0, gemMine: 0 }
+        buildingLimits: { farm: 4, forester: 3, quarry: 3, mine: 1, workshop: 0, gemMine: 0 },
+        population: 10
     },
     hall: {
         name: 'Hall',
         upgradeTo: 'fortress',
         cost: { stone: 20, metal: 5 },
-        buildingLimits: { farm: 5, forester: 4, quarry: 4, mine: 2, workshop: 1, gemMine: 1 }
+        buildingLimits: { farm: 5, forester: 4, quarry: 4, mine: 2, workshop: 1, gemMine: 1 },
+        population: 15
     },
     fortress: {
         name: 'Fortress',
         upgradeTo: null,
         cost: null,
-        buildingLimits: { farm: 6, forester: 5, quarry: 5, mine: 3, workshop: 2, gemMine: 2 }
+        buildingLimits: { farm: 6, forester: 5, quarry: 5, mine: 3, workshop: 2, gemMine: 2 },
+        population: 20
     }
 };
 
@@ -358,6 +363,9 @@ function initGame() {
 console.log('Initializing Dice & Castle...');
 try {
     loadGame();
+    if (!gameState.population) {
+        gameState.population = homeTypes[gameState.settlement.home].population;
+    }
     setupResourceBar();
     generateDailyChallenge();
     updateUI();
@@ -681,8 +689,11 @@ function sleep() {
         if (production.woodConsumed) {
             gameState.resources.wood = Math.max(0, gameState.resources.wood - production.woodConsumed);
         }
+        if (production.foodDemand) {
+            gameState.resources.food = Math.max(0, gameState.resources.food - production.foodDemand);
+        }
 
-        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0 || production.woodConsumed > 0) {
+        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0 || production.woodConsumed > 0 || production.foodDemand > 0) {
             const parts = [];
             if (production.food) parts.push(`+${production.food} food`);
             if (production.wood) parts.push(`+${production.wood} wood`);
@@ -691,6 +702,7 @@ function sleep() {
             if (production.tools) parts.push(`+${production.tools} tools`);
             if (production.gems) parts.push(`+${production.gems} gems`);
             if (production.woodConsumed) parts.push(`-${production.woodConsumed} wood`);
+            if (production.foodDemand) parts.push(`-${production.foodDemand} food`);
             addEventLog(`🏭 Daily production: ${parts.join(', ')}`, 'success');
         }
 
@@ -703,6 +715,7 @@ function sleep() {
             gameState.settlement.home = gameState.settlement.pendingHome;
             gameState.settlement.pendingHome = null;
             const newHome = homeTypes[gameState.settlement.home];
+            gameState.population = newHome.population;
             addEventLog(`🏠 Home upgrade complete! Now ${newHome.name}.`, 'success');
             gainXP(100);
         }
@@ -733,7 +746,7 @@ function sleep() {
         // Build detail text for modal
         const details = [];
         details.push(eventMessage);
-        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0 || production.woodConsumed > 0) {
+        if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0 || production.woodConsumed > 0 || production.foodDemand > 0) {
             const parts = [];
             if (production.food) parts.push(`+${production.food} food`);
             if (production.wood) parts.push(`+${production.wood} wood`);
@@ -742,6 +755,7 @@ function sleep() {
             if (production.tools) parts.push(`+${production.tools} tools`);
             if (production.gems) parts.push(`+${production.gems} gems`);
             if (production.woodConsumed) parts.push(`-${production.woodConsumed} wood`);
+            if (production.foodDemand) parts.push(`-${production.foodDemand} food`);
             details.push(`🏭 Daily production: ${parts.join(', ')}`);
         }
         details.push(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
@@ -906,6 +920,7 @@ function calculateDailyProduction() {
     let metal = 0;
     let tools = 0;
     let gems = 0;
+    let foodDemand = gameState.population || 0;
 
     gameState.settlement.farms.forEach(farm => {
         const production = buildingTypes.farm.levels[farm.level].production;
@@ -951,7 +966,7 @@ function calculateDailyProduction() {
     tools = Math.floor(tools * multiplier);
     gems = Math.floor(gems * multiplier);
 
-    return { food, wood, stone, metal, tools, gems, woodConsumed };
+    return { food, wood, stone, metal, tools, gems, woodConsumed, foodDemand };
 }
 
 function damageWalls() {
@@ -1153,6 +1168,12 @@ if (currentWalls.upgradeTo) {
     wallsUpgradeBtn.style.display = 'none';
 }
 
+// Population info
+const popEl = document.getElementById('population-count');
+const foodEl = document.getElementById('population-food');
+if (popEl) popEl.textContent = gameState.population;
+if (foodEl) foodEl.textContent = gameState.population;
+
 // Buildings
 updateBuildingsUI();
 
@@ -1351,6 +1372,9 @@ function updateResourceBar() {
             if (r === 'wood') {
                 val -= prod.woodConsumed || 0;
             }
+            if (r === 'food') {
+                val -= prod.foodDemand || 0;
+            }
             prodEl.textContent = val > 0 ? `(+${val})` : val < 0 ? `(${val})` : '';
         }
     });
@@ -1428,7 +1452,7 @@ function checkDailyChallengeCompletion() {
     }
     if (progress >= challenge.target) {
         challenge.completed = true;
-        addEventLog('🎯 Daily Challenge completed! Bonus XP gained.', 'success');
+        addEventLog(`🎯 Daily Challenge completed! Gained ${challenge.reward} XP.`, 'success');
         gainXP(challenge.reward);
     }
 }
@@ -1474,7 +1498,11 @@ const loadedState = JSON.parse(savedData);
                 loadedState.dailyChallenge.explored = new Set(loadedState.dailyChallenge.explored);
             }
         }
-        
+
+        if (!loadedState.population) {
+            loadedState.population = homeTypes[loadedState.settlement.home].population;
+        }
+
         gameState = { ...gameState, ...loadedState };
         console.log('Game loaded from memory');
     }
