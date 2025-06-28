@@ -316,8 +316,19 @@ font-weight: 500;
 }
 
 .building-level {
-font-size: 0.9rem;
-color: #7f8c8d;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.under-construction .building-level {
+    color: #e67e22;
+    font-style: italic;
+}
+
+.pending-indicator {
+    color: #e67e22;
+    font-style: italic;
+    font-size: 0.9rem;
 }
 
 /* Buttons */

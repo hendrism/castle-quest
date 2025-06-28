@@ -758,13 +758,15 @@ function sleep() {
         if (gameState.settlement.constructionQueue.length > 0) {
             gameState.settlement.constructionQueue.forEach(b => {
                 const key = getBuildingKey(b.type);
-                gameState.settlement[key].push({ id: b.id, level: 'basic' });
+                gameState.settlement[key].push({ id: b.id, level: 'basic', pendingLevel: null });
                 const bt = buildingTypes[b.type];
                 addEventLog(`${bt.icon} ${bt.name} finished construction!`, 'success');
                 gainXP(50);
             });
             gameState.settlement.constructionQueue = [];
         }
+
+        finalizeBuildingUpgrades();
 
         // Change season every 4 days
         const seasonKeys = Object.keys(seasons);
@@ -874,11 +876,11 @@ if (!currentLevel.upgradeTo) return;
 if (!canAfford(currentLevel.cost)) return;
 
 spendResources(currentLevel.cost);
-building.level = currentLevel.upgradeTo;
+building.pendingLevel = currentLevel.upgradeTo;
 
-const newLevel = buildingTypes[type].levels[building.level];
-addEventLog(`⬆️ Upgraded ${buildingTypes[type].name} to ${newLevel.name}!`, 'success');
-gainXP(25);
+const newLevel = buildingTypes[type].levels[currentLevel.upgradeTo];
+addEventLog(`${buildingTypes[type].icon} Upgrading ${buildingTypes[type].name} to ${newLevel.name}. It will be ready tomorrow.`, 'success');
+gainXP(10);
 
     if (gameState.dailyChallenge.type === 'upgrade') {
         gameState.dailyChallenge.progress++;
@@ -888,6 +890,23 @@ gainXP(25);
 updateUI();
 saveGame();
 
+}
+
+function finalizeBuildingUpgrades() {
+    const types = ['farm', 'forester', 'quarry', 'mine', 'gemMine', 'workshop'];
+    types.forEach(t => {
+        const key = getBuildingKey(t);
+        gameState.settlement[key].forEach(b => {
+            if (b.pendingLevel) {
+                b.level = b.pendingLevel;
+                b.pendingLevel = null;
+                const bt = buildingTypes[t];
+                const lvl = bt.levels[b.level];
+                addEventLog(`${bt.icon} ${bt.name} upgrade to ${lvl.name} complete!`, 'success');
+                gainXP(25);
+            }
+        });
+    });
 }
 
 // Crafting
@@ -1253,14 +1272,23 @@ function updateBuildingsUI() {
 const farmLimit = getBuildingLimit('farm');
 document.getElementById('farm-count').textContent = gameState.settlement.farms.length;
 document.getElementById('farm-max').textContent = farmLimit;
+const farmsUnderway = gameState.settlement.constructionQueue.filter(b=>b.type==='farm').length;
 document.getElementById('build-farm-btn').disabled =
     gameState.level < buildingTypes.farm.requiredLevel ||
     !homeAtLeast(buildingTypes.farm.requiredHome || 'camp') ||
-    gameState.settlement.farms.length + gameState.settlement.constructionQueue.filter(b=>b.type==='farm').length >= farmLimit ||
+    gameState.settlement.farms.length + farmsUnderway >= farmLimit ||
     !canAfford(buildingTypes.farm.buildCost);
 document.getElementById('build-farm-btn').title =
     gameState.level < buildingTypes.farm.requiredLevel ?
     `Requires level ${buildingTypes.farm.requiredLevel}` : '';
+const farmCostText = Object.keys(buildingTypes.farm.buildCost).map(r => `${buildingTypes.farm.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const farmBtn = document.getElementById('build-farm-btn');
+farmBtn.querySelector('.build-text').textContent = 'Build Farm';
+farmBtn.querySelector('.build-cost').textContent = farmCostText;
+if (farmsUnderway > 0) {
+    farmBtn.querySelector('.build-text').textContent += ` (${farmsUnderway} building)`;
+}
+document.getElementById('farm-pending').textContent = farmsUnderway > 0 ? `${buildingTypes.farm.icon} ${farmsUnderway} being built` : '';
 
 const farmsContainer = document.getElementById('farms-container');
 farmsContainer.innerHTML = '';
@@ -1268,19 +1296,32 @@ gameState.settlement.farms.forEach(farm => {
     const farmElement = createBuildingElement('farm', farm);
     farmsContainer.appendChild(farmElement);
 });
+gameState.settlement.constructionQueue.filter(b=>b.type==='farm').forEach(b=>{
+    const el = createConstructionElement('farm');
+    farmsContainer.appendChild(el);
+});
 
 // Foresters
 const foresterLimit = getBuildingLimit('forester');
 document.getElementById('forester-count').textContent = gameState.settlement.foresters.length;
 document.getElementById('forester-max').textContent = foresterLimit;
+const forestersUnderway = gameState.settlement.constructionQueue.filter(b=>b.type==='forester').length;
 document.getElementById('build-forester-btn').disabled =
     gameState.level < buildingTypes.forester.requiredLevel ||
     !homeAtLeast(buildingTypes.forester.requiredHome || 'camp') ||
-    gameState.settlement.foresters.length + gameState.settlement.constructionQueue.filter(b=>b.type==='forester').length >= foresterLimit ||
+    gameState.settlement.foresters.length + forestersUnderway >= foresterLimit ||
     !canAfford(buildingTypes.forester.buildCost);
 document.getElementById('build-forester-btn').title =
     gameState.level < buildingTypes.forester.requiredLevel ?
     `Requires level ${buildingTypes.forester.requiredLevel}` : '';
+const foresterCostText = Object.keys(buildingTypes.forester.buildCost).map(r => `${buildingTypes.forester.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const foresterBtn = document.getElementById('build-forester-btn');
+foresterBtn.querySelector('.build-text').textContent = 'Build Forester Hut';
+foresterBtn.querySelector('.build-cost').textContent = foresterCostText;
+if (forestersUnderway > 0) {
+    foresterBtn.querySelector('.build-text').textContent += ` (${forestersUnderway} building)`;
+}
+document.getElementById('forester-pending').textContent = forestersUnderway > 0 ? `${buildingTypes.forester.icon} ${forestersUnderway} being built` : '';
 
 const forestersContainer = document.getElementById('foresters-container');
 forestersContainer.innerHTML = '';
@@ -1288,19 +1329,32 @@ gameState.settlement.foresters.forEach(f => {
     const el = createBuildingElement('forester', f);
     forestersContainer.appendChild(el);
 });
+gameState.settlement.constructionQueue.filter(b=>b.type==='forester').forEach(b=>{
+    const el = createConstructionElement('forester');
+    forestersContainer.appendChild(el);
+});
 
 // Quarries
 const quarryLimit = getBuildingLimit('quarry');
 document.getElementById('quarry-count').textContent = gameState.settlement.quarries.length;
 document.getElementById('quarry-max').textContent = quarryLimit;
+const quarriesUnderway = gameState.settlement.constructionQueue.filter(b=>b.type==='quarry').length;
 document.getElementById('build-quarry-btn').disabled =
     gameState.level < buildingTypes.quarry.requiredLevel ||
     !homeAtLeast(buildingTypes.quarry.requiredHome || 'camp') ||
-    gameState.settlement.quarries.length + gameState.settlement.constructionQueue.filter(b=>b.type==='quarry').length >= quarryLimit ||
+    gameState.settlement.quarries.length + quarriesUnderway >= quarryLimit ||
     !canAfford(buildingTypes.quarry.buildCost);
 document.getElementById('build-quarry-btn').title =
     gameState.level < buildingTypes.quarry.requiredLevel ?
     `Requires level ${buildingTypes.quarry.requiredLevel}` : '';
+const quarryCostText = Object.keys(buildingTypes.quarry.buildCost).map(r => `${buildingTypes.quarry.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const quarryBtn = document.getElementById('build-quarry-btn');
+quarryBtn.querySelector('.build-text').textContent = 'Build Quarry';
+quarryBtn.querySelector('.build-cost').textContent = quarryCostText;
+if (quarriesUnderway > 0) {
+    quarryBtn.querySelector('.build-text').textContent += ` (${quarriesUnderway} building)`;
+}
+document.getElementById('quarry-pending').textContent = quarriesUnderway > 0 ? `${buildingTypes.quarry.icon} ${quarriesUnderway} being built` : '';
 
 const quarriesContainer = document.getElementById('quarries-container');
 quarriesContainer.innerHTML = '';
@@ -1308,19 +1362,32 @@ gameState.settlement.quarries.forEach(quarry => {
     const quarryElement = createBuildingElement('quarry', quarry);
     quarriesContainer.appendChild(quarryElement);
 });
+gameState.settlement.constructionQueue.filter(b=>b.type==='quarry').forEach(b=>{
+    const el = createConstructionElement('quarry');
+    quarriesContainer.appendChild(el);
+});
 
 // Mines
 const mineLimit = getBuildingLimit('mine');
 document.getElementById('mine-count').textContent = gameState.settlement.mines.length;
 document.getElementById('mine-max').textContent = mineLimit;
+const minesUnderway = gameState.settlement.constructionQueue.filter(b=>b.type==='mine').length;
 document.getElementById('build-mine-btn').disabled =
     gameState.level < buildingTypes.mine.requiredLevel ||
     !homeAtLeast(buildingTypes.mine.requiredHome || 'camp') ||
-    gameState.settlement.mines.length + gameState.settlement.constructionQueue.filter(b=>b.type==='mine').length >= mineLimit ||
+    gameState.settlement.mines.length + minesUnderway >= mineLimit ||
     !canAfford(buildingTypes.mine.buildCost);
 document.getElementById('build-mine-btn').title =
     gameState.level < buildingTypes.mine.requiredLevel ?
     `Requires level ${buildingTypes.mine.requiredLevel}` : '';
+const mineCostText = Object.keys(buildingTypes.mine.buildCost).map(r => `${buildingTypes.mine.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const mineBtn = document.getElementById('build-mine-btn');
+mineBtn.querySelector('.build-text').textContent = 'Build Mine';
+mineBtn.querySelector('.build-cost').textContent = mineCostText;
+if (minesUnderway > 0) {
+    mineBtn.querySelector('.build-text').textContent += ` (${minesUnderway} building)`;
+}
+document.getElementById('mine-pending').textContent = minesUnderway > 0 ? `${buildingTypes.mine.icon} ${minesUnderway} being built` : '';
 
 const minesContainer = document.getElementById('mines-container');
 minesContainer.innerHTML = '';
@@ -1328,19 +1395,32 @@ gameState.settlement.mines.forEach(mine => {
     const mineElement = createBuildingElement('mine', mine);
     minesContainer.appendChild(mineElement);
 });
+gameState.settlement.constructionQueue.filter(b=>b.type==='mine').forEach(b=>{
+    const el = createConstructionElement('mine');
+    minesContainer.appendChild(el);
+});
 
 // Gem Mines
 const gemMineLimit = getBuildingLimit('gemMine');
 document.getElementById('gemMine-count').textContent = gameState.settlement.gemMines.length;
 document.getElementById('gemMine-max').textContent = gemMineLimit;
+const gemMinesUnderway = gameState.settlement.constructionQueue.filter(b=>b.type==='gemMine').length;
 document.getElementById('build-gemMine-btn').disabled =
     gameState.level < buildingTypes.gemMine.requiredLevel ||
     !homeAtLeast(buildingTypes.gemMine.requiredHome || 'camp') ||
-    gameState.settlement.gemMines.length + gameState.settlement.constructionQueue.filter(b=>b.type==='gemMine').length >= gemMineLimit ||
+    gameState.settlement.gemMines.length + gemMinesUnderway >= gemMineLimit ||
     !canAfford(buildingTypes.gemMine.buildCost);
 document.getElementById('build-gemMine-btn').title =
     gameState.level < buildingTypes.gemMine.requiredLevel ?
     `Requires level ${buildingTypes.gemMine.requiredLevel}` : '';
+const gemMineCostText = Object.keys(buildingTypes.gemMine.buildCost).map(r => `${buildingTypes.gemMine.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const gemMineBtn = document.getElementById('build-gemMine-btn');
+gemMineBtn.querySelector('.build-text').textContent = 'Build Gem Mine';
+gemMineBtn.querySelector('.build-cost').textContent = gemMineCostText;
+if (gemMinesUnderway > 0) {
+    gemMineBtn.querySelector('.build-text').textContent += ` (${gemMinesUnderway} building)`;
+}
+document.getElementById('gemMine-pending').textContent = gemMinesUnderway > 0 ? `${buildingTypes.gemMine.icon} ${gemMinesUnderway} being built` : '';
 
 const gemMinesContainer = document.getElementById('gemMines-container');
 gemMinesContainer.innerHTML = '';
@@ -1348,19 +1428,32 @@ gameState.settlement.gemMines.forEach(gm => {
     const el = createBuildingElement('gemMine', gm);
     gemMinesContainer.appendChild(el);
 });
+gameState.settlement.constructionQueue.filter(b=>b.type==='gemMine').forEach(b=>{
+    const el = createConstructionElement('gemMine');
+    gemMinesContainer.appendChild(el);
+});
 
 // Workshops
 const workshopLimit = getBuildingLimit('workshop');
 document.getElementById('workshop-count').textContent = gameState.settlement.workshops.length;
 document.getElementById('workshop-max').textContent = workshopLimit;
+const workshopsUnderway = gameState.settlement.constructionQueue.filter(b=>b.type==='workshop').length;
 document.getElementById('build-workshop-btn').disabled =
     gameState.level < buildingTypes.workshop.requiredLevel ||
     !homeAtLeast(buildingTypes.workshop.requiredHome || 'camp') ||
-    gameState.settlement.workshops.length + gameState.settlement.constructionQueue.filter(b=>b.type==='workshop').length >= workshopLimit ||
+    gameState.settlement.workshops.length + workshopsUnderway >= workshopLimit ||
     !canAfford(buildingTypes.workshop.buildCost);
 document.getElementById('build-workshop-btn').title =
     gameState.level < buildingTypes.workshop.requiredLevel ?
     `Requires level ${buildingTypes.workshop.requiredLevel}` : '';
+const workshopCostText = Object.keys(buildingTypes.workshop.buildCost).map(r => `${buildingTypes.workshop.buildCost[r]} ${getResourceIcon(r)}`).join(' ');
+const workshopBtn = document.getElementById('build-workshop-btn');
+workshopBtn.querySelector('.build-text').textContent = 'Build Workshop';
+workshopBtn.querySelector('.build-cost').textContent = workshopCostText;
+if (workshopsUnderway > 0) {
+    workshopBtn.querySelector('.build-text').textContent += ` (${workshopsUnderway} building)`;
+}
+document.getElementById('workshop-pending').textContent = workshopsUnderway > 0 ? `${buildingTypes.workshop.icon} ${workshopsUnderway} being built` : '';
 
 const workshopsContainer = document.getElementById('workshops-container');
 workshopsContainer.innerHTML = '';
@@ -1368,34 +1461,53 @@ gameState.settlement.workshops.forEach(ws => {
     const wsElement = createBuildingElement('workshop', ws);
     workshopsContainer.appendChild(wsElement);
 });
+gameState.settlement.constructionQueue.filter(b=>b.type==='workshop').forEach(b=>{
+    const el = createConstructionElement('workshop');
+    workshopsContainer.appendChild(el);
+});
 
 }
 
 function createBuildingElement(type, building) {
-const buildingType = buildingTypes[type];
-const currentLevel = buildingType.levels[building.level];
+    const buildingType = buildingTypes[type];
+    const currentLevel = buildingType.levels[building.level];
+    const upgrading = !!building.pendingLevel;
 
-const div = document.createElement('div');
-div.className = 'building-item';
+    const div = document.createElement('div');
+    div.className = 'building-item' + (upgrading ? ' under-construction' : '');
 
-div.innerHTML = `
-    <div class="building-info">
-        <div class="building-name">${buildingType.icon} ${buildingType.name}</div>
-        <div class="building-level">${currentLevel.name} (${currentLevel.production} production)</div>
-    </div>
-    ${currentLevel.upgradeTo ? `
-        <button class="upgrade-btn" onclick="upgradeBuilding('${type}', ${building.id})" 
-                ${!canAfford(currentLevel.cost) ? 'disabled' : ''}>
-            <span class="upgrade-text">Upgrade to ${buildingType.levels[currentLevel.upgradeTo].name}</span>
-            <span class="upgrade-cost">${Object.keys(currentLevel.cost).map(r => 
-                `${currentLevel.cost[r]} ${getResourceIcon(r)}`
-            ).join(' ')}</span>
-        </button>
-    ` : ''}
-`;
+    const levelText = upgrading
+        ? `Upgrading to ${buildingType.levels[building.pendingLevel].name}...`
+        : `${currentLevel.name} (${currentLevel.production} production)`;
 
-return div;
+    div.innerHTML = `
+        <div class="building-info">
+            <div class="building-name">${buildingType.icon} ${buildingType.name}</div>
+            <div class="building-level">${levelText}</div>
+        </div>
+        ${!upgrading && currentLevel.upgradeTo ? `
+            <button class="upgrade-btn" onclick="upgradeBuilding('${type}', ${building.id})"
+                    ${!canAfford(currentLevel.cost) ? 'disabled' : ''}>
+                <span class="upgrade-text">Upgrade to ${buildingType.levels[currentLevel.upgradeTo].name}</span>
+                <span class="upgrade-cost">${Object.keys(currentLevel.cost).map(r => `${currentLevel.cost[r]} ${getResourceIcon(r)}`).join(' ')}</span>
+            </button>
+        ` : ''}
+    `;
 
+    return div;
+}
+
+function createConstructionElement(type) {
+    const buildingType = buildingTypes[type];
+    const div = document.createElement('div');
+    div.className = 'building-item under-construction';
+    div.innerHTML = `
+        <div class="building-info">
+            <div class="building-name">${buildingType.icon} ${buildingType.name}</div>
+            <div class="building-level">Building...</div>
+        </div>
+    `;
+    return div;
 }
 
 function updateEventLogUI() {
@@ -1564,6 +1676,14 @@ const loadedState = JSON.parse(savedData);
         if (!loadedState.population) {
             loadedState.population = homeTypes[loadedState.settlement.home].population;
         }
+
+        // Ensure buildings have pendingLevel property
+        const keys = ['farms','foresters','quarries','mines','gemMines','workshops'];
+        keys.forEach(k => {
+            if (loadedState.settlement[k]) {
+                loadedState.settlement[k] = loadedState.settlement[k].map(b => ({ pendingLevel: null, ...b }));
+            }
+        });
 
         gameState = { ...gameState, ...loadedState };
         console.log('Game loaded from memory');
