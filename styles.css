@@ -57,6 +57,11 @@ font-size: 0.8rem;
 opacity: 0.8;
 }
 
+#ruler-traits {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
 .season {
 font-size: 1.1rem;
 font-weight: bold;
