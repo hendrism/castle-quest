@@ -227,6 +227,11 @@ class Game {
         saveGame();
     }
 
+    load() {
+        loadGame();
+        debouncedUpdateUI();
+    }
+
     upgradeHome() {
         upgradeHome();
     }
@@ -304,14 +309,32 @@ locationBtns.forEach((btn, index) => {
 
 // Sleep button
 const sleepBtn = document.getElementById('sleep-btn');
-if (sleepBtn) {
-    sleepBtn.addEventListener('click', (e) => {
-        console.log('Sleep button clicked');
-        sleep();
-    });
-} else {
-    console.error('Sleep button not found!');
-}
+    if (sleepBtn) {
+        sleepBtn.addEventListener('click', (e) => {
+            console.log('Sleep button clicked');
+            sleep();
+        });
+    } else {
+        console.error('Sleep button not found!');
+    }
+
+    // Save and load buttons
+    const saveBtn = document.getElementById('save-btn');
+    const loadBtn = document.getElementById('load-btn');
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            console.log('Save button clicked');
+            game.save();
+        });
+    }
+
+    if (loadBtn) {
+        loadBtn.addEventListener('click', () => {
+            console.log('Load button clicked');
+            game.load();
+        });
+    }
 
 // Settlement upgrades
 const homeUpgradeBtn = document.getElementById('home-upgrade-btn');
@@ -1598,9 +1621,12 @@ dailyChallenge: {
 
 try {
     const gameData = JSON.stringify(saveData);
-    // Store in memory instead of localStorage for Claude.ai compatibility
-    window[`dicecastleGameData_${slot}`] = gameData;
-    console.log('Game saved to memory');
+    if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(`dicecastleGameData_${slot}`, gameData);
+    } else {
+        window[`dicecastleGameData_${slot}`] = gameData;
+    }
+    addEventLog('💾 Game saved.', 'success');
 } catch (error) {
     console.error('Failed to save game:', error);
 }
@@ -1609,8 +1635,12 @@ try {
 
 function loadGame(slot = 'default') {
     try {
-        // Load from memory instead of localStorage
-        const savedData = window[`dicecastleGameData_${slot}`];
+        let savedData;
+        if (typeof localStorage !== 'undefined') {
+            savedData = localStorage.getItem(`dicecastleGameData_${slot}`);
+        } else {
+            savedData = window[`dicecastleGameData_${slot}`];
+        }
         if (savedData) {
             const loadedState = JSON.parse(savedData);
             validateGameState(loadedState);
@@ -1639,7 +1669,8 @@ function loadGame(slot = 'default') {
             }
 
             gameState = { ...gameState, ...loadedState };
-            console.log('Game loaded from memory');
+            addEventLog('📂 Game loaded.', 'success');
+            debouncedUpdateUI();
         }
     } catch (error) {
         console.error('Failed to load game:', error);
