@@ -1467,14 +1467,19 @@ function createBuildingElement(type, building) {
             <div class="building-name">${buildingType.icon} ${buildingType.name}</div>
             <div class="building-level">${levelText}</div>
         </div>
-        ${!upgrading && currentLevel.upgradeTo ? `
-            <button class="upgrade-btn" onclick="upgradeBuilding('${type}', ${building.id})"
-                    ${!canAfford(adjustCostForTraits(currentLevel.cost)) ? 'disabled' : ''}>
-                <span class="upgrade-text">Upgrade to ${buildingType.levels[currentLevel.upgradeTo].name}</span>
-                <span class="upgrade-cost">${formatCost(adjustCostForTraits(currentLevel.cost))}</span>
-            </button>
-        ` : ''}
     `;
+
+    if (!upgrading && currentLevel.upgradeTo) {
+        const btn = document.createElement('button');
+        btn.className = 'upgrade-btn';
+        btn.disabled = !canAfford(adjustCostForTraits(currentLevel.cost));
+        btn.innerHTML = `
+            <span class="upgrade-text">Upgrade to ${buildingType.levels[currentLevel.upgradeTo].name}</span>
+            <span class="upgrade-cost">${formatCost(adjustCostForTraits(currentLevel.cost))}</span>
+        `;
+        btn.addEventListener('click', () => upgradeBuilding(type, building.id));
+        div.appendChild(btn);
+    }
 
     return div;
 }
