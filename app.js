@@ -242,6 +242,7 @@ function initGame() {
 console.log('Initializing Dice & Castle...');
 try {
     loadGame();
+    validateGameState(gameState);
     if (!gameState.population) {
         gameState.population = homeTypes[gameState.settlement.home].population;
     }
@@ -425,15 +426,23 @@ console.log('Event listeners setup complete');
 
 // Exploration
 function exploreLocation(locationKey) {
-if (gameState.explorationsLeft <= 0) return;
+    try {
+        if (gameState.explorationsLeft <= 0) {
+            throw new Error('No explorations remaining');
+        }
 
-const location = LOCATIONS[locationKey];
-if (gameState.level < (location.requiredLevel || 1)) {
-    addEventLog(`🔒 ${location.name} requires level ${location.requiredLevel}.`, 'failure');
-    updateUI();
-    return;
-}
-    gameState.explorationsLeft--;
+        const location = LOCATIONS[locationKey];
+        if (!location) {
+            throw new Error(`Invalid location: ${locationKey}`);
+        }
+
+        if (gameState.level < (location.requiredLevel || 1)) {
+            addEventLog(`🔒 ${location.name} requires level ${location.requiredLevel}.`, 'failure');
+            updateUI();
+            return;
+        }
+
+        gameState.explorationsLeft--;
 
     if (gameState.dailyChallenge.type === 'explore' && gameState.dailyChallenge.exploreTargets && gameState.dailyChallenge.exploreTargets.has(locationKey)) {
         gameState.dailyChallenge.explored.add(locationKey);
@@ -485,8 +494,13 @@ showDiceRoll((roll) => {
     if (result.xp) details.push(`+${result.xp} XP`);
 
     return details;
-});
+    });
 
+    } catch (error) {
+        console.error('Exploration failed:', error);
+        addEventLog(`❌ Exploration failed: ${error.message}`, 'failure');
+        return;
+    }
 }
 
 function calculateExplorationResult(locationKey, roll) {
@@ -1535,6 +1549,19 @@ function checkDailyChallengeCompletion() {
     }
 }
 
+function validateGameState(state) {
+    const required = ['day', 'level', 'xp', 'resources', 'settlement'];
+    for (const field of required) {
+        if (!(field in state)) {
+            throw new Error(`Missing required field: ${field}`);
+        }
+    }
+
+    if (state.level < 1) {
+        throw new Error('Invalid level');
+    }
+}
+
 // Save/Load
 function saveGame() {
 const saveData = {
@@ -1564,42 +1591,42 @@ try {
 }
 
 function loadGame() {
-try {
-// Load from memory instead of localStorage
-const savedData = window.dicecastleGameData;
-if (savedData) {
-const loadedState = JSON.parse(savedData);
+    try {
+        // Load from memory instead of localStorage
+        const savedData = window.dicecastleGameData;
+        if (savedData) {
+            const loadedState = JSON.parse(savedData);
+            validateGameState(loadedState);
 
-        // Restore Set from array
-        if (loadedState.dailyChallenge) {
-            if (loadedState.dailyChallenge.explored) {
-                loadedState.dailyChallenge.explored = new Set(loadedState.dailyChallenge.explored);
+            // Restore Set from array
+            if (loadedState.dailyChallenge) {
+                if (loadedState.dailyChallenge.explored) {
+                    loadedState.dailyChallenge.explored = new Set(loadedState.dailyChallenge.explored);
+                }
             }
-        }
 
-        if (!loadedState.population) {
-            loadedState.population = homeTypes[loadedState.settlement.home].population;
-        }
-
-        // Ensure buildings have pendingLevel property
-        const keys = ['farms','foresters','quarries','mines','gemMines','workshops'];
-        keys.forEach(k => {
-            if (loadedState.settlement[k]) {
-                loadedState.settlement[k] = loadedState.settlement[k].map(b => ({ pendingLevel: null, ...b }));
+            if (!loadedState.population) {
+                loadedState.population = homeTypes[loadedState.settlement.home].population;
             }
-        });
 
-        if (!loadedState.legacy) {
-            loadedState.legacy = { builder: 0, explorer: 0, wealthy: 0, lucky: 0, charismatic: 0 };
+            // Ensure buildings have pendingLevel property
+            const keys = ['farms','foresters','quarries','mines','gemMines','workshops'];
+            keys.forEach(k => {
+                if (loadedState.settlement[k]) {
+                    loadedState.settlement[k] = loadedState.settlement[k].map(b => ({ pendingLevel: null, ...b }));
+                }
+            });
+
+            if (!loadedState.legacy) {
+                loadedState.legacy = { builder: 0, explorer: 0, wealthy: 0, lucky: 0, charismatic: 0 };
+            }
+
+            gameState = { ...gameState, ...loadedState };
+            console.log('Game loaded from memory');
         }
-
-        gameState = { ...gameState, ...loadedState };
-        console.log('Game loaded from memory');
+    } catch (error) {
+        console.error('Failed to load game:', error);
     }
-} catch (error) {
-    console.error('Failed to load game:', error);
-}
-
 }
 
 // Initialize when page loads. Only run initGame once
