@@ -3,6 +3,7 @@ import { gameState } from './gameState.js';
 import { LOCATIONS } from './data/locations.js';
 import { BUILDING_TYPES } from './data/buildings.js';
 import { CONSTANTS } from './constants.js';
+import { uiManager } from './uiManager.js';
 
 // Game data
 
@@ -231,7 +232,7 @@ class Game {
     }
 
     updateUI() {
-        updateUI();
+        debouncedUpdateUI();
     }
 }
 
@@ -251,7 +252,7 @@ try {
     }
     setupResourceBar();
     generateDailyChallenge();
-    updateUI();
+    debouncedUpdateUI();
 setupEventListeners();
 console.log('Game initialized successfully!');
 
@@ -438,7 +439,7 @@ function exploreLocation(locationKey) {
 
         if (gameState.level < (location.requiredLevel || 1)) {
             addEventLog(`🔒 ${location.name} requires level ${location.requiredLevel}.`, 'failure');
-            updateUI();
+            debouncedUpdateUI();
             return;
         }
 
@@ -479,7 +480,7 @@ showDiceRoll((roll) => {
     }
     addEventLog(logMsg, result.type);
 
-    updateUI();
+    debouncedUpdateUI();
     saveGame();
 
     // Build detail lines for the modal
@@ -660,7 +661,7 @@ function sleep() {
         addEventLog(eventMessage, eventType);
         addEventLog(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
 
-        updateUI();
+        debouncedUpdateUI();
         saveGame();
 
         // Build detail text for modal
@@ -696,7 +697,7 @@ spendResources(upgradeCost);
 gameState.settlement.pendingHome = currentHome.upgradeTo;
 addEventLog(`🏠 Started upgrading home to ${homeTypes[currentHome.upgradeTo].name}. It will be ready tomorrow.`, 'success');
 
-updateUI();
+debouncedUpdateUI();
 saveGame();
 
 }
@@ -715,7 +716,7 @@ const newWalls = wallTypes[gameState.settlement.walls];
 addEventLog(`🛡️ Built ${newWalls.name} walls!`, 'success');
 gainXP(75);
 
-updateUI();
+debouncedUpdateUI();
 saveGame();
 
 }
@@ -744,7 +745,7 @@ function buildBuilding(type) {
     }
     checkDailyChallengeCompletion();
 
-updateUI();
+debouncedUpdateUI();
 saveGame();
 
 }
@@ -772,7 +773,7 @@ gainXP(10);
     }
     checkDailyChallengeCompletion();
 
-updateUI();
+debouncedUpdateUI();
 saveGame();
 
 }
@@ -804,7 +805,7 @@ gameState.items.luckyCharm += CONSTANTS.LUCKY_CHARM_MAX_USES;
 addEventLog(`🍀 Crafted a Lucky Charm! (${CONSTANTS.LUCKY_CHARM_MAX_USES} uses)`, 'success');
 gainXP(30);
 
-updateUI();
+debouncedUpdateUI();
 saveGame();
 
 }
@@ -819,7 +820,7 @@ function craftMagicScroll() {
     // Automatically gain the scroll's XP when crafted
     gainXP(20);
     addEventLog('✨ Magic Scroll activated for bonus XP!', 'success');
-    updateUI();
+    debouncedUpdateUI();
     saveGame();
 }
 
@@ -998,7 +999,7 @@ if (gameState.eventLog.length > 50) {
 
 function clearEventLog() {
 gameState.eventLog = [];
-updateUI();
+debouncedUpdateUI();
 saveGame();
 }
 
@@ -1054,18 +1055,17 @@ document.getElementById('dice-modal').classList.remove('show');
 
 // UI Updates
 function updateUI() {
-// Update header
-document.getElementById('day').textContent = gameState.day;
-document.getElementById('level').textContent = gameState.level;
-document.getElementById('xp').textContent = gameState.xp;
-document.getElementById('xp-next').textContent = gameState.xpToNext;
-document.getElementById('season').textContent = `${seasons[gameState.season].icon} ${seasons[gameState.season].name}`;
-if (gameState.ruler) {
-    document.getElementById('ruler-name').textContent = gameState.ruler.name;
-    document.getElementById('ruler-age').textContent = gameState.ruler.age;
-    const traitsEl = document.getElementById('ruler-traits');
-    if (traitsEl) traitsEl.textContent = gameState.ruler.traits.join(', ');
-}
+    // Update header using cached elements
+    uiManager.updateDay(gameState.day);
+    uiManager.updateLevel(gameState.level);
+    uiManager.updateXP(gameState.xp, gameState.xpToNext);
+    uiManager.updateSeason(`${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
+    if (gameState.ruler) {
+        const el = uiManager.elements;
+        if (el.rulerName) el.rulerName.textContent = gameState.ruler.name;
+        if (el.rulerAge) el.rulerAge.textContent = gameState.ruler.age;
+        if (el.rulerTraits) el.rulerTraits.textContent = gameState.ruler.traits.join(', ');
+    }
 
     // Update resources bar
     updateResourceBar();
@@ -1077,8 +1077,9 @@ if (gameState.ruler) {
 
 
 // Update exploration
-document.getElementById('explorations-left').textContent = gameState.explorationsLeft;
-document.getElementById('exploration-max').textContent = getExplorationMax();
+const uiEl = uiManager.elements;
+if (uiEl.explorationsLeft) uiEl.explorationsLeft.textContent = gameState.explorationsLeft;
+if (uiEl.explorationMax) uiEl.explorationMax.textContent = getExplorationMax();
 
 // Enable/disable location buttons
 document.querySelectorAll('.location-btn').forEach(btn => {
@@ -1093,7 +1094,7 @@ document.querySelectorAll('.location-btn').forEach(btn => {
 });
 
 // Enable/disable sleep button
-document.getElementById('sleep-btn').disabled = gameState.explorationsLeft > 0;
+if (uiEl.sleepBtn) uiEl.sleepBtn.disabled = gameState.explorationsLeft > 0;
 
 // Update settlement
 updateSettlementUI();
@@ -1104,6 +1105,20 @@ updateSettlementUI();
     checkDailyChallengeCompletion();
 
 }
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const debouncedUpdateUI = debounce(updateUI, 16);
 
 function updateSettlementUI() {
 // Home upgrade
@@ -1563,9 +1578,11 @@ function validateGameState(state) {
 }
 
 // Save/Load
-function saveGame() {
+function saveGame(slot = 'default') {
 const saveData = {
 ...gameState,
+savedAt: new Date().toISOString(),
+version: '1.0',
 dailyChallenge: {
     type: gameState.dailyChallenge.type,
     description: gameState.dailyChallenge.description,
@@ -1582,7 +1599,7 @@ dailyChallenge: {
 try {
     const gameData = JSON.stringify(saveData);
     // Store in memory instead of localStorage for Claude.ai compatibility
-    window.dicecastleGameData = gameData;
+    window[`dicecastleGameData_${slot}`] = gameData;
     console.log('Game saved to memory');
 } catch (error) {
     console.error('Failed to save game:', error);
@@ -1590,10 +1607,10 @@ try {
 
 }
 
-function loadGame() {
+function loadGame(slot = 'default') {
     try {
         // Load from memory instead of localStorage
-        const savedData = window.dicecastleGameData;
+        const savedData = window[`dicecastleGameData_${slot}`];
         if (savedData) {
             const loadedState = JSON.parse(savedData);
             validateGameState(loadedState);
