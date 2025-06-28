@@ -1,57 +1,5 @@
-// Game state
-let gameState = {
-    day: 1,
-    level: 1,
-    xp: 0,
-    xpToNext: 100,
-    season: 'spring',
-    explorationsLeft: 5,
-    resources: {
-        wood: 0,
-        stone: 0,
-        metal: 0,
-        food: 0,
-        tools: 0,
-        gems: 0
-    },
-    settlement: {
-        home: 'camp',
-        walls: 'none',
-        farms: [],
-        quarries: [],
-        mines: [],
-        workshops: [],
-        foresters: [],
-        gemMines: [],
-        pendingHome: null,
-        constructionQueue: []
-    },
-    ruler: {
-        name: '',
-        age: 20,
-        yearsRemaining: 20,
-        traits: []
-    },
-    pastRulers: [],
-    legacy: { builder: 0, explorer: 0, wealthy: 0, lucky: 0, charismatic: 0 },
-    population: 5,
-    items: {
-        luckyCharm: 0,
-        magicScroll: 0
-    },
-    dailyChallenge: {
-        type: 'explore',
-        description: 'Explore all unlocked locations',
-        target: 0,
-        progress: 0,
-        explored: new Set(),
-        resource: null,
-        startAmount: 0,
-        reward: 50,
-        completed: false
-    },
-    eventLog: []
-};
+// Game state has been moved to its own module for better organization
+import { gameState } from './gameState.js';
 
 const LUCKY_CHARM_MAX_USES = 3;
 
@@ -368,6 +316,35 @@ const nightEvents = [
         }
     }
 ];
+
+// Core Game class encapsulating high level actions
+class Game {
+    constructor() {
+        this.state = gameState;
+    }
+
+    exploreLocation(locationKey) {
+        exploreLocation(locationKey);
+    }
+
+    sleep() {
+        sleep();
+    }
+
+    save() {
+        saveGame();
+    }
+
+    upgradeHome() {
+        upgradeHome();
+    }
+
+    updateUI() {
+        updateUI();
+    }
+}
+
+const game = new Game();
 
 // Initialize game
 function initGame() {
@@ -1738,3 +1715,5 @@ document.addEventListener('DOMContentLoaded', initGame);
 } else {
 initGame();
 }
+
+export { game };
