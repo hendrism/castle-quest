@@ -105,6 +105,28 @@ font-weight: bold;
   font-weight: bold;
 }
 
+.save-load {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.save-load-btn {
+  background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.save-load-btn:hover {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
 /* Main content */
 main {
 padding: 1rem;
