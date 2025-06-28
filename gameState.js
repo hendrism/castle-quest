@@ -1,10 +1,12 @@
+import { CONSTANTS } from './constants.js';
+
 export const gameState = {
     day: 1,
     level: 1,
     xp: 0,
     xpToNext: 100,
     season: 'spring',
-    explorationsLeft: 5,
+    explorationsLeft: CONSTANTS.BASE_EXPLORATIONS,
     resources: {
         wood: 0,
         stone: 0,
