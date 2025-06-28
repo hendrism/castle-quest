@@ -26,6 +26,14 @@ let gameState = {
         pendingHome: null,
         constructionQueue: []
     },
+    ruler: {
+        name: '',
+        age: 20,
+        yearsRemaining: 20,
+        traits: []
+    },
+    pastRulers: [],
+    legacy: { builder: 0, explorer: 0, wealthy: 0, lucky: 0, charismatic: 0 },
     population: 5,
     items: {
         luckyCharm: 0,
@@ -80,11 +88,14 @@ plains: {
 };
 
 const seasons = {
-spring: { name: 'Spring', icon: '🌸', farmMultiplier: 1.2 },
-summer: { name: 'Summer', icon: '☀️', farmMultiplier: 1.5 },
-autumn: { name: 'Autumn', icon: '🍂', farmMultiplier: 1.0 },
-winter: { name: 'Winter', icon: '❄️', farmMultiplier: 0.8 }
+    spring: { name: 'Spring', icon: '🌸', farmMultiplier: 1.2 },
+    summer: { name: 'Summer', icon: '☀️', farmMultiplier: 1.5 },
+    autumn: { name: 'Autumn', icon: '🍂', farmMultiplier: 1.0 },
+    winter: { name: 'Winter', icon: '❄️', farmMultiplier: 0.8 }
 };
+
+const rulerNames = ['Arthur', 'Beatrice', 'Cedric', 'Diana', 'Edmund', 'Fiona'];
+const rulerTraits = ['builder', 'explorer', 'wealthy', 'lucky', 'charismatic'];
 
 const homeTypes = {
     camp: {
@@ -365,6 +376,12 @@ try {
     loadGame();
     if (!gameState.population) {
         gameState.population = homeTypes[gameState.settlement.home].population;
+    }
+    if (!gameState.ruler || !gameState.ruler.name) {
+        createNewRuler();
+    }
+    if (!gameState.explorationsLeft) {
+        gameState.explorationsLeft = getExplorationLimit();
     }
     setupResourceBar();
     generateDailyChallenge();
@@ -719,8 +736,19 @@ function sleep() {
 
         // Progress day
         gameState.day++;
-        gameState.explorationsLeft = 5;
+        gameState.explorationsLeft = getExplorationLimit();
         generateDailyChallenge();
+
+        // Age ruler
+        if (gameState.ruler) {
+            gameState.ruler.age++;
+            gameState.ruler.yearsRemaining--;
+            if (gameState.ruler.yearsRemaining <= 0) {
+                endCurrentRuler();
+            }
+        } else {
+            createNewRuler();
+        }
 
         if (gameState.settlement.pendingHome) {
             gameState.settlement.home = gameState.settlement.pendingHome;
@@ -900,16 +928,39 @@ function rollDice(sides = 20) {
     return Math.floor(Math.random() * sides) + 1;
 }
 
+function getTraitCount(trait) {
+    let count = gameState.ruler && gameState.ruler.traits.includes(trait) ? 1 : 0;
+    if (gameState.legacy && gameState.legacy[trait]) {
+        count += gameState.legacy[trait];
+    }
+    return count;
+}
+
+function getAdjustedCost(cost) {
+    const builderBonus = getTraitCount('builder');
+    if (!builderBonus) return cost;
+    const discount = 1 - builderBonus * 0.1;
+    const adjusted = {};
+    Object.keys(cost).forEach(r => {
+        adjusted[r] = Math.ceil(cost[r] * discount);
+    });
+    return adjusted;
+}
+
+function getExplorationLimit() {
+    return 5 + getTraitCount('explorer');
+}
+
 function canAfford(cost) {
-return Object.keys(cost).every(resource =>
-gameState.resources[resource] >= cost[resource]
-);
+    const adjusted = getAdjustedCost(cost);
+    return Object.keys(adjusted).every(res => gameState.resources[res] >= adjusted[res]);
 }
 
 function spendResources(cost) {
-Object.keys(cost).forEach(resource => {
-gameState.resources[resource] -= cost[resource];
-});
+    const adjusted = getAdjustedCost(cost);
+    Object.keys(adjusted).forEach(resource => {
+        gameState.resources[resource] -= adjusted[resource];
+    });
 }
 
 function getBuildingKey(type) {
@@ -986,6 +1037,41 @@ function damageWalls() {
     if (idx > 0) {
         gameState.settlement.walls = order[idx - 1];
     }
+}
+
+function createNewRuler() {
+    const name = rulerNames[Math.floor(Math.random() * rulerNames.length)];
+    const traits = [];
+    const pool = [...rulerTraits];
+    while (traits.length < 2 && pool.length > 0) {
+        const idx = Math.floor(Math.random() * pool.length);
+        traits.push(pool.splice(idx, 1)[0]);
+    }
+    gameState.ruler = {
+        name,
+        age: 20,
+        yearsRemaining: 20,
+        traits
+    };
+    addEventLog(`👑 ${name} begins their reign.`, 'success');
+    addEventLog(`Traits: ${traits.join(', ')}`, 'neutral');
+    if (traits.includes('wealthy')) {
+        gameState.resources.wood += 10;
+        gameState.resources.stone += 10;
+        gameState.resources.food += 10;
+        addEventLog('💰 The new ruler\'s wealth boosts your supplies!', 'success');
+    }
+    gameState.explorationsLeft = getExplorationLimit();
+}
+
+function endCurrentRuler() {
+    gameState.pastRulers.push({ ...gameState.ruler });
+    gameState.ruler.traits.forEach(t => {
+        if (!gameState.legacy[t]) gameState.legacy[t] = 0;
+        gameState.legacy[t]++;
+    });
+    addEventLog(`⚰️ ${gameState.ruler.name}'s reign has ended.`, 'neutral');
+    createNewRuler();
 }
 
 function getWallBonus() {
@@ -1096,6 +1182,12 @@ document.getElementById('level').textContent = gameState.level;
 document.getElementById('xp').textContent = gameState.xp;
 document.getElementById('xp-next').textContent = gameState.xpToNext;
 document.getElementById('season').textContent = `${seasons[gameState.season].icon} ${seasons[gameState.season].name}`;
+if (gameState.ruler) {
+    document.getElementById('ruler-name').textContent = gameState.ruler.name;
+    document.getElementById('ruler-age').textContent = gameState.ruler.age;
+    const traitEl = document.getElementById('ruler-traits');
+    if (traitEl) traitEl.textContent = gameState.ruler.traits.join(', ');
+}
 
     // Update resources bar
     updateResourceBar();
@@ -1108,6 +1200,8 @@ document.getElementById('season').textContent = `${seasons[gameState.season].ico
 
 // Update exploration
 document.getElementById('explorations-left').textContent = gameState.explorationsLeft;
+const maxEl = document.getElementById('explorations-max');
+if (maxEl) maxEl.textContent = getExplorationLimit();
 
 // Enable/disable location buttons
 document.querySelectorAll('.location-btn').forEach(btn => {
@@ -1512,6 +1606,10 @@ const loadedState = JSON.parse(savedData);
 
         if (!loadedState.population) {
             loadedState.population = homeTypes[loadedState.settlement.home].population;
+        }
+
+        if (!loadedState.legacy) {
+            loadedState.legacy = { builder: 0, explorer: 0, wealthy: 0, lucky: 0, charismatic: 0 };
         }
 
         gameState = { ...gameState, ...loadedState };
