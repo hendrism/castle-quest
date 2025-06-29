@@ -1,5 +1,5 @@
 import { game } from './app.js';
 
-export function updateUI() {
-    game.updateUI();
+export function refreshGameInterface() {
+    game.refreshGameInterface();
 }
