@@ -219,8 +219,8 @@ class Game {
         exploreLocation(locationKey);
     }
 
-    sleep() {
-        sleep();
+    endDayAndProcessNightEvents() {
+        endDayAndProcessNightEvents();
     }
 
     save() {
@@ -229,15 +229,15 @@ class Game {
 
     load() {
         loadGame();
-        debouncedUpdateUI();
+        debouncedRefreshGameInterface();
     }
 
     upgradeHome() {
         upgradeHome();
     }
 
-    updateUI() {
-        debouncedUpdateUI();
+    refreshGameInterface() {
+        debouncedRefreshGameInterface();
     }
 }
 
@@ -257,7 +257,7 @@ try {
     }
     setupResourceBar();
     generateDailyChallenge();
-    debouncedUpdateUI();
+    debouncedRefreshGameInterface();
 setupEventListeners();
 console.log('Game initialized successfully!');
 
@@ -312,7 +312,7 @@ const sleepBtn = document.getElementById('sleep-btn');
     if (sleepBtn) {
         sleepBtn.addEventListener('click', (e) => {
             console.log('Sleep button clicked');
-            sleep();
+            endDayAndProcessNightEvents();
         });
     } else {
         console.error('Sleep button not found!');
@@ -462,7 +462,7 @@ function exploreLocation(locationKey) {
 
         if (gameState.level < (location.requiredLevel || 1)) {
             addEventLog(`🔒 ${location.name} requires level ${location.requiredLevel}.`, 'failure');
-            debouncedUpdateUI();
+            debouncedRefreshGameInterface();
             return;
         }
 
@@ -503,7 +503,7 @@ showDiceRoll((roll) => {
     }
     addEventLog(logMsg, result.type);
 
-    debouncedUpdateUI();
+    debouncedRefreshGameInterface();
     saveGame();
 
     // Build detail lines for the modal
@@ -527,6 +527,12 @@ showDiceRoll((roll) => {
     }
 }
 
+/**
+ * Calculates exploration results based on location and dice roll
+ * @param {string} locationKey - The key of the location being explored
+ * @param {number} roll - The dice roll result (1-20)
+ * @returns {Object} The exploration result with rewards and messages
+ */
 function calculateExplorationResult(locationKey, roll) {
 const location = LOCATIONS[locationKey];
 let luckyCharmBonus = 0;
@@ -582,7 +588,7 @@ return { rewards, xp, message, type, roll: effectiveRoll };
 }
 
 // Sleep and day progression
-function sleep() {
+function endDayAndProcessNightEvents() {
     showDiceRoll((roll) => {
         // Overnight event using 2d6 for event and provided d20 roll for severity
         const d1 = rollDice(6);
@@ -696,7 +702,7 @@ function sleep() {
         addEventLog(eventMessage, eventType);
         addEventLog(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
 
-        debouncedUpdateUI();
+        debouncedRefreshGameInterface();
         saveGame();
 
         // Build detail text for modal
@@ -732,7 +738,7 @@ spendResources(upgradeCost);
 gameState.settlement.pendingHome = currentHome.upgradeTo;
 addEventLog(`🏠 Started upgrading home to ${homeTypes[currentHome.upgradeTo].name}. It will be ready tomorrow.`, 'success');
 
-debouncedUpdateUI();
+debouncedRefreshGameInterface();
 saveGame();
 
 }
@@ -751,7 +757,7 @@ const newWalls = wallTypes[gameState.settlement.walls];
 addEventLog(`🛡️ Built ${newWalls.name} walls!`, 'success');
 gainXP(75);
 
-debouncedUpdateUI();
+debouncedRefreshGameInterface();
 saveGame();
 
 }
@@ -780,7 +786,7 @@ function buildBuilding(type) {
     }
     checkDailyChallengeCompletion();
 
-debouncedUpdateUI();
+debouncedRefreshGameInterface();
 saveGame();
 
 }
@@ -808,7 +814,7 @@ gainXP(10);
     }
     checkDailyChallengeCompletion();
 
-debouncedUpdateUI();
+debouncedRefreshGameInterface();
 saveGame();
 
 }
@@ -840,7 +846,7 @@ gameState.items.luckyCharm += CONSTANTS.LUCKY_CHARM_MAX_USES;
 addEventLog(`🍀 Crafted a Lucky Charm! (${CONSTANTS.LUCKY_CHARM_MAX_USES} uses)`, 'success');
 gainXP(30);
 
-debouncedUpdateUI();
+debouncedRefreshGameInterface();
 saveGame();
 
 }
@@ -855,7 +861,7 @@ function craftMagicScroll() {
     // Automatically gain the scroll's XP when crafted
     gainXP(20);
     addEventLog('✨ Magic Scroll activated for bonus XP!', 'success');
-    debouncedUpdateUI();
+    debouncedRefreshGameInterface();
     saveGame();
 }
 
@@ -888,6 +894,10 @@ function getBuildingLimit(type) {
     return 0;
 }
 
+function getProductionValue(type, building) {
+    return BUILDING_TYPES[type].levels[building?.level]?.production ?? 0;
+}
+
 function calculateDailyProduction() {
     let food = 0;
     let wood = 0;
@@ -897,41 +907,41 @@ function calculateDailyProduction() {
     let gems = 0;
     let foodDemand = gameState.population || 0;
 
-    gameState.settlement.farms.forEach(farm => {
-        const production = BUILDING_TYPES.farm.levels[farm.level].production;
-        const seasonMultiplier = seasons[gameState.season].farmMultiplier;
-        food += Math.floor(production * seasonMultiplier);
-    });
+    const farmProduction = gameState.settlement.farms
+        .filter(farm => farm.level)
+        .reduce((sum, farm) => sum + getProductionValue('farm', farm), 0);
+    const seasonMultiplier = seasons[gameState.season].farmMultiplier;
+    food += Math.floor(farmProduction * seasonMultiplier);
 
-    gameState.settlement.quarries.forEach(quarry => {
-        const production = BUILDING_TYPES.quarry.levels[quarry.level].production;
-        stone += production;
-    });
+    stone += gameState.settlement.quarries
+        .filter(quarry => quarry.level)
+        .reduce((sum, quarry) => sum + getProductionValue('quarry', quarry), 0);
 
-    gameState.settlement.mines.forEach(mine => {
-        const production = BUILDING_TYPES.mine.levels[mine.level].production;
-        metal += production;
-    });
+    metal += gameState.settlement.mines
+        .filter(mine => mine.level)
+        .reduce((sum, mine) => sum + getProductionValue('mine', mine), 0);
 
-    gameState.settlement.foresters.forEach(forester => {
-        const production = BUILDING_TYPES.forester.levels[forester.level].production;
-        wood += production;
-    });
+    wood += gameState.settlement.foresters
+        .filter(forester => forester.level)
+        .reduce((sum, forester) => sum + getProductionValue('forester', forester), 0);
 
-    gameState.settlement.gemMines.forEach(gm => {
-        const production = BUILDING_TYPES.gemMine.levels[gm.level].production;
-        gems += production;
-    });
+    gems += gameState.settlement.gemMines
+        .filter(gm => gm.level)
+        .reduce((sum, gm) => sum + getProductionValue('gemMine', gm), 0);
 
     let woodConsumed = 0;
-    gameState.settlement.workshops.forEach(ws => {
-        const levelData = BUILDING_TYPES.workshop.levels[ws.level];
-        const woodCost = levelData.woodCost || 1;
-        if (gameState.resources.wood - woodConsumed >= woodCost) {
-            woodConsumed += woodCost;
-            tools += levelData.production;
-        }
-    });
+    const toolProduction = gameState.settlement.workshops
+        .filter(ws => ws.level)
+        .reduce((sum, ws) => {
+            const levelData = BUILDING_TYPES.workshop.levels[ws.level];
+            const woodCost = levelData.woodCost ?? 1;
+            if (gameState.resources.wood - woodConsumed >= woodCost) {
+                woodConsumed += woodCost;
+                return sum + levelData.production;
+            }
+            return sum;
+        }, 0);
+    tools += toolProduction;
 
     const multiplier = getLevelMultiplier();
     food = Math.floor(food * multiplier);
@@ -1034,7 +1044,7 @@ if (gameState.eventLog.length > 50) {
 
 function clearEventLog() {
 gameState.eventLog = [];
-debouncedUpdateUI();
+debouncedRefreshGameInterface();
 saveGame();
 }
 
@@ -1098,7 +1108,7 @@ document.getElementById('dice-modal').classList.remove('show');
 }
 
 // UI Updates
-function updateUI() {
+function refreshGameInterface() {
     // Update header using cached elements
     uiManager.updateDay(gameState.day);
     uiManager.updateLevel(gameState.level);
@@ -1123,7 +1133,8 @@ function updateUI() {
 // Update exploration
 const uiEl = uiManager.elements;
 if (uiEl.explorationsLeft) uiEl.explorationsLeft.textContent = gameState.explorationsLeft;
-if (uiEl.explorationMax) uiEl.explorationMax.textContent = getExplorationMax();
+const explorationMax = getExplorationMax() ?? 5;
+if (uiEl.explorationMax) uiEl.explorationMax.textContent = explorationMax;
 
 // Enable/disable location buttons
 document.querySelectorAll('.location-btn').forEach(btn => {
@@ -1162,7 +1173,7 @@ function debounce(func, wait) {
     };
 }
 
-const debouncedUpdateUI = debounce(updateUI, 16);
+const debouncedRefreshGameInterface = debounce(refreshGameInterface, 16);
 
 function updateSettlementUI() {
 // Home upgrade
