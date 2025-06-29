@@ -1,7 +1,7 @@
 import { CONSTANTS } from './constants.js';
 
 export const gameState = {
-    day: 1,
+    month: 1,
     level: 1,
     xp: 0,
     xpToNext: 100,
@@ -41,7 +41,7 @@ export const gameState = {
         luckyCharm: 0,
         magicScroll: 0
     },
-    dailyChallenge: {
+    monthlyChallenge: {
         type: 'explore',
         description: 'Explore all unlocked locations',
         target: 0,

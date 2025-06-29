@@ -1,12 +1,12 @@
 export class UIManager {
   constructor() {
     this.elements = {
-      day: document.getElementById('day'),
+      month: document.getElementById('month'),
       level: document.getElementById('level'),
       xp: document.getElementById('xp'),
       xpNext: document.getElementById('xp-next'),
       season: document.getElementById('season'),
-      sleepBtn: document.getElementById('sleep-btn'),
+      nextMonthBtn: document.getElementById('next-month-btn'),
       explorationsLeft: document.getElementById('explorations-left'),
       explorationMax: document.getElementById('exploration-max'),
       rulerName: document.getElementById('ruler-name'),
@@ -15,9 +15,9 @@ export class UIManager {
     };
   }
 
-  updateDay(day) {
-    if (this.elements.day) {
-      this.elements.day.textContent = day;
+  updateMonth(month) {
+    if (this.elements.month) {
+      this.elements.month.textContent = month;
     }
   }
 

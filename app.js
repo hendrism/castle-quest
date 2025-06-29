@@ -219,8 +219,8 @@ class Game {
         exploreLocation(locationKey);
     }
 
-    endDayAndProcessNightEvents() {
-        endDayAndProcessNightEvents();
+    advanceMonth() {
+        advanceMonth();
     }
 
     save() {
@@ -256,7 +256,7 @@ try {
         createNewRuler();
     }
     setupResourceBar();
-    generateDailyChallenge();
+    generateMonthlyChallenge();
     debouncedRefreshGameInterface();
 setupEventListeners();
 console.log('Game initialized successfully!');
@@ -307,15 +307,15 @@ locationBtns.forEach((btn, index) => {
     });
 });
 
-// Sleep button
-const sleepBtn = document.getElementById('sleep-btn');
-    if (sleepBtn) {
-        sleepBtn.addEventListener('click', (e) => {
-            console.log('Sleep button clicked');
-            endDayAndProcessNightEvents();
+// Next month button
+const nextMonthBtn = document.getElementById('next-month-btn');
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener('click', (e) => {
+            console.log('Next month button clicked');
+            advanceMonth();
         });
     } else {
-        console.error('Sleep button not found!');
+        console.error('Next month button not found!');
     }
 
     // Save and load buttons
@@ -468,11 +468,11 @@ function exploreLocation(locationKey) {
 
         gameState.explorationsLeft--;
 
-    if (gameState.dailyChallenge.type === 'explore' && gameState.dailyChallenge.exploreTargets && gameState.dailyChallenge.exploreTargets.has(locationKey)) {
-        gameState.dailyChallenge.explored.add(locationKey);
-        gameState.dailyChallenge.progress = gameState.dailyChallenge.explored.size;
+    if (gameState.monthlyChallenge.type === 'explore' && gameState.monthlyChallenge.exploreTargets && gameState.monthlyChallenge.exploreTargets.has(locationKey)) {
+        gameState.monthlyChallenge.explored.add(locationKey);
+        gameState.monthlyChallenge.progress = gameState.monthlyChallenge.explored.size;
     }
-    checkDailyChallengeCompletion();
+    checkMonthlyChallengeCompletion();
 
 // Roll dice and show modal
 showDiceRoll((roll) => {
@@ -582,8 +582,8 @@ return { rewards, xp, message, type, roll: effectiveRoll };
 
 }
 
-// Sleep and day progression
-function endDayAndProcessNightEvents() {
+// Month progression and random event
+function advanceMonth() {
     showDiceRoll((roll) => {
         // Overnight event using 2d6 for event and provided d20 roll for severity
         const d1 = rollDice(6);
@@ -610,8 +610,8 @@ function endDayAndProcessNightEvents() {
             eventType = result.type || nightEvent.type;
         }
 
-        // Daily production from buildings
-        const production = calculateDailyProduction();
+        // Monthly production from buildings
+        const production = calculateMonthlyProduction();
         gameState.resources.food += production.food;
         gameState.resources.wood += production.wood;
         gameState.resources.stone += production.stone;
@@ -632,7 +632,7 @@ function endDayAndProcessNightEvents() {
         }
         if (foodShortage > 0) {
             gameState.rollPenalty = foodShortage;
-            addEventLog(`⚠️ Food shortage! All rolls suffer -${foodShortage} today.`, 'failure');
+            addEventLog(`⚠️ Food shortage! All rolls suffer -${foodShortage} this month.`, 'failure');
         } else {
             gameState.rollPenalty = 0;
         }
@@ -647,13 +647,13 @@ function endDayAndProcessNightEvents() {
             if (production.gems) parts.push(`+${production.gems} gems`);
             if (production.woodConsumed) parts.push(`-${production.woodConsumed} wood`);
             if (production.foodDemand) parts.push(`-${production.foodDemand} food`);
-            addEventLog(`🏭 Daily production: ${parts.join(', ')}`, 'success');
+            addEventLog(`🏭 Monthly production: ${parts.join(', ')}`, 'success');
         }
 
-        // Progress day
-        gameState.day++;
+        // Progress month
+        gameState.month++;
         gameState.explorationsLeft = getExplorationMax();
-        generateDailyChallenge();
+        generateMonthlyChallenge();
 
         // Age ruler
         if (gameState.ruler) {
@@ -688,14 +688,14 @@ function endDayAndProcessNightEvents() {
 
         finalizeBuildingUpgrades();
 
-        // Change season every CONSTANTS.SEASON_CYCLE_DAYS days
+        // Change season every CONSTANTS.SEASON_CYCLE_MONTHS months
         const seasonKeys = Object.keys(seasons);
-        const seasonIndex = Math.floor((gameState.day - 1) / CONSTANTS.SEASON_CYCLE_DAYS) % seasonKeys.length;
+        const seasonIndex = Math.floor((gameState.month - 1) / CONSTANTS.SEASON_CYCLE_MONTHS) % seasonKeys.length;
         gameState.season = seasonKeys[seasonIndex];
 
         // Add event log
         addEventLog(eventMessage, eventType);
-        addEventLog(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
+        addEventLog(`🌅 Month ${gameState.month} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
 
         debouncedRefreshGameInterface();
         saveGame();
@@ -714,9 +714,9 @@ function endDayAndProcessNightEvents() {
             if (production.gems) parts.push(`+${production.gems} gems`);
             if (production.woodConsumed) parts.push(`-${production.woodConsumed} wood`);
             if (production.foodDemand) parts.push(`-${production.foodDemand} food`);
-            details.push(`🏭 Daily production: ${parts.join(', ')}`);
+            details.push(`🏭 Monthly production: ${parts.join(', ')}`);
         }
-        details.push(`🌅 Day ${gameState.day} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
+        details.push(`🌅 Month ${gameState.month} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
 
         return details;
     });
@@ -777,10 +777,10 @@ function buildBuilding(type) {
     gameState.settlement.constructionQueue.push({ type, id });
     addEventLog(`${buildingType.icon} Started building a ${buildingType.name}. It will be ready tomorrow.`, 'success');
 
-    if (gameState.dailyChallenge.type === 'build') {
-        gameState.dailyChallenge.progress++;
+    if (gameState.monthlyChallenge.type === 'build') {
+        gameState.monthlyChallenge.progress++;
     }
-    checkDailyChallengeCompletion();
+    checkMonthlyChallengeCompletion();
 
 debouncedRefreshGameInterface();
 saveGame();
@@ -805,10 +805,10 @@ const newLevel = BUILDING_TYPES[type].levels[currentLevel.upgradeTo];
 addEventLog(`${BUILDING_TYPES[type].icon} Upgrading ${BUILDING_TYPES[type].name} to ${newLevel.name}. It will be ready tomorrow.`, 'success');
 gainXP(10);
 
-    if (gameState.dailyChallenge.type === 'upgrade') {
-        gameState.dailyChallenge.progress++;
+    if (gameState.monthlyChallenge.type === 'upgrade') {
+        gameState.monthlyChallenge.progress++;
     }
-    checkDailyChallengeCompletion();
+    checkMonthlyChallengeCompletion();
 
 debouncedRefreshGameInterface();
 saveGame();
@@ -894,7 +894,7 @@ function getProductionValue(type, building) {
     return BUILDING_TYPES[type].levels[building?.level]?.production ?? 0;
 }
 
-function calculateDailyProduction() {
+function calculateMonthlyProduction() {
     let food = 0;
     let wood = 0;
     let stone = 0;
@@ -1028,7 +1028,7 @@ gameState.eventLog.unshift({
 message,
 type,
 timestamp,
-day: gameState.day
+month: gameState.month
 });
 
 // Keep only last 50 entries
@@ -1112,7 +1112,7 @@ document.getElementById('dice-modal').classList.remove('show');
 // UI Updates
 function refreshGameInterface() {
     // Update header using cached elements
-    uiManager.updateDay(gameState.day);
+    uiManager.updateMonth(gameState.month);
     uiManager.updateLevel(gameState.level);
     uiManager.updateXP(gameState.xp, gameState.xpToNext);
     uiManager.updateSeason(`${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
@@ -1126,9 +1126,9 @@ function refreshGameInterface() {
     // Update resources bar
     updateResourceBar();
 
-    if (gameState.dailyChallenge.type === 'gather') {
-        const res = gameState.dailyChallenge.resource;
-        gameState.dailyChallenge.progress = Math.max(0, gameState.resources[res] - gameState.dailyChallenge.startAmount);
+    if (gameState.monthlyChallenge.type === 'gather') {
+        const res = gameState.monthlyChallenge.resource;
+        gameState.monthlyChallenge.progress = Math.max(0, gameState.resources[res] - gameState.monthlyChallenge.startAmount);
     }
 
 
@@ -1150,16 +1150,16 @@ document.querySelectorAll('.location-btn').forEach(btn => {
     }
 });
 
-// Enable/disable sleep button
-if (uiEl.sleepBtn) uiEl.sleepBtn.disabled = gameState.explorationsLeft > 0;
+// Enable/disable next month button
+if (uiEl.nextMonthBtn) uiEl.nextMonthBtn.disabled = gameState.explorationsLeft > 0;
 
 // Update settlement
 updateSettlementUI();
 
 // Update event log
     updateEventLogUI();
-    updateDailyChallengeUI();
-    checkDailyChallengeCompletion();
+    updateMonthlyChallengeUI();
+    checkMonthlyChallengeCompletion();
 
 }
 
@@ -1482,7 +1482,7 @@ gameState.eventLog.forEach(entry => {
     const div = document.createElement('div');
     div.className = `log-entry ${entry.type}`;
     div.innerHTML = `
-        <div><strong>Day ${entry.day}</strong> - ${entry.timestamp}</div>
+        <div><strong>Month ${entry.month}</strong> - ${entry.timestamp}</div>
         <div>${entry.message}</div>
     `;
     logContent.appendChild(div);
@@ -1500,7 +1500,7 @@ function setupResourceBar() {
 }
 
 function updateResourceBar() {
-    const prod = calculateDailyProduction();
+    const prod = calculateMonthlyProduction();
     Object.keys(gameState.resources).forEach(r => {
         const el = document.getElementById(`bar-${r}`);
         if (el) el.textContent = gameState.resources[r];
@@ -1563,10 +1563,10 @@ function getAccessibleLocations() {
     });
 }
 
-function generateDailyChallenge() {
+function generateMonthlyChallenge() {
     const types = ['explore', 'build', 'upgrade', 'gather'];
     const type = types[Math.floor(Math.random() * types.length)];
-    const challenge = gameState.dailyChallenge;
+    const challenge = gameState.monthlyChallenge;
 
     challenge.type = type;
     challenge.progress = 0;
@@ -1595,20 +1595,20 @@ function generateDailyChallenge() {
     }
 }
 
-function updateDailyChallengeUI() {
+function updateMonthlyChallengeUI() {
     const textEl = document.getElementById('daily-challenge-text');
     const progEl = document.getElementById('daily-challenge-progress');
     if (!textEl || !progEl) return;
-    textEl.textContent = gameState.dailyChallenge.description;
-    const target = gameState.dailyChallenge.target;
-    const progress = gameState.dailyChallenge.type === 'explore'
-        ? gameState.dailyChallenge.explored.size
-        : gameState.dailyChallenge.progress;
+    textEl.textContent = gameState.monthlyChallenge.description;
+    const target = gameState.monthlyChallenge.target;
+    const progress = gameState.monthlyChallenge.type === 'explore'
+        ? gameState.monthlyChallenge.explored.size
+        : gameState.monthlyChallenge.progress;
     progEl.textContent = `${progress}/${target}`;
 }
 
-function checkDailyChallengeCompletion() {
-    const challenge = gameState.dailyChallenge;
+function checkMonthlyChallengeCompletion() {
+    const challenge = gameState.monthlyChallenge;
     if (challenge.completed) return;
     let progress = challenge.progress;
     if (challenge.type === 'explore') {
@@ -1616,13 +1616,13 @@ function checkDailyChallengeCompletion() {
     }
     if (progress >= challenge.target) {
         challenge.completed = true;
-        addEventLog(`🎯 Daily Challenge completed! Gained ${challenge.reward} XP.`, 'success');
+        addEventLog(`🎯 Monthly Challenge completed! Gained ${challenge.reward} XP.`, 'success');
         gainXP(challenge.reward);
     }
 }
 
 function validateGameState(state) {
-    const required = ['day', 'level', 'xp', 'resources', 'settlement'];
+    const required = ['month', 'level', 'xp', 'resources', 'settlement'];
     for (const field of required) {
         if (!(field in state)) {
             throw new Error(`Missing required field: ${field}`);

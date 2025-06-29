@@ -17,8 +17,8 @@
             <h1>🛡️ Dice & Castle</h1>
             <div class="stats">
                 <div class="stat">
-                    <span class="stat-label">Day:</span>
-                    <span id="day">1</span>
+                    <span class="stat-label">Month:</span>
+                    <span id="month">1</span>
                 </div>
                 <div class="stat">
                     <span class="stat-label">Level:</span>
@@ -42,7 +42,7 @@
                 <a href="#exploration">Explore</a>
                 <a href="#event-log">Events</a>
                 <a href="#settlement">Settlement</a>
-                <a href="#sleep-section">Sleep</a>
+                <a href="#month-section">Next Month</a>
             </nav>
             <!-- Save/Load temporarily disabled -->
         </header>
@@ -52,8 +52,8 @@
         <section class="exploration" id="exploration">
             <h2>Exploration</h2>
             <div class="exploration-info">
-                <p>Explorations remaining today: <span id="explorations-left">5</span>/<span id="exploration-max">5</span></p>
-                <p>Daily Challenge: <span id="daily-challenge-text">Explore all locations</span> (<span id="daily-challenge-progress">0/0</span>)</p>
+                <p>Explorations remaining this month: <span id="explorations-left">5</span>/<span id="exploration-max">5</span></p>
+                <p>Monthly Challenge: <span id="daily-challenge-text">Explore all locations</span> (<span id="daily-challenge-progress">0/0</span>)</p>
             </div>
 
             <div class="locations">
@@ -210,10 +210,10 @@
             </div>
         </section>
 
-        <section class="sleep-section" id="sleep-section">
-            <button id="sleep-btn" class="sleep-btn" disabled>
+        <section class="sleep-section" id="month-section">
+            <button id="next-month-btn" class="sleep-btn" disabled>
                 <span class="sleep-icon">😴</span>
-                Sleep (End Day)
+                Go To Next Month
             </button>
         </section>
 
