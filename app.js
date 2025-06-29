@@ -535,12 +535,7 @@ showDiceRoll((roll) => {
  */
 function calculateExplorationResult(locationKey, roll) {
 const location = LOCATIONS[locationKey];
-let luckyCharmBonus = 0;
-if (gameState.items.luckyCharm > 0) {
-    luckyCharmBonus = 2;
-    gameState.items.luckyCharm--;
-}
-const effectiveRoll = Math.min(20, roll + luckyCharmBonus);
+const effectiveRoll = Math.min(20, roll);
 
 let multiplier = 1;
 let type = 'neutral';
@@ -704,6 +699,7 @@ function endDayAndProcessNightEvents() {
 
         debouncedRefreshGameInterface();
         saveGame();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         // Build detail text for modal
         const details = [];
@@ -1070,20 +1066,26 @@ function showDiceRoll(callback) {
         dice.classList.remove('rolling');
         const baseRoll = rollDice();
         let roll = baseRoll;
-        let penaltyNote = '';
+        const notes = [];
+
         if (gameState.rollPenalty) {
-            roll = Math.max(1, baseRoll - gameState.rollPenalty);
-            penaltyNote = ` (Food penalty: -${gameState.rollPenalty} = ${roll})`;
+            roll = Math.max(1, roll - gameState.rollPenalty);
+            notes.push(`Food penalty: -${gameState.rollPenalty} = ${roll}`);
         }
+
+        if (gameState.items.luckyCharm > 0) {
+            gameState.items.luckyCharm--;
+            const boosted = Math.min(20, roll + 2);
+            notes.push(`Lucky Charm: +2 = ${boosted}`);
+            roll = boosted;
+        }
+
         diceFace.textContent = roll;
 
         const lines = [];
         let rollLine = `You rolled a ${roll}.`;
-        if (penaltyNote) {
-            rollLine += penaltyNote;
-        }
-        if (gameState.items.luckyCharm > 0) {
-            rollLine += ` (Lucky Charm: +2 = ${Math.min(20, roll + 2)})`;
+        if (notes.length) {
+            rollLine += ` (${notes.join(', ')})`;
         }
         lines.push(rollLine);
 
