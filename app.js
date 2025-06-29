@@ -620,8 +620,20 @@ function sleep() {
         if (production.woodConsumed) {
             gameState.resources.wood = Math.max(0, gameState.resources.wood - production.woodConsumed);
         }
+        let foodShortage = 0;
         if (production.foodDemand) {
-            gameState.resources.food = Math.max(0, gameState.resources.food - production.foodDemand);
+            if (gameState.resources.food >= production.foodDemand) {
+                gameState.resources.food -= production.foodDemand;
+            } else {
+                foodShortage = production.foodDemand - gameState.resources.food;
+                gameState.resources.food = 0;
+            }
+        }
+        if (foodShortage > 0) {
+            gameState.rollPenalty = foodShortage;
+            addEventLog(`⚠️ Food shortage! All rolls suffer -${foodShortage} today.`, 'failure');
+        } else {
+            gameState.rollPenalty = 0;
         }
 
         if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0 || production.woodConsumed > 0 || production.foodDemand > 0) {
@@ -1046,11 +1058,20 @@ function showDiceRoll(callback) {
 
     setTimeout(() => {
         dice.classList.remove('rolling');
-        const roll = rollDice();
+        const baseRoll = rollDice();
+        let roll = baseRoll;
+        let penaltyNote = '';
+        if (gameState.rollPenalty) {
+            roll = Math.max(1, baseRoll - gameState.rollPenalty);
+            penaltyNote = ` (Food penalty: -${gameState.rollPenalty} = ${roll})`;
+        }
         diceFace.textContent = roll;
 
         const lines = [];
         let rollLine = `You rolled a ${roll}.`;
+        if (penaltyNote) {
+            rollLine += penaltyNote;
+        }
         if (gameState.items.luckyCharm > 0) {
             rollLine += ` (Lucky Charm: +2 = ${Math.min(20, roll + 2)})`;
         }

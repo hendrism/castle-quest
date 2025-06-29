@@ -5,13 +5,14 @@ export const gameState = {
     level: 1,
     xp: 0,
     xpToNext: 100,
+    rollPenalty: 0,
     season: 'spring',
     explorationsLeft: CONSTANTS.BASE_EXPLORATIONS,
     resources: {
         wood: 0,
         stone: 0,
         metal: 0,
-        food: 0,
+        food: 10,
         tools: 0,
         gems: 0
     },
