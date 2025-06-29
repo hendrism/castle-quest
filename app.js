@@ -1021,6 +1021,18 @@ function getLevelMultiplier() {
     return 1 + (gameState.level - 1) * 0.05;
 }
 
+function getRequirementTooltip(type) {
+    const bt = BUILDING_TYPES[type];
+    const requirements = [];
+    if (gameState.level < bt.requiredLevel) {
+        requirements.push(`level ${bt.requiredLevel}`);
+    }
+    if (!homeAtLeast(bt.requiredHome || 'camp')) {
+        requirements.push(homeTypes[bt.requiredHome || 'camp'].name);
+    }
+    return requirements.length ? `Requires ${requirements.join(' and ')}` : '';
+}
+
 function gainXP(amount) {
 gameState.xp += amount;
 
@@ -1288,9 +1300,7 @@ document.getElementById('build-farm-btn').disabled =
     !homeAtLeast(BUILDING_TYPES.farm.requiredHome || 'camp') ||
     gameState.settlement.farms.length + gameState.settlement.constructionQueue.filter(b=>b.type==='farm').length >= farmLimit ||
     !canAfford(adjustCostForTraits(BUILDING_TYPES.farm.buildCost));
-document.getElementById('build-farm-btn').title =
-    gameState.level < BUILDING_TYPES.farm.requiredLevel ?
-    `Requires level ${BUILDING_TYPES.farm.requiredLevel}` : '';
+document.getElementById('build-farm-btn').title = getRequirementTooltip('farm');
 const farmCost = adjustCostForTraits(BUILDING_TYPES.farm.buildCost);
 const farmCostText = formatCost(farmCost);
 const farmBtn = document.getElementById('build-farm-btn');
@@ -1319,9 +1329,7 @@ document.getElementById('build-forester-btn').disabled =
     !homeAtLeast(BUILDING_TYPES.forester.requiredHome || 'camp') ||
     gameState.settlement.foresters.length + gameState.settlement.constructionQueue.filter(b=>b.type==='forester').length >= foresterLimit ||
     !canAfford(adjustCostForTraits(BUILDING_TYPES.forester.buildCost));
-document.getElementById('build-forester-btn').title =
-    gameState.level < BUILDING_TYPES.forester.requiredLevel ?
-    `Requires level ${BUILDING_TYPES.forester.requiredLevel}` : '';
+document.getElementById('build-forester-btn').title = getRequirementTooltip('forester');
 const foresterCost = adjustCostForTraits(BUILDING_TYPES.forester.buildCost);
 const foresterCostText = formatCost(foresterCost);
 const foresterBtn = document.getElementById('build-forester-btn');
@@ -1350,9 +1358,7 @@ document.getElementById('build-quarry-btn').disabled =
     !homeAtLeast(BUILDING_TYPES.quarry.requiredHome || 'camp') ||
     gameState.settlement.quarries.length + gameState.settlement.constructionQueue.filter(b=>b.type==='quarry').length >= quarryLimit ||
     !canAfford(adjustCostForTraits(BUILDING_TYPES.quarry.buildCost));
-document.getElementById('build-quarry-btn').title =
-    gameState.level < BUILDING_TYPES.quarry.requiredLevel ?
-    `Requires level ${BUILDING_TYPES.quarry.requiredLevel}` : '';
+document.getElementById('build-quarry-btn').title = getRequirementTooltip('quarry');
 const quarryCost = adjustCostForTraits(BUILDING_TYPES.quarry.buildCost);
 const quarryCostText = formatCost(quarryCost);
 const quarryBtn = document.getElementById('build-quarry-btn');
@@ -1381,9 +1387,7 @@ document.getElementById('build-mine-btn').disabled =
     !homeAtLeast(BUILDING_TYPES.mine.requiredHome || 'camp') ||
     gameState.settlement.mines.length + gameState.settlement.constructionQueue.filter(b=>b.type==='mine').length >= mineLimit ||
     !canAfford(adjustCostForTraits(BUILDING_TYPES.mine.buildCost));
-document.getElementById('build-mine-btn').title =
-    gameState.level < BUILDING_TYPES.mine.requiredLevel ?
-    `Requires level ${BUILDING_TYPES.mine.requiredLevel}` : '';
+document.getElementById('build-mine-btn').title = getRequirementTooltip('mine');
 const mineCost = adjustCostForTraits(BUILDING_TYPES.mine.buildCost);
 const mineCostText = formatCost(mineCost);
 const mineBtn = document.getElementById('build-mine-btn');
@@ -1412,9 +1416,7 @@ document.getElementById('build-gemMine-btn').disabled =
     !homeAtLeast(BUILDING_TYPES.gemMine.requiredHome || 'camp') ||
     gameState.settlement.gemMines.length + gameState.settlement.constructionQueue.filter(b=>b.type==='gemMine').length >= gemMineLimit ||
     !canAfford(adjustCostForTraits(BUILDING_TYPES.gemMine.buildCost));
-document.getElementById('build-gemMine-btn').title =
-    gameState.level < BUILDING_TYPES.gemMine.requiredLevel ?
-    `Requires level ${BUILDING_TYPES.gemMine.requiredLevel}` : '';
+document.getElementById('build-gemMine-btn').title = getRequirementTooltip('gemMine');
 const gemMineCost = adjustCostForTraits(BUILDING_TYPES.gemMine.buildCost);
 const gemMineCostText = formatCost(gemMineCost);
 const gemMineBtn = document.getElementById('build-gemMine-btn');
@@ -1443,9 +1445,7 @@ document.getElementById('build-workshop-btn').disabled =
     !homeAtLeast(BUILDING_TYPES.workshop.requiredHome || 'camp') ||
     gameState.settlement.workshops.length + gameState.settlement.constructionQueue.filter(b=>b.type==='workshop').length >= workshopLimit ||
     !canAfford(adjustCostForTraits(BUILDING_TYPES.workshop.buildCost));
-document.getElementById('build-workshop-btn').title =
-    gameState.level < BUILDING_TYPES.workshop.requiredLevel ?
-    `Requires level ${BUILDING_TYPES.workshop.requiredLevel}` : '';
+document.getElementById('build-workshop-btn').title = getRequirementTooltip('workshop');
 const workshopCost = adjustCostForTraits(BUILDING_TYPES.workshop.buildCost);
 const workshopCostText = formatCost(workshopCost);
 const workshopBtn = document.getElementById('build-workshop-btn');
