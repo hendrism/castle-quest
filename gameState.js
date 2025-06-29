@@ -5,6 +5,7 @@ export const gameState = {
     level: 1,
     xp: 0,
     xpToNext: 100,
+    morale: 100,
     rollPenalty: 0,
     season: 'spring',
     explorationsLeft: CONSTANTS.BASE_EXPLORATIONS,

@@ -5,6 +5,7 @@ export class UIManager {
       level: document.getElementById('level'),
       xp: document.getElementById('xp'),
       xpNext: document.getElementById('xp-next'),
+      morale: document.getElementById('morale'),
       season: document.getElementById('season'),
       nextMonthBtn: document.getElementById('next-month-btn'),
       explorationsLeft: document.getElementById('explorations-left'),
@@ -34,6 +35,10 @@ export class UIManager {
 
   updateSeason(text) {
     if (this.elements.season) this.elements.season.textContent = text;
+  }
+
+  updateMorale(val) {
+    if (this.elements.morale) this.elements.morale.textContent = val;
   }
 }
 

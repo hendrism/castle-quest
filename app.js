@@ -610,6 +610,13 @@ function advanceMonth() {
             eventType = result.type || nightEvent.type;
         }
 
+        // Adjust morale based on event type
+        if (eventType === 'success' || eventType === 'good') {
+            increaseMorale(5);
+        } else if (eventType === 'failure' || eventType === 'bad') {
+            decreaseMorale(5);
+        }
+
         // Monthly production from buildings
         const production = calculateMonthlyProduction();
         gameState.resources.food += production.food;
@@ -633,6 +640,7 @@ function advanceMonth() {
         if (foodShortage > 0) {
             gameState.rollPenalty = foodShortage;
             addEventLog(`⚠️ Food shortage! All rolls suffer -${foodShortage} this month.`, 'failure');
+            decreaseMorale(5);
         } else {
             gameState.rollPenalty = 0;
         }
@@ -696,6 +704,8 @@ function advanceMonth() {
         // Add event log
         addEventLog(eventMessage, eventType);
         addEventLog(`🌅 Month ${gameState.month} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
+
+        checkRulerStability();
 
         debouncedRefreshGameInterface();
         saveGame();
@@ -972,6 +982,7 @@ function createNewRuler() {
         yearsRemaining: 20,
         traits
     };
+    gameState.morale = 100;
     const traitText = traits.join(', ');
     addEventLog(`👑 ${name} begins their reign. Traits: ${traitText}`, 'success');
     if (traits.includes('wealthy')) {
@@ -1036,6 +1047,34 @@ if (gameState.eventLog.length > 50) {
     gameState.eventLog = gameState.eventLog.slice(0, 50);
 }
 
+}
+
+function increaseMorale(amount) {
+    gameState.morale = Math.min(100, gameState.morale + amount);
+    addEventLog(`😊 Morale +${amount} (now ${gameState.morale})`, 'success');
+}
+
+function decreaseMorale(amount) {
+    gameState.morale = Math.max(0, gameState.morale - amount);
+    addEventLog(`😟 Morale -${amount} (now ${gameState.morale})`, 'failure');
+}
+
+function checkRulerStability() {
+    if (gameState.morale < 25) {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        if (roll <= 2) {
+            addEventLog('👑 The ruler clings to power, unrest grows.', 'neutral');
+            decreaseMorale(5);
+        } else if (roll <= 4) {
+            addEventLog('⚔️ The ruler is overthrown!', 'failure');
+            endCurrentRuler();
+            gameState.morale = 50;
+        } else {
+            addEventLog('📜 The ruler abdicates to the heir.', 'neutral');
+            endCurrentRuler();
+            gameState.morale = 50;
+        }
+    }
 }
 
 function clearEventLog() {
@@ -1115,6 +1154,7 @@ function refreshGameInterface() {
     uiManager.updateMonth(gameState.month);
     uiManager.updateLevel(gameState.level);
     uiManager.updateXP(gameState.xp, gameState.xpToNext);
+    uiManager.updateMorale(gameState.morale);
     uiManager.updateSeason(`${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
     if (gameState.ruler) {
         const el = uiManager.elements;
