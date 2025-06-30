@@ -37,6 +37,10 @@ export const gameState = {
     },
     pastRulers: [],
     legacy: { builder: 0, explorer: 0, wealthy: 0, lucky: 0, charismatic: 0 },
+    culture: null,
+    cultureLegacy: { military: 0, trading: 0, scholarly: 0, artistic: 0 },
+    technologies: [],
+    research: { current: null, progress: 0 },
     population: 5,
     items: {
         luckyCharm: 0,
