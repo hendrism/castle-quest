@@ -44,10 +44,18 @@
             </div>
             <div id="resource-bar" class="resource-bar"></div>
             <nav class="quick-nav">
-                <a href="#exploration" aria-label="Jump to exploration">Explore</a>
-                <a href="#event-log" aria-label="Jump to event log">Events</a>
-                <a href="#settlement" aria-label="Jump to settlement">Settlement</a>
-                <a href="#month-section" aria-label="Jump to next month controls">Next Month</a>
+                <a href="#exploration" aria-label="Jump to exploration">
+                    <span class="icon">🗺️</span><span class="label">Explore</span>
+                </a>
+                <a href="#event-log" aria-label="Jump to event log">
+                    <span class="icon">📜</span><span class="label">Events</span>
+                </a>
+                <a href="#settlement" aria-label="Jump to settlement">
+                    <span class="icon">🏠</span><span class="label">Settlement</span>
+                </a>
+                <a href="#month-section" class="top-next-month" aria-label="Jump to next month controls">
+                    <span class="icon">⏭️</span><span class="label">Next Month</span>
+                </a>
             </nav>
             <!-- Save/Load temporarily disabled -->
         </header>
@@ -297,6 +305,7 @@
             <button id="close-modal-btn" class="modal-btn">Continue</button>
         </div>
     </div>
+    <button id="fab-next-month" class="fab" aria-label="Advance to next month">⏭️</button>
 </div>
 
 <!-- Load the main script as an ES module -->
