@@ -32,6 +32,11 @@ text-align: center;
 position: sticky;
 top: 0;
 z-index: 1000;
+transition: transform 0.3s ease;
+}
+
+header.hide-header {
+  transform: translateY(-100%);
 }
 
 header h1 {
@@ -40,10 +45,12 @@ margin-bottom: 0.5rem;
 }
 
 .stats {
-display: flex;
-justify-content: space-between;
-margin-bottom: 0.5rem;
-font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
 }
 
 .stat {
@@ -112,6 +119,16 @@ font-weight: bold;
   color: white;
   text-decoration: none;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.quick-nav .icon {
+  display: none;
+}
+.quick-nav .label {
+  display: inline;
 }
 
 .save-load {
@@ -295,6 +312,24 @@ cursor: not-allowed;
 .sleep-icon {
 margin-right: 0.5rem;
 font-size: 1.3rem;
+}
+
+.fab {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  z-index: 1000;
 }
 
 /* Settlement */
@@ -640,14 +675,42 @@ main {
 }
 
 
-.location-btn {
-    padding: 0.8rem;
-}
 
-.location-icon {
+  .stats {
+    justify-content: center;
+  }
+
+  .quick-nav .label {
+    display: none;
+  }
+  .quick-nav .icon {
+    display: inline;
+    font-size: 1.2rem;
+  }
+  .quick-nav .top-next-month {
+    display: none;
+  }
+
+  .locations {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .location-btn {
+    padding: 0.8rem;
+    min-width: 160px;
+    flex: 0 0 auto;
+  }
+
+  .location-icon {
     font-size: 1.5rem;
     margin-right: 0.8rem;
-}
+  }
+
+  .fab {
+    display: flex;
+  }
 
 }
 

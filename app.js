@@ -312,14 +312,36 @@ locationBtns.forEach((btn, index) => {
 
 // Next month button
 const nextMonthBtn = document.getElementById('next-month-btn');
-    if (nextMonthBtn) {
-        nextMonthBtn.addEventListener('click', (e) => {
-            console.log('Next month button clicked');
-            advanceMonth();
-        });
+if (nextMonthBtn) {
+    nextMonthBtn.addEventListener('click', () => {
+        console.log('Next month button clicked');
+        advanceMonth();
+    });
+} else {
+    console.error('Next month button not found!');
+}
+
+// Floating next month button
+const fabNext = document.getElementById('fab-next-month');
+if (fabNext) {
+    fabNext.addEventListener('click', () => {
+        console.log('FAB next month clicked');
+        advanceMonth();
+    });
+}
+
+// Auto hide header on scroll
+let lastScroll = window.scrollY;
+window.addEventListener('scroll', () => {
+    const header = document.querySelector('header');
+    if (!header) return;
+    if (window.scrollY > lastScroll && window.scrollY > 50) {
+        header.classList.add('hide-header');
     } else {
-        console.error('Next month button not found!');
+        header.classList.remove('hide-header');
     }
+    lastScroll = window.scrollY;
+});
 
     // Save and load buttons
     const saveBtn = document.getElementById('save-btn');
