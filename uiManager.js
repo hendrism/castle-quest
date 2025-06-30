@@ -31,6 +31,11 @@ export class UIManager {
   updateXP(xp, next) {
     if (this.elements.xp) this.elements.xp.textContent = xp;
     if (this.elements.xpNext) this.elements.xpNext.textContent = next;
+    const prog = document.getElementById('xp-progress');
+    if (prog) {
+      prog.max = next;
+      prog.value = xp;
+    }
   }
 
   updateSeason(text) {
