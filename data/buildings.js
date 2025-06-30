@@ -3,6 +3,7 @@ export const BUILDING_TYPES = {
     name: 'Farm',
     icon: '🌾',
     buildCost: { wood: 1, stone: 1 },
+    produces: 'food',
     requiredLevel: 1,
     requiredHome: 'camp',
     levels: {
@@ -16,6 +17,7 @@ export const BUILDING_TYPES = {
     name: 'Quarry',
     icon: '⛏️',
     buildCost: { wood: 1, stone: 2 },
+    produces: 'stone',
     requiredLevel: 1,
     requiredHome: 'camp',
     levels: {
@@ -29,6 +31,7 @@ export const BUILDING_TYPES = {
     name: 'Mine',
     icon: '⚒️',
     buildCost: { wood: 2, stone: 2 },
+    produces: 'metal',
     requiredLevel: 2,
     requiredHome: 'house',
     levels: {
@@ -42,6 +45,8 @@ export const BUILDING_TYPES = {
     name: 'Workshop',
     icon: '🔧',
     buildCost: { wood: 2, stone: 1 },
+    produces: 'tools',
+    consumes: 'wood',
     requiredLevel: 3,
     requiredHome: 'hall',
     requiredTech: 'metallurgy',
@@ -56,6 +61,7 @@ export const BUILDING_TYPES = {
     name: 'Forester Hut',
     icon: '🌳',
     buildCost: { wood: 2, stone: 1 },
+    produces: 'wood',
     requiredLevel: 2,
     requiredHome: 'camp',
     levels: {
@@ -69,6 +75,7 @@ export const BUILDING_TYPES = {
     name: 'Gem Mine',
     icon: '💎',
     buildCost: { wood: 2, stone: 2, metal: 1 },
+    produces: 'gems',
     requiredLevel: 4,
     requiredHome: 'fortress',
     requiredTech: 'metallurgy',
@@ -83,6 +90,7 @@ export const BUILDING_TYPES = {
     name: 'Sawmill',
     icon: '🪚',
     buildCost: { wood: 3, stone: 2 },
+    produces: 'wood',
     requiredLevel: 2,
     requiredHome: 'house',
     levels: {
@@ -96,6 +104,7 @@ export const BUILDING_TYPES = {
     name: 'Granary',
     icon: '🍞',
     buildCost: { wood: 2, stone: 2 },
+    produces: 'food',
     requiredLevel: 2,
     requiredHome: 'house',
     levels: {
@@ -109,6 +118,7 @@ export const BUILDING_TYPES = {
     name: 'Smelter',
     icon: '🔥',
     buildCost: { wood: 2, stone: 3, metal: 1 },
+    produces: 'metal',
     requiredLevel: 3,
     requiredHome: 'hall',
     requiredTech: 'metallurgy',
@@ -123,6 +133,7 @@ export const BUILDING_TYPES = {
     name: 'Barracks',
     icon: '🏹',
     buildCost: { wood: 3, stone: 3, metal: 2 },
+    produces: 'tools',
     requiredLevel: 4,
     requiredHome: 'fortress',
     requiredTech: 'fortifications',

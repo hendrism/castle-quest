@@ -262,6 +262,7 @@ try {
     updateResearchUI();
     debouncedRefreshGameInterface();
 setupEventListeners();
+    initScrollIndicators();
 console.log('Game initialized successfully!');
 
     // Test that buttons exist
@@ -1337,6 +1338,7 @@ updateSettlementUI();
     updateEventLogUI();
     updateMonthlyChallengeUI();
     checkMonthlyChallengeCompletion();
+    updateScrollIndicators();
 
 }
 
@@ -1715,7 +1717,7 @@ function createBuildingElement(type, building) {
 
     const levelText = upgrading
         ? `Upgrading to ${buildingType.levels[building.pendingLevel].name}...`
-        : `${currentLevel.name} (${currentLevel.production} production)`;
+        : `${currentLevel.name} (${getProductionDescription(type, currentLevel)})`;
 
     div.innerHTML = `
         <div class="building-info">
@@ -1811,6 +1813,20 @@ tools: '🔧',
 gems: '💎'
 };
 return icons[resource] || resource;
+}
+
+function getProductionDescription(type, levelData) {
+    const bt = BUILDING_TYPES[type];
+    const parts = [];
+    if (bt.consumes && levelData[`${bt.consumes}Cost`]) {
+        parts.push(`-${levelData[`${bt.consumes}Cost`]} ${bt.consumes}`);
+    }
+    if (bt.produces) {
+        parts.push(`+${levelData.production} ${bt.produces}`);
+    } else {
+        parts.push(`${levelData.production} production`);
+    }
+    return parts.join(' \u2192 ');
 }
 
 function formatCost(cost) {
@@ -1947,6 +1963,24 @@ function loadGame(slot = 'default') {
     // Temporarily disable loading while save/load is suspended
     console.log('Load feature is currently disabled.');
     return;
+}
+
+function initScrollIndicators() {
+    const containers = document.querySelectorAll('.scroll-container');
+    const update = () => updateScrollIndicators(containers);
+    update();
+    containers.forEach(el => el.addEventListener('scroll', update));
+    window.addEventListener('resize', update);
+}
+
+function updateScrollIndicators(containers = document.querySelectorAll('.scroll-container')) {
+    containers.forEach(el => {
+        if (el.scrollWidth - el.clientWidth - el.scrollLeft > 1) {
+            el.classList.add('scrollable');
+        } else {
+            el.classList.remove('scrollable');
+        }
+    });
 }
 
 // Initialize when page loads. Only run initGame once
