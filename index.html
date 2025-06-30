@@ -70,76 +70,92 @@
             </div>
 
             <div class="locations scroll-container">
-                <button class="location-btn" data-location="forest" aria-label="Explore Deep Forest">
+                <button class="location-btn location-forest" data-location="forest" aria-label="Explore Deep Forest">
                     <span class="location-icon">🌲</span>
                     <span class="location-info">
                         <span class="location-name">Deep Forest</span>
                         <span class="location-desc">Rich in wood and wildlife</span>
-                        <span class="location-rewards">🪵1-4 🌾0-2</span>
+                        <span class="location-rewards animated-rewards">🪵1-4 🌾0-2</span>
                         <span class="location-level">Unlocks at level 1</span>
+                        <span class="location-difficulty" id="forest-difficulty"></span>
+                        <span class="success-chance" id="forest-chance"></span>
                     </span>
                 </button>
-                <button class="location-btn" data-location="quarry" aria-label="Explore Stone Quarry">
+                <button class="location-btn location-quarry" data-location="quarry" aria-label="Explore Stone Quarry">
                     <span class="location-icon">⛰️</span>
                     <span class="location-info">
                         <span class="location-name">Stone Quarry</span>
                         <span class="location-desc">Source of stone and metal</span>
-                        <span class="location-rewards">🗿1-3 ⚔️0-1</span>
+                        <span class="location-rewards animated-rewards">🗿1-3 ⚔️0-1</span>
                         <span class="location-level">Unlocks at level 1</span>
+                        <span class="location-difficulty" id="quarry-difficulty"></span>
+                        <span class="success-chance" id="quarry-chance"></span>
                     </span>
                 </button>
-                <button class="location-btn" data-location="plains" aria-label="Explore Fertile Plains">
+                <button class="location-btn location-plains" data-location="plains" aria-label="Explore Fertile Plains">
                     <span class="location-icon">🌾</span>
                     <span class="location-info">
                         <span class="location-name">Fertile Plains</span>
                         <span class="location-desc">Food and farming supplies</span>
-                        <span class="location-rewards">🌾1-3 🪵0-1</span>
+                        <span class="location-rewards animated-rewards">🌾1-3 🪵0-1</span>
                         <span class="location-level">Unlocks at level 1</span>
+                        <span class="location-difficulty" id="plains-difficulty"></span>
+                        <span class="success-chance" id="plains-chance"></span>
                     </span>
                 </button>
-                <button class="location-btn" data-location="ruins" aria-label="Explore Ancient Ruins">
+                <button class="location-btn location-ruins" data-location="ruins" aria-label="Explore Ancient Ruins">
                     <span class="location-icon">🏛️</span>
                     <span class="location-info">
                         <span class="location-name">Ancient Ruins</span>
                         <span class="location-desc">Mysterious treasures await</span>
-                        <span class="location-rewards">🪵0-2 🗿0-2 ⚔️0-2 🌾0-1 💎0-1</span>
+                        <span class="location-rewards animated-rewards">🪵0-2 🗿0-2 ⚔️0-2 🌾0-1 💎0-1</span>
                         <span class="location-level">Unlocks at level 2</span>
+                        <span class="location-difficulty" id="ruins-difficulty"></span>
+                        <span class="success-chance" id="ruins-chance"></span>
                     </span>
                 </button>
-                <button class="location-btn" data-location="swamp" aria-label="Explore Misty Swamp">
+                <button class="location-btn location-swamp" data-location="swamp" aria-label="Explore Misty Swamp">
                     <span class="location-icon">🐸</span>
                     <span class="location-info">
                         <span class="location-name">Misty Swamp</span>
                         <span class="location-desc">Treacherous wetlands rich in herbs</span>
-                        <span class="location-rewards">🌾0-2 🪵0-1 🗿0-1</span>
+                        <span class="location-rewards animated-rewards">🌾0-2 🪵0-1 🗿0-1</span>
                         <span class="location-level">Unlocks at level 2</span>
+                        <span class="location-difficulty" id="swamp-difficulty"></span>
+                        <span class="success-chance" id="swamp-chance"></span>
                     </span>
                 </button>
-                <button class="location-btn" data-location="mountains" aria-label="Explore High Mountains">
+                <button class="location-btn location-mountains" data-location="mountains" aria-label="Explore High Mountains">
                     <span class="location-icon">🏔️</span>
                     <span class="location-info">
                         <span class="location-name">High Mountains</span>
                         <span class="location-desc">Metal and gems hidden in the peaks</span>
-                        <span class="location-rewards">🗿1-3 ⚔️1-2 💎0-1</span>
+                        <span class="location-rewards animated-rewards">🗿1-3 ⚔️1-2 💎0-1</span>
                         <span class="location-level">Unlocks at level 3</span>
+                        <span class="location-difficulty" id="mountains-difficulty"></span>
+                        <span class="success-chance" id="mountains-chance"></span>
                     </span>
                 </button>
-                <button class="location-btn" data-location="cavern" aria-label="Explore Crystal Cavern">
+                <button class="location-btn location-cavern" data-location="cavern" aria-label="Explore Crystal Cavern">
                     <span class="location-icon">🕳️</span>
                     <span class="location-info">
                         <span class="location-name">Crystal Cavern</span>
                         <span class="location-desc">Shimmering crystals line the walls</span>
-                        <span class="location-rewards">💎0-2 ⚔️0-1</span>
+                        <span class="location-rewards animated-rewards">💎0-2 ⚔️0-1</span>
                         <span class="location-level">Unlocks at level 4</span>
+                        <span class="location-difficulty" id="cavern-difficulty"></span>
+                        <span class="success-chance" id="cavern-chance"></span>
                     </span>
                 </button>
-                <button class="location-btn" data-location="lake" aria-label="Explore Serene Lake">
+                <button class="location-btn location-lake" data-location="lake" aria-label="Explore Serene Lake">
                     <span class="location-icon">🌊</span>
                     <span class="location-info">
                         <span class="location-name">Serene Lake</span>
                         <span class="location-desc">Plentiful fish and clean water</span>
-                        <span class="location-rewards">🌾1-3 🪵0-1</span>
+                        <span class="location-rewards animated-rewards">🌾1-3 🪵0-1</span>
                         <span class="location-level">Unlocks at level 2</span>
+                        <span class="location-difficulty" id="lake-difficulty"></span>
+                        <span class="success-chance" id="lake-chance"></span>
                     </span>
                 </button>
             </div>

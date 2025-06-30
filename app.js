@@ -1326,6 +1326,23 @@ document.querySelectorAll('.location-btn').forEach(btn => {
     } else {
         btn.removeAttribute('title');
     }
+
+    // Update difficulty stars
+    const diffEl = document.getElementById(`${btn.dataset.location}-difficulty`);
+    if (diffEl) {
+        const diff = loc.requiredLevel || 1;
+        const stars = '★★★★★'.slice(0, diff).padEnd(5, '☆');
+        diffEl.textContent = `Difficulty: ${stars}`;
+    }
+
+    // Update success chance hint
+    const chanceEl = document.getElementById(`${btn.dataset.location}-chance`);
+    if (chanceEl) {
+        const levelDiff = gameState.level - (loc.requiredLevel || 1);
+        let chance = 0.5 + levelDiff * 0.1;
+        chance = Math.min(0.95, Math.max(0.1, chance));
+        chanceEl.textContent = `Success: ${Math.round(chance * 100)}%`;
+    }
 });
 
 // Enable/disable next month button

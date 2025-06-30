@@ -287,27 +287,29 @@ font-weight: 500;
 }
 
 .locations {
-display: grid;
-gap: 0.8rem;
-margin-bottom: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 .location-btn {
-background: white;
-border: 2px solid #3498db;
-border-radius: 10px;
-padding: 1rem;
-text-align: left;
-cursor: pointer;
-transition: all 0.3s ease;
-display: flex;
-align-items: center;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .location-btn:hover {
-background: #3498db;
-color: white;
-transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .location-btn:disabled {
@@ -317,9 +319,19 @@ transform: none;
 }
 
 .location-icon {
-font-size: 2rem;
-margin-right: 1rem;
+  font-size: 2rem;
+  margin-right: 1rem;
 }
+
+/* Gradients for locations */
+.location-forest { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+.location-quarry { background: linear-gradient(135deg, #7f8c8d, #95a5a6); }
+.location-plains { background: linear-gradient(135deg, #f1c40f, #e67e22); }
+.location-ruins { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+.location-swamp { background: linear-gradient(135deg, #16a085, #27ae60); }
+.location-mountains { background: linear-gradient(135deg, #bdc3c7, #2c3e50); }
+.location-cavern { background: linear-gradient(135deg, #34495e, #2c3e50); }
+.location-lake { background: linear-gradient(135deg, #3498db, #2980b9); }
 
 .location-info {
 flex: 1;
@@ -343,6 +355,22 @@ opacity: 0.8;
   display: block;
   font-size: 0.8rem;
   opacity: 0.7;
+}
+.location-difficulty,
+.success-chance {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+.animated-rewards {
+  display: inline-block;
+  animation: reward-bounce 2s infinite;
+}
+
+@keyframes reward-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 .sleep-section {
@@ -772,7 +800,7 @@ main {
   }
   .location-btn {
     padding: 0.8rem;
-    min-width: 160px;
+    min-width: 180px;
     flex: 0 0 auto;
   }
 
