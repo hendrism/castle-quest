@@ -26,5 +26,33 @@ export const LOCATIONS = {
     description: 'Food and farming supplies',
     rewards: { food: [1, 3], wood: [0, 1] },
     requiredLevel: 1
+  },
+  swamp: {
+    name: 'Misty Swamp',
+    icon: '🐸',
+    description: 'Treacherous wetlands rich in herbs',
+    rewards: { food: [0, 2], wood: [0, 1], stone: [0, 1] },
+    requiredLevel: 2
+  },
+  mountains: {
+    name: 'High Mountains',
+    icon: '🏔️',
+    description: 'Metal and gems hidden in the peaks',
+    rewards: { stone: [1, 3], metal: [1, 2], gems: [0, 1] },
+    requiredLevel: 3
+  },
+  cavern: {
+    name: 'Crystal Cavern',
+    icon: '🕳️',
+    description: 'Shimmering crystals line the walls',
+    rewards: { gems: [0, 2], metal: [0, 1] },
+    requiredLevel: 4
+  },
+  lake: {
+    name: 'Serene Lake',
+    icon: '🌊',
+    description: 'Plentiful fish and clean water',
+    rewards: { food: [1, 3], wood: [0, 1] },
+    requiredLevel: 2
   }
 };
