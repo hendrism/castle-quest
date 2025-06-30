@@ -423,6 +423,7 @@ if (craftScrollBtn) {
 // Event log controls
 const clearLogBtn = document.getElementById('clear-log-btn');
 const textSizeSelect = document.getElementById('text-size-select');
+const logSearch = document.getElementById('log-search');
 
 if (clearLogBtn) {
     clearLogBtn.addEventListener('click', () => {
@@ -435,14 +436,31 @@ if (textSizeSelect) {
     textSizeSelect.addEventListener('change', changeTextSize);
 }
 
+if (logSearch) {
+    logSearch.addEventListener('input', updateEventLogUI);
+}
+
 // Modal controls
 const closeModalBtn = document.getElementById('close-modal-btn');
+const modalCloseX = document.querySelector('.modal-close-btn');
 if (closeModalBtn) {
     closeModalBtn.addEventListener('click', () => {
         console.log('Close modal clicked');
         closeModal();
     });
 }
+if (modalCloseX) {
+    modalCloseX.addEventListener('click', () => closeModal());
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('dice-modal');
+        if (modal && modal.classList.contains('show')) {
+            closeModal();
+        }
+    }
+});
 
 console.log('Event listeners setup complete');
 
@@ -1516,6 +1534,8 @@ function createConstructionElement(type) {
 
 function updateEventLogUI() {
 const logContent = document.getElementById('event-log-content');
+const search = document.getElementById('log-search');
+const term = search ? search.value.toLowerCase() : '';
 logContent.innerHTML = '';
 
 gameState.eventLog.forEach(entry => {
@@ -1525,7 +1545,9 @@ gameState.eventLog.forEach(entry => {
         <div><strong>Month ${entry.month}</strong> - ${entry.timestamp}</div>
         <div>${entry.message}</div>
     `;
-    logContent.appendChild(div);
+    if (!term || div.textContent.toLowerCase().includes(term)) {
+        logContent.appendChild(div);
+    }
 });
 
 }
@@ -1535,7 +1557,8 @@ function setupResourceBar() {
     if (!bar) return;
     bar.innerHTML = Object.keys(gameState.resources).map(r => {
         const icon = getResourceIcon(r);
-        return `<div class="resource"><span class="resource-icon">${icon}</span><span class="resource-amount" id="bar-${r}">${gameState.resources[r]}</span><span class="resource-production" id="bar-prod-${r}"></span></div>`;
+        const name = r.charAt(0).toUpperCase() + r.slice(1);
+        return `<div class="resource" title="${name}"><span class="resource-icon">${icon}</span><span class="resource-amount" id="bar-${r}">${gameState.resources[r]}</span><span class="resource-production" id="bar-prod-${r}"></span></div>`;
     }).join('');
 }
 

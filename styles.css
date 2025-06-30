@@ -52,6 +52,12 @@ flex-direction: column;
 align-items: center;
 }
 
+.xp-progress {
+  width: 100%;
+  height: 0.5rem;
+  margin-top: 0.25rem;
+}
+
 .stat-label {
 font-size: 0.8rem;
 opacity: 0.8;
@@ -97,6 +103,9 @@ font-weight: bold;
   justify-content: space-around;
   background: #34495e;
   padding: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 900;
 }
 
 .quick-nav a {
@@ -322,11 +331,21 @@ margin-bottom: 1.5rem;
 }
 
 .building-section {
-background: white;
-border-radius: 8px;
-padding: 1rem;
-margin-bottom: 1rem;
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.building-section > summary {
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+}
+
+.building-section[open] {
+  padding-bottom: 1rem;
 }
 
 .building-item {
@@ -566,6 +585,16 @@ font-size: 1rem;
 font-weight: bold;
 cursor: pointer;
 transition: all 0.3s ease;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
 }
 
 .modal-btn:hover {
