@@ -26,6 +26,10 @@ export const gameState = {
         workshops: [],
         foresters: [],
         gemMines: [],
+        sawmills: [],
+        granaries: [],
+        smelters: [],
+        barracks: [],
         pendingHome: null,
         constructionQueue: []
     },
