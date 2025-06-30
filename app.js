@@ -24,28 +24,28 @@ const homeTypes = {
         name: 'Camp',
         upgradeTo: 'house',
         cost: { wood: 5 },
-        buildingLimits: { farm: 2, forester: 2, quarry: 2, mine: 0, workshop: 0, gemMine: 0 },
+        buildingLimits: { farm: 2, forester: 2, quarry: 2, mine: 0, workshop: 0, gemMine: 0, sawmill: 0, granary: 0, smelter: 0, barracks: 0 },
         population: 5
     },
     house: {
         name: 'House',
         upgradeTo: 'hall',
         cost: { wood: 10, stone: 5 },
-        buildingLimits: { farm: 4, forester: 3, quarry: 3, mine: 1, workshop: 0, gemMine: 0 },
+        buildingLimits: { farm: 4, forester: 3, quarry: 3, mine: 1, workshop: 0, gemMine: 0, sawmill: 1, granary: 1, smelter: 0, barracks: 0 },
         population: 10
     },
     hall: {
         name: 'Hall',
         upgradeTo: 'fortress',
         cost: { stone: 20, metal: 5 },
-        buildingLimits: { farm: 5, forester: 4, quarry: 4, mine: 2, workshop: 1, gemMine: 1 },
+        buildingLimits: { farm: 5, forester: 4, quarry: 4, mine: 2, workshop: 1, gemMine: 1, sawmill: 2, granary: 2, smelter: 1, barracks: 0 },
         population: 15
     },
     fortress: {
         name: 'Fortress',
         upgradeTo: null,
         cost: null,
-        buildingLimits: { farm: 6, forester: 5, quarry: 5, mine: 3, workshop: 2, gemMine: 2 },
+        buildingLimits: { farm: 6, forester: 5, quarry: 5, mine: 3, workshop: 2, gemMine: 2, sawmill: 2, granary: 2, smelter: 1, barracks: 1 },
         population: 20
     }
 };
@@ -386,6 +386,10 @@ const buildMineBtn = document.getElementById('build-mine-btn');
 const buildWorkshopBtn = document.getElementById('build-workshop-btn');
 const buildForesterBtn = document.getElementById('build-forester-btn');
 const buildGemMineBtn = document.getElementById('build-gemMine-btn');
+const buildSawmillBtn = document.getElementById('build-sawmill-btn');
+const buildGranaryBtn = document.getElementById('build-granary-btn');
+const buildSmelterBtn = document.getElementById('build-smelter-btn');
+const buildBarracksBtn = document.getElementById('build-barracks-btn');
 const researchSelect = document.getElementById('research-select');
 const startResearchBtn = document.getElementById('start-research-btn');
 
@@ -421,6 +425,30 @@ if (buildGemMineBtn) {
     buildGemMineBtn.addEventListener('click', () => {
         console.log('Build gem mine clicked');
         buildBuilding('gemMine');
+    });
+}
+
+if (buildSawmillBtn) {
+    buildSawmillBtn.addEventListener('click', () => {
+        buildBuilding('sawmill');
+    });
+}
+
+if (buildGranaryBtn) {
+    buildGranaryBtn.addEventListener('click', () => {
+        buildBuilding('granary');
+    });
+}
+
+if (buildSmelterBtn) {
+    buildSmelterBtn.addEventListener('click', () => {
+        buildBuilding('smelter');
+    });
+}
+
+if (buildBarracksBtn) {
+    buildBarracksBtn.addEventListener('click', () => {
+        buildBuilding('barracks');
     });
 }
 
@@ -885,7 +913,7 @@ saveGame();
 }
 
 function finalizeBuildingUpgrades() {
-    const types = ['farm', 'forester', 'quarry', 'mine', 'gemMine', 'workshop'];
+    const types = ['farm', 'forester', 'quarry', 'mine', 'gemMine', 'workshop', 'sawmill', 'granary', 'smelter', 'barracks'];
     types.forEach(t => {
         const key = getBuildingKey(t);
         gameState.settlement[key].forEach(b => {
@@ -948,7 +976,16 @@ gameState.resources[resource] -= cost[resource];
 }
 
 function getBuildingKey(type) {
-    return type === 'quarry' ? 'quarries' : type + 's';
+    switch (type) {
+        case 'quarry':
+            return 'quarries';
+        case 'granary':
+            return 'granaries';
+        case 'barracks':
+            return 'barracks';
+        default:
+            return type + 's';
+    }
 }
 
 function getBuildingLimit(type) {
@@ -990,9 +1027,21 @@ function calculateMonthlyProduction() {
         .filter(forester => forester.level)
         .reduce((sum, forester) => sum + getProductionValue('forester', forester), 0);
 
+    wood += gameState.settlement.sawmills
+        .filter(sm => sm.level)
+        .reduce((sum, sm) => sum + getProductionValue('sawmill', sm), 0);
+
+    food += gameState.settlement.granaries
+        .filter(g => g.level)
+        .reduce((sum, g) => sum + getProductionValue('granary', g), 0);
+
     gems += gameState.settlement.gemMines
         .filter(gm => gm.level)
         .reduce((sum, gm) => sum + getProductionValue('gemMine', gm), 0);
+
+    metal += gameState.settlement.smelters
+        .filter(sm => sm.level)
+        .reduce((sum, sm) => sum + getProductionValue('smelter', sm), 0);
 
     let woodConsumed = 0;
     const toolProduction = gameState.settlement.workshops
@@ -1007,6 +1056,11 @@ function calculateMonthlyProduction() {
             return sum;
         }, 0);
     tools += toolProduction;
+
+    const barracksProduction = gameState.settlement.barracks
+        .filter(b => b.level)
+        .reduce((sum, b) => sum + getProductionValue('barracks', b), 0);
+    tools += barracksProduction;
 
     const multiplier = getLevelMultiplier();
     food = Math.floor(food * multiplier);
@@ -1534,6 +1588,118 @@ gameState.settlement.workshops.forEach(ws => {
 gameState.settlement.constructionQueue.filter(b=>b.type==='workshop').forEach(b=>{
     const el = createConstructionElement('workshop');
     workshopsContainer.appendChild(el);
+});
+
+// Sawmills
+const sawmillLimit = getBuildingLimit('sawmill');
+document.getElementById('sawmill-count').textContent = gameState.settlement.sawmills.length;
+document.getElementById('sawmill-max').textContent = sawmillLimit;
+document.getElementById('build-sawmill-btn').disabled =
+    gameState.level < BUILDING_TYPES.sawmill.requiredLevel ||
+    !homeAtLeast(BUILDING_TYPES.sawmill.requiredHome || 'camp') ||
+    gameState.settlement.sawmills.length + gameState.settlement.constructionQueue.filter(b=>b.type==='sawmill').length >= sawmillLimit ||
+    !canAfford(adjustCostForTraits(BUILDING_TYPES.sawmill.buildCost));
+document.getElementById('build-sawmill-btn').title = getRequirementTooltip('sawmill');
+const sawmillCost = adjustCostForTraits(BUILDING_TYPES.sawmill.buildCost);
+const sawmillBtn = document.getElementById('build-sawmill-btn');
+const sawmillInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'sawmill').length;
+sawmillBtn.querySelector('.build-text').textContent =
+    sawmillInProgress > 0 ? `Build Sawmill (${sawmillInProgress} in progress)` : 'Build Sawmill';
+sawmillBtn.querySelector('.build-cost').textContent = formatCost(sawmillCost);
+
+const sawmillsContainer = document.getElementById('sawmills-container');
+sawmillsContainer.innerHTML = '';
+gameState.settlement.sawmills.forEach(sm => {
+    const el = createBuildingElement('sawmill', sm);
+    sawmillsContainer.appendChild(el);
+});
+gameState.settlement.constructionQueue.filter(b=>b.type==='sawmill').forEach(b=>{
+    const el = createConstructionElement('sawmill');
+    sawmillsContainer.appendChild(el);
+});
+
+// Granaries
+const granaryLimit = getBuildingLimit('granary');
+document.getElementById('granary-count').textContent = gameState.settlement.granaries.length;
+document.getElementById('granary-max').textContent = granaryLimit;
+document.getElementById('build-granary-btn').disabled =
+    gameState.level < BUILDING_TYPES.granary.requiredLevel ||
+    !homeAtLeast(BUILDING_TYPES.granary.requiredHome || 'camp') ||
+    gameState.settlement.granaries.length + gameState.settlement.constructionQueue.filter(b=>b.type==='granary').length >= granaryLimit ||
+    !canAfford(adjustCostForTraits(BUILDING_TYPES.granary.buildCost));
+document.getElementById('build-granary-btn').title = getRequirementTooltip('granary');
+const granaryCost = adjustCostForTraits(BUILDING_TYPES.granary.buildCost);
+const granaryBtn = document.getElementById('build-granary-btn');
+const granaryInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'granary').length;
+granaryBtn.querySelector('.build-text').textContent =
+    granaryInProgress > 0 ? `Build Granary (${granaryInProgress} in progress)` : 'Build Granary';
+granaryBtn.querySelector('.build-cost').textContent = formatCost(granaryCost);
+
+const granariesContainer = document.getElementById('granaries-container');
+granariesContainer.innerHTML = '';
+gameState.settlement.granaries.forEach(g => {
+    const el = createBuildingElement('granary', g);
+    granariesContainer.appendChild(el);
+});
+gameState.settlement.constructionQueue.filter(b=>b.type==='granary').forEach(b=>{
+    const el = createConstructionElement('granary');
+    granariesContainer.appendChild(el);
+});
+
+// Smelters
+const smelterLimit = getBuildingLimit('smelter');
+document.getElementById('smelter-count').textContent = gameState.settlement.smelters.length;
+document.getElementById('smelter-max').textContent = smelterLimit;
+document.getElementById('build-smelter-btn').disabled =
+    gameState.level < BUILDING_TYPES.smelter.requiredLevel ||
+    !homeAtLeast(BUILDING_TYPES.smelter.requiredHome || 'camp') ||
+    gameState.settlement.smelters.length + gameState.settlement.constructionQueue.filter(b=>b.type==='smelter').length >= smelterLimit ||
+    !canAfford(adjustCostForTraits(BUILDING_TYPES.smelter.buildCost));
+document.getElementById('build-smelter-btn').title = getRequirementTooltip('smelter');
+const smelterCost = adjustCostForTraits(BUILDING_TYPES.smelter.buildCost);
+const smelterBtn = document.getElementById('build-smelter-btn');
+const smelterInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'smelter').length;
+smelterBtn.querySelector('.build-text').textContent =
+    smelterInProgress > 0 ? `Build Smelter (${smelterInProgress} in progress)` : 'Build Smelter';
+smelterBtn.querySelector('.build-cost').textContent = formatCost(smelterCost);
+
+const smeltersContainer = document.getElementById('smelters-container');
+smeltersContainer.innerHTML = '';
+gameState.settlement.smelters.forEach(s => {
+    const el = createBuildingElement('smelter', s);
+    smeltersContainer.appendChild(el);
+});
+gameState.settlement.constructionQueue.filter(b=>b.type==='smelter').forEach(b=>{
+    const el = createConstructionElement('smelter');
+    smeltersContainer.appendChild(el);
+});
+
+// Barracks
+const barracksLimit = getBuildingLimit('barracks');
+document.getElementById('barracks-count').textContent = gameState.settlement.barracks.length;
+document.getElementById('barracks-max').textContent = barracksLimit;
+document.getElementById('build-barracks-btn').disabled =
+    gameState.level < BUILDING_TYPES.barracks.requiredLevel ||
+    !homeAtLeast(BUILDING_TYPES.barracks.requiredHome || 'camp') ||
+    gameState.settlement.barracks.length + gameState.settlement.constructionQueue.filter(b=>b.type==='barracks').length >= barracksLimit ||
+    !canAfford(adjustCostForTraits(BUILDING_TYPES.barracks.buildCost));
+document.getElementById('build-barracks-btn').title = getRequirementTooltip('barracks');
+const barracksCost = adjustCostForTraits(BUILDING_TYPES.barracks.buildCost);
+const barracksBtn = document.getElementById('build-barracks-btn');
+const barracksInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'barracks').length;
+barracksBtn.querySelector('.build-text').textContent =
+    barracksInProgress > 0 ? `Build Barracks (${barracksInProgress} in progress)` : 'Build Barracks';
+barracksBtn.querySelector('.build-cost').textContent = formatCost(barracksCost);
+
+const barracksContainer = document.getElementById('barracks-container');
+barracksContainer.innerHTML = '';
+gameState.settlement.barracks.forEach(b => {
+    const el = createBuildingElement('barracks', b);
+    barracksContainer.appendChild(el);
+});
+gameState.settlement.constructionQueue.filter(b=>b.type==='barracks').forEach(b=>{
+    const el = createConstructionElement('barracks');
+    barracksContainer.appendChild(el);
 });
 updateResearchUI();
 

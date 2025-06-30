@@ -78,5 +78,59 @@ export const BUILDING_TYPES = {
       advanced: { name: 'Advanced', upgradeTo: 'master', cost: { stone: 6, metal: 4 }, production: 3 },
       master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
     }
+  },
+  sawmill: {
+    name: 'Sawmill',
+    icon: '🪚',
+    buildCost: { wood: 3, stone: 2 },
+    requiredLevel: 2,
+    requiredHome: 'house',
+    levels: {
+      basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
+      improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
+      advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
+      master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+    }
+  },
+  granary: {
+    name: 'Granary',
+    icon: '🍞',
+    buildCost: { wood: 2, stone: 2 },
+    requiredLevel: 2,
+    requiredHome: 'house',
+    levels: {
+      basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
+      improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
+      advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
+      master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+    }
+  },
+  smelter: {
+    name: 'Smelter',
+    icon: '🔥',
+    buildCost: { wood: 2, stone: 3, metal: 1 },
+    requiredLevel: 3,
+    requiredHome: 'hall',
+    requiredTech: 'metallurgy',
+    levels: {
+      basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1 },
+      improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 3 }, production: 2 },
+      advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 4 }, production: 3 },
+      master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+    }
+  },
+  barracks: {
+    name: 'Barracks',
+    icon: '🏹',
+    buildCost: { wood: 3, stone: 3, metal: 2 },
+    requiredLevel: 4,
+    requiredHome: 'fortress',
+    requiredTech: 'fortifications',
+    levels: {
+      basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1 },
+      improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 3 }, production: 2 },
+      advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 4 }, production: 3 },
+      master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+    }
   }
 };
