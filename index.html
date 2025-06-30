@@ -15,34 +15,31 @@
     <div id="app">
         <header>
             <h1>🛡️ Dice & Castle</h1>
-            <div class="stats">
-                <div class="stat">
-                    <span class="stat-label">Month:</span>
+            <div class="header-cards">
+                <div class="stat-card month-card">
+                    <span class="stat-label">Month</span>
                     <span id="month">1</span>
+                    <span id="season" class="season">🌸 Spring</span>
                 </div>
-                <div class="stat">
-                    <span class="stat-label">Level:</span>
-                    <span id="level">1</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">XP:</span>
-                    <span id="xp">0</span>/<span id="xp-next">100</span>
+                <div class="stat-card xp-card">
+                    <div class="level-line">
+                        <span class="stat-label">Level</span>
+                        <span id="level">1</span>
+                    </div>
                     <progress id="xp-progress" value="0" max="100" class="xp-progress" aria-label="Experience progress"></progress>
+                    <div class="xp-amount"><span id="xp">0</span>/<span id="xp-next">100</span></div>
                 </div>
-                <div class="stat">
-                    <span class="stat-label">Morale:</span>
+                <div class="stat-card morale-card">
+                    <span class="stat-label">Morale</span>
                     <span id="morale">100</span>
                 </div>
-                <div class="stat" id="ruler-stat">
-                    <span class="stat-label">Ruler:</span>
+                <div class="stat-card ruler-card" id="ruler-stat">
+                    <span class="stat-label">Ruler</span>
                     <span id="ruler-name">-</span> (<span id="ruler-age">0</span>)
                     <div id="ruler-traits" class="ruler-traits"></div>
                 </div>
             </div>
-            <div class="season">
-                <span id="season">🌸 Spring</span>
-            </div>
-            <div id="resource-bar" class="resource-bar"></div>
+            <div id="resource-bar" class="resource-bar resource-cards"></div>
             <nav class="quick-nav">
                 <a href="#exploration" aria-label="Jump to exploration">
                     <span class="icon">🗺️</span><span class="label">Explore</span>
