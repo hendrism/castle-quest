@@ -112,17 +112,63 @@ font-weight: bold;
 .resource-bar .resource {
   background: none;
   box-shadow: none;
-  padding: 0;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.resource-bar .resource-circle {
+  --progress: 0;
+  --color: #2ecc71;
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: conic-gradient(var(--color) calc(var(--progress) * 1%), #ddd 0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.resource-bar .resource-circle::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  background: #ecf0f1;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.resource-bar .resource-circle span {
+  position: relative;
+  z-index: 1;
 }
 
 .resource-bar .resource-icon {
-  margin-right: 0.2rem;
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1;
+}
+
+.resource-bar .resource-amount {
+  font-size: 0.75rem;
+  font-weight: bold;
+  line-height: 1;
 }
 
 .resource-bar .resource-production {
   font-size: 0.8rem;
-  margin-left: 0.2rem;
   color: #27ae60;
+}
+
+.resource-production.negative {
+  color: #c0392b;
 }
 
 .quick-nav {
