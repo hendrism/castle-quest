@@ -43,7 +43,13 @@ export class UIManager {
   }
 
   updateMorale(val) {
-    if (this.elements.morale) this.elements.morale.textContent = val;
+    if (this.elements.morale) {
+      let face = '😀';
+      if (val < 25) face = '😠';
+      else if (val < 50) face = '😟';
+      else if (val < 75) face = '🙂';
+      this.elements.morale.textContent = `${face} ${val}`;
+    }
   }
 }
 

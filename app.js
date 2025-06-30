@@ -1433,6 +1433,8 @@ document.getElementById('craft-lucky-charm').disabled = !canAfford({ wood: 3, st
 document.getElementById('magic-scroll-count').textContent = gameState.items.magicScroll;
 document.getElementById('craft-magic-scroll').disabled = !canAfford({ wood: 2, gems: 1 });
 
+    updateSettlementDashboard();
+
 }
 
 function updateBuildingsUI() {
@@ -1761,14 +1763,66 @@ function createBuildingElement(type, building) {
 function createConstructionElement(type) {
     const buildingType = BUILDING_TYPES[type];
     const div = document.createElement('div');
-    div.className = 'building-item under-construction';
+    div.className = 'building-item under-construction construction-item';
     div.innerHTML = `
         <div class="building-info">
             <div class="building-name">${buildingType.icon} ${buildingType.name}</div>
             <div class="building-level">Building...</div>
+            <div class="progress-bar"><div class="progress"></div></div>
         </div>
     `;
     return div;
+}
+
+function updateSettlementDashboard() {
+    const overview = document.getElementById('building-overview');
+    if (overview) {
+        let html = '';
+        Object.keys(BUILDING_TYPES).forEach(t => {
+            const key = getBuildingKey(t);
+            const count = gameState.settlement[key].length;
+            if (count > 0) {
+                const icon = BUILDING_TYPES[t].icon;
+                html += `<span title="${BUILDING_TYPES[t].name}">${icon.repeat(count)}</span>`;
+            }
+        });
+        overview.innerHTML = html || '<em>No buildings yet</em>';
+    }
+
+    const happiness = document.getElementById('happiness-meter');
+    if (happiness) {
+        const val = gameState.morale;
+        let face = '😀';
+        if (val < 25) face = '😠';
+        else if (val < 50) face = '😟';
+        else if (val < 75) face = '🙂';
+        happiness.textContent = `${face} ${val}`;
+    }
+
+    const construction = document.getElementById('construction-progress');
+    if (construction) {
+        construction.innerHTML = '';
+        gameState.settlement.constructionQueue.forEach(b => {
+            const item = document.createElement('div');
+            item.className = 'construction-item';
+            const bt = BUILDING_TYPES[b.type];
+            item.innerHTML = `<span class="construction-label">${bt.icon} ${bt.name}</span><div class="progress-bar"><div class="progress"></div></div>`;
+            construction.appendChild(item);
+        });
+        if (gameState.settlement.constructionQueue.length === 0) {
+            construction.innerHTML = '<em>No construction</em>';
+        }
+    }
+
+    const stats = document.getElementById('settlement-stats');
+    if (stats) {
+        const totalBuildings = Object.keys(BUILDING_TYPES).reduce((sum, t) => sum + gameState.settlement[getBuildingKey(t)].length, 0);
+        stats.innerHTML = `
+            <div class="stat-item">Population: ${gameState.population}</div>
+            <div class="stat-item">Buildings: ${totalBuildings}</div>
+            <div class="stat-item">Morale: ${gameState.morale}</div>
+        `;
+    }
 }
 
 function updateEventLogUI() {

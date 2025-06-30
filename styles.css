@@ -836,3 +836,60 @@ padding-bottom: env(safe-area-inset-bottom);
 }
 /* Research */
 .research { background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 1rem; }
+
+/* Settlement dashboard */
+.settlement-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-section {
+  background: #f0f4f8;
+  border-radius: 6px;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+#building-overview span {
+  margin: 0 0.15rem;
+  font-size: 1.2rem;
+}
+
+#happiness-meter {
+  font-size: 1.5rem;
+}
+
+.construction-item {
+  margin-bottom: 0.4rem;
+}
+
+.progress-bar {
+  position: relative;
+  height: 6px;
+  background: #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+
+.progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #3498db, #8e44ad);
+  animation: progress-indef 1s linear infinite;
+}
+
+.stat-item {
+  font-size: 0.9rem;
+  margin-bottom: 0.2rem;
+}
+
+@keyframes progress-indef {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
