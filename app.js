@@ -3,7 +3,7 @@ import { gameState } from './gameState.js';
 import { LOCATIONS } from './data/locations.js';
 import { BUILDING_TYPES } from './data/buildings.js';
 import { TECHNOLOGIES } from './data/technologies.js';
-import { CONSTANTS } from './constants.js';
+import { CONSTANTS, RESOURCE_COLORS } from './constants.js';
 import { uiManager } from './uiManager.js';
 import { startResearch, progressResearch, getAvailableTechnologies, getResearchProgress } from './research.js';
 
@@ -1852,7 +1852,7 @@ function setupResourceBar() {
         const icon = getResourceIcon(r);
         const name = r.charAt(0).toUpperCase() + r.slice(1);
         const amount = gameState.resources[r];
-        const color = getResourceColor(amount);
+        const color = getResourceColor(r);
         return `
             <div class="resource" title="${name}">
                 <div class="resource-circle" id="circle-${r}" style="--progress:${Math.min(100, amount)};--color:${color}">
@@ -1878,7 +1878,7 @@ function updateResourceBar() {
         const circle = document.getElementById(`circle-${r}`);
         if (circle) {
             circle.style.setProperty('--progress', Math.min(100, amount));
-            circle.style.setProperty('--color', getResourceColor(amount));
+            circle.style.setProperty('--color', getResourceColor(r));
         }
         const prodEl = document.getElementById(`bar-prod-${r}`);
         if (prodEl) {
@@ -1915,10 +1915,8 @@ gems: '💎'
 return icons[resource] || resource;
 }
 
-function getResourceColor(amount) {
-    if (amount >= 20) return '#2ecc71';
-    if (amount >= 10) return '#f1c40f';
-    return '#e74c3c';
+function getResourceColor(resource) {
+    return RESOURCE_COLORS[resource] || '#3498db';
 }
 
 function animateCounter(el, from, to) {

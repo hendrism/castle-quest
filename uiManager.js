@@ -16,15 +16,24 @@ export class UIManager {
     };
   }
 
+  pulse(el) {
+    if (!el) return;
+    const target = el.closest('.stat-card') || el;
+    target.classList.add('pulse');
+    setTimeout(() => target.classList.remove('pulse'), 500);
+  }
+
   updateMonth(month) {
     if (this.elements.month) {
       this.elements.month.textContent = month;
+      this.pulse(this.elements.month);
     }
   }
 
   updateLevel(level) {
     if (this.elements.level) {
       this.elements.level.textContent = level;
+      this.pulse(this.elements.level);
     }
   }
 
@@ -35,6 +44,9 @@ export class UIManager {
     if (prog) {
       prog.max = next;
       prog.value = xp;
+      prog.classList.add('shimmer');
+      this.pulse(prog);
+      setTimeout(() => prog.classList.remove('shimmer'), 1000);
     }
   }
 
@@ -49,6 +61,7 @@ export class UIManager {
       else if (val < 50) face = '😟';
       else if (val < 75) face = '🙂';
       this.elements.morale.textContent = `${face} ${val}`;
+      this.pulse(this.elements.morale);
     }
   }
 }
