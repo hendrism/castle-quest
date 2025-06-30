@@ -2,8 +2,10 @@
 import { gameState } from './gameState.js';
 import { LOCATIONS } from './data/locations.js';
 import { BUILDING_TYPES } from './data/buildings.js';
+import { TECHNOLOGIES } from './data/technologies.js';
 import { CONSTANTS } from './constants.js';
 import { uiManager } from './uiManager.js';
+import { startResearch, progressResearch, getAvailableTechnologies, getResearchProgress } from './research.js';
 
 // Game data
 
@@ -257,6 +259,7 @@ try {
     }
     setupResourceBar();
     generateMonthlyChallenge();
+    updateResearchUI();
     debouncedRefreshGameInterface();
 setupEventListeners();
 console.log('Game initialized successfully!');
@@ -361,6 +364,8 @@ const buildMineBtn = document.getElementById('build-mine-btn');
 const buildWorkshopBtn = document.getElementById('build-workshop-btn');
 const buildForesterBtn = document.getElementById('build-forester-btn');
 const buildGemMineBtn = document.getElementById('build-gemMine-btn');
+const researchSelect = document.getElementById('research-select');
+const startResearchBtn = document.getElementById('start-research-btn');
 
 if (buildFarmBtn) {
     buildFarmBtn.addEventListener('click', () => {
@@ -401,6 +406,15 @@ if (buildWorkshopBtn) {
     buildWorkshopBtn.addEventListener('click', () => {
         console.log('Build workshop clicked');
         buildBuilding('workshop');
+    });
+}
+
+if (startResearchBtn) {
+    startResearchBtn.addEventListener('click', () => {
+        const key = researchSelect.value;
+        if (startResearch(key)) {
+            updateResearchUI();
+        }
     });
 }
 
@@ -680,6 +694,10 @@ function advanceMonth() {
         gameState.month++;
         gameState.explorationsLeft = getExplorationMax();
         generateMonthlyChallenge();
+        const completedTech = progressResearch(10);
+        if (completedTech) {
+            addEventLog(`📚 Research completed: ${TECHNOLOGIES[completedTech].name}!`, 'success');
+        }
 
         // Age ruler
         if (gameState.ruler) {
@@ -795,6 +813,7 @@ function buildBuilding(type) {
 
     if (gameState.level < (buildingType.requiredLevel || 1)) return;
     if (buildingType.requiredHome && !homeAtLeast(buildingType.requiredHome)) return;
+    if (buildingType.requiredTech && !gameState.technologies.includes(buildingType.requiredTech)) return;
     if (currentCount >= maxBuildings) return;
     const buildCost = adjustCostForTraits(buildingType.buildCost);
     if (!canAfford(buildCost)) return;
@@ -994,6 +1013,11 @@ function createNewRuler() {
         const idx = Math.floor(Math.random() * pool.length);
         traits.push(pool.splice(idx, 1)[0]);
     }
+    if (!gameState.culture) {
+        const cultures = ['military', 'trading', 'scholarly', 'artistic'];
+        gameState.culture = cultures[Math.floor(Math.random() * cultures.length)];
+        addEventLog(`🏛️ Your people adopt a ${gameState.culture} culture.`, 'success');
+    }
     gameState.ruler = {
         name,
         age: 20,
@@ -1019,6 +1043,10 @@ function endCurrentRuler() {
         if (!gameState.legacy[t]) gameState.legacy[t] = 0;
         gameState.legacy[t]++;
     });
+    if (gameState.culture) {
+        if (!gameState.cultureLegacy[gameState.culture]) gameState.cultureLegacy[gameState.culture] = 0;
+        gameState.cultureLegacy[gameState.culture]++;
+    }
     addEventLog(`⚰️ ${gameState.ruler.name}'s reign has ended.`, 'neutral');
     createNewRuler();
 }
@@ -1047,6 +1075,9 @@ function getRequirementTooltip(type) {
     }
     if (!homeAtLeast(bt.requiredHome || 'camp')) {
         requirements.push(homeTypes[bt.requiredHome || 'camp'].name);
+    }
+    if (bt.requiredTech && !gameState.technologies.includes(bt.requiredTech)) {
+        requirements.push(`tech: ${TECHNOLOGIES[bt.requiredTech].name}`);
     }
     return requirements.length ? `Requires ${requirements.join(' and ')}` : '';
 }
@@ -1482,6 +1513,7 @@ gameState.settlement.constructionQueue.filter(b=>b.type==='workshop').forEach(b=
     const el = createConstructionElement('workshop');
     workshopsContainer.appendChild(el);
 });
+updateResearchUI();
 
 }
 
@@ -1597,6 +1629,25 @@ function formatCost(cost) {
     return Object.keys(cost)
         .map(r => `${cost[r]} ${getResourceIcon(r)}`)
         .join(' ');
+}
+
+function updateResearchUI() {
+    const select = document.getElementById('research-select');
+    const current = document.getElementById('current-research');
+    const progressEl = document.getElementById('research-progress');
+    if (!select || !current || !progressEl) return;
+
+    const available = getAvailableTechnologies();
+    select.innerHTML = available.map(k => `<option value="${k}">${TECHNOLOGIES[k].name}</option>`).join('');
+
+    const prog = getResearchProgress();
+    if (prog) {
+        current.textContent = TECHNOLOGIES[prog.key].name;
+        progressEl.textContent = `${prog.progress}/${prog.cost}`;
+    } else {
+        current.textContent = 'None';
+        progressEl.textContent = '';
+    }
 }
 
 function getTraitCount(trait) {

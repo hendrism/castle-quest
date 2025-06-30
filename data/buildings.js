@@ -44,6 +44,7 @@ export const BUILDING_TYPES = {
     buildCost: { wood: 2, stone: 1 },
     requiredLevel: 3,
     requiredHome: 'hall',
+    requiredTech: 'metallurgy',
     levels: {
       basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1, woodCost: 1 },
       improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 2 }, production: 2, woodCost: 1 },
@@ -70,6 +71,7 @@ export const BUILDING_TYPES = {
     buildCost: { wood: 2, stone: 2, metal: 1 },
     requiredLevel: 4,
     requiredHome: 'fortress',
+    requiredTech: 'metallurgy',
     levels: {
       basic: { name: 'Basic', upgradeTo: 'improved', cost: { metal: 1 }, production: 1 },
       improved: { name: 'Improved', upgradeTo: 'advanced', cost: { stone: 3, metal: 2 }, production: 2 },
