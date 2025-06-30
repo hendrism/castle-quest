@@ -1780,15 +1780,35 @@ function setupResourceBar() {
     bar.innerHTML = Object.keys(gameState.resources).map(r => {
         const icon = getResourceIcon(r);
         const name = r.charAt(0).toUpperCase() + r.slice(1);
-        return `<div class="resource" title="${name}"><span class="resource-icon">${icon}</span><span class="resource-amount" id="bar-${r}">${gameState.resources[r]}</span><span class="resource-production" id="bar-prod-${r}"></span></div>`;
+        const amount = gameState.resources[r];
+        const color = getResourceColor(amount);
+        return `
+            <div class="resource" title="${name}">
+                <div class="resource-circle" id="circle-${r}" style="--progress:${Math.min(100, amount)};--color:${color}">
+                    <span class="resource-icon">${icon}</span>
+                    <span class="resource-amount" id="bar-${r}">${amount}</span>
+                </div>
+                <div class="resource-production" id="bar-prod-${r}"></div>
+            </div>`;
     }).join('');
 }
 
 function updateResourceBar() {
     const prod = calculateMonthlyProduction();
     Object.keys(gameState.resources).forEach(r => {
+        const amount = gameState.resources[r];
         const el = document.getElementById(`bar-${r}`);
-        if (el) el.textContent = gameState.resources[r];
+        if (el) {
+            const old = parseInt(el.textContent) || 0;
+            if (old !== amount) {
+                animateCounter(el, old, amount);
+            }
+        }
+        const circle = document.getElementById(`circle-${r}`);
+        if (circle) {
+            circle.style.setProperty('--progress', Math.min(100, amount));
+            circle.style.setProperty('--color', getResourceColor(amount));
+        }
         const prodEl = document.getElementById(`bar-prod-${r}`);
         if (prodEl) {
             let val = prod[r] || 0;
@@ -1798,7 +1818,16 @@ function updateResourceBar() {
             if (r === 'food') {
                 val -= prod.foodDemand || 0;
             }
-            prodEl.textContent = val > 0 ? `(+${val})` : val < 0 ? `(${val})` : '';
+            if (val > 0) {
+                prodEl.textContent = `↗️ ${val}`;
+                prodEl.classList.remove('negative');
+            } else if (val < 0) {
+                prodEl.textContent = `↘️ ${Math.abs(val)}`;
+                prodEl.classList.add('negative');
+            } else {
+                prodEl.textContent = '';
+                prodEl.classList.remove('negative');
+            }
         }
     });
 }
@@ -1813,6 +1842,24 @@ tools: '🔧',
 gems: '💎'
 };
 return icons[resource] || resource;
+}
+
+function getResourceColor(amount) {
+    if (amount >= 20) return '#2ecc71';
+    if (amount >= 10) return '#f1c40f';
+    return '#e74c3c';
+}
+
+function animateCounter(el, from, to) {
+    const duration = 500;
+    const start = performance.now();
+    function step(now) {
+        const progress = Math.min(1, (now - start) / duration);
+        const value = Math.floor(from + (to - from) * progress);
+        el.textContent = value;
+        if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
 }
 
 function getProductionDescription(type, levelData) {
