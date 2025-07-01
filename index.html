@@ -1298,11 +1298,16 @@
 
         function gainXP(amount) {
             gameState.xp += amount;
+            let leveledUp = false;
             while (gameState.xp >= gameState.xpToNext) {
                 gameState.xp -= gameState.xpToNext;
                 gameState.level++;
                 gameState.xpToNext = Math.floor(gameState.xpToNext * 1.2);
                 addLogEntry(`🎉 Level up! You are now level ${gameState.level}!`, 'success');
+                leveledUp = true;
+            }
+            if (leveledUp) {
+                initializeBuildings();
             }
         }
 
