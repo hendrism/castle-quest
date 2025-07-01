@@ -86,34 +86,6 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .header-toggle {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: var(--border-radius-small);
-            color: var(--white);
-            padding: var(--spacing-sm);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-toggle:active {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(0.95);
-        }
-
-        .toggle-icon {
-            transition: transform 0.3s ease;
-            font-size: 1rem;
-        }
-
-        .header-toggle.expanded .toggle-icon {
-            transform: rotate(180deg);
-        }
 
         /* Compact Stats Row */
         .stats-compact {
@@ -179,16 +151,10 @@
 
         /* Expandable Details */
         .header-details {
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            transition: all 0.4s ease;
-            margin-top: var(--spacing-sm);
-        }
-
-        .header-details.expanded {
-            max-height: 300px;
+            max-height: none;
+            overflow: visible;
             opacity: 1;
+            margin-top: var(--spacing-sm);
         }
 
         .details-grid {
@@ -641,8 +607,8 @@
             border-left: 3px solid var(--warning-orange);
         }
 
-        /* Bottom Navigation */
-        .bottom-nav {
+        /* Resource Bar */
+        .resource-bar {
             position: fixed;
             bottom: var(--safe-area-bottom);
             left: 50%;
@@ -652,30 +618,9 @@
             background: rgba(44, 62, 80, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: space-around;
             padding: var(--spacing-md);
             z-index: 999;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-item {
-            color: var(--white);
-            text-decoration: none;
-            font-size: 1.5rem;
-            padding: var(--spacing-sm);
-            border-radius: var(--border-radius-small);
-            transition: all 0.3s ease;
-            min-width: 44px;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-item:active {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(0.9);
         }
 
         /* Modal */
@@ -807,9 +752,6 @@
             <div class="header-content">
                 <div class="header-top">
                     <h1 class="game-title">🛡️ Dice & Castle</h1>
-                    <button class="header-toggle" id="header-toggle" aria-label="Toggle details">
-                        <span class="toggle-icon">▼</span>
-                    </button>
                 </div>
                 
                 <!-- Compact Stats -->
@@ -832,39 +774,7 @@
                     </div>
                 </div>
 
-                <!-- Compact Resources -->
-                <div class="resources-compact">
-                    <div class="resource-compact">
-                        <div class="resource-icon">🪵</div>
-                        <div class="resource-amount" id="wood-amount">0</div>
-                        <div class="resource-prod" id="prod-wood"></div>
-                    </div>
-                    <div class="resource-compact">
-                        <div class="resource-icon">🗿</div>
-                        <div class="resource-amount" id="stone-amount">0</div>
-                        <div class="resource-prod" id="prod-stone"></div>
-                    </div>
-                    <div class="resource-compact">
-                        <div class="resource-icon">⚔️</div>
-                        <div class="resource-amount" id="metal-amount">0</div>
-                        <div class="resource-prod" id="prod-metal"></div>
-                    </div>
-                    <div class="resource-compact">
-                        <div class="resource-icon">🌾</div>
-                        <div class="resource-amount" id="food-amount">10</div>
-                        <div class="resource-prod" id="prod-food"></div>
-                    </div>
-                    <div class="resource-compact">
-                        <div class="resource-icon">🔧</div>
-                        <div class="resource-amount" id="tools-amount">0</div>
-                        <div class="resource-prod" id="prod-tools"></div>
-                    </div>
-                    <div class="resource-compact">
-                        <div class="resource-icon">💎</div>
-                        <div class="resource-amount" id="gems-amount">0</div>
-                        <div class="resource-prod" id="prod-gems"></div>
-                    </div>
-                </div>
+
 
                 <!-- Expandable Details -->
                 <div class="header-details" id="header-details">
@@ -981,12 +891,41 @@
             </button>
         </main>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="#exploration" class="nav-item" aria-label="Exploration">🗺️</a>
-            <a href="#settlement" class="nav-item" aria-label="Settlement">🏠</a>
-            <a href="#event-log" class="nav-item" aria-label="Event Log">📜</a>
-        </nav>
+        <!-- Resource Bar -->
+        <div class="resource-bar">
+            <div class="resources-compact">
+                <div class="resource-compact">
+                    <div class="resource-icon">🪵</div>
+                    <div class="resource-amount" id="wood-amount">0</div>
+                    <div class="resource-prod" id="prod-wood"></div>
+                </div>
+                <div class="resource-compact">
+                    <div class="resource-icon">🗿</div>
+                    <div class="resource-amount" id="stone-amount">0</div>
+                    <div class="resource-prod" id="prod-stone"></div>
+                </div>
+                <div class="resource-compact">
+                    <div class="resource-icon">⚔️</div>
+                    <div class="resource-amount" id="metal-amount">0</div>
+                    <div class="resource-prod" id="prod-metal"></div>
+                </div>
+                <div class="resource-compact">
+                    <div class="resource-icon">🌾</div>
+                    <div class="resource-amount" id="food-amount">10</div>
+                    <div class="resource-prod" id="prod-food"></div>
+                </div>
+                <div class="resource-compact">
+                    <div class="resource-icon">🔧</div>
+                    <div class="resource-amount" id="tools-amount">0</div>
+                    <div class="resource-prod" id="prod-tools"></div>
+                </div>
+                <div class="resource-compact">
+                    <div class="resource-icon">💎</div>
+                    <div class="resource-amount" id="gems-amount">0</div>
+                    <div class="resource-prod" id="prod-gems"></div>
+                </div>
+            </div>
+        </div>
 
         <!-- Dice Roll Modal -->
         <div class="modal" id="dice-modal">
@@ -1851,14 +1790,6 @@
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
-            // Header toggle
-            document.getElementById('header-toggle').addEventListener('click', () => {
-                const toggle = document.getElementById('header-toggle');
-                const details = document.getElementById('header-details');
-                
-                toggle.classList.toggle('expanded');
-                details.classList.toggle('expanded');
-            });
             
             // Next month button
             document.getElementById('next-month-btn').addEventListener('click', advanceMonth);
@@ -1871,41 +1802,6 @@
                 document.getElementById('dice-modal').classList.remove('show');
             });
             
-            // Smooth scrolling for navigation
-            document.querySelectorAll('.nav-item').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const href = link.getAttribute('href');
-                    
-                    // Handle different section targets
-                    let targetSelector = '';
-                    if (href === '#exploration') {
-                        targetSelector = '.section:nth-of-type(1)'; // First section
-                    } else if (href === '#settlement') {
-                        targetSelector = '.section:nth-of-type(2)'; // Second section
-                    } else if (href === '#event-log') {
-                        targetSelector = '.section:nth-of-type(3)'; // Third section
-                    }
-                    
-                    const target = document.querySelector(targetSelector);
-                    if (target) {
-                        // Add visual feedback
-                        link.style.background = 'rgba(255, 255, 255, 0.3)';
-                        setTimeout(() => {
-                            link.style.background = '';
-                        }, 200);
-                        
-                        // Scroll to target with offset for header
-                        const headerHeight = document.querySelector('header').offsetHeight;
-                        const targetPosition = target.offsetTop - headerHeight - 10;
-                        
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
             
             // Initialize game
             initializeLocations();
@@ -1923,13 +1819,13 @@
 
         // Touch feedback for better mobile experience
         document.addEventListener('touchstart', (e) => {
-            if (e.target.matches('button, .nav-item, .location-card')) {
+            if (e.target.matches('button, .location-card')) {
                 e.target.style.transform = 'scale(0.98)';
             }
         });
 
         document.addEventListener('touchend', (e) => {
-            if (e.target.matches('button, .nav-item, .location-card')) {
+            if (e.target.matches('button, .location-card')) {
                 setTimeout(() => {
                     e.target.style.transform = '';
                 }, 100);
