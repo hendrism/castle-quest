@@ -1555,8 +1555,7 @@
             }
             
             gameState.explorationsLeft--;
-            showDiceRoll(() => {
-                const roll = Math.floor(Math.random() * 20) + 1;
+            showDiceRoll((roll) => {
                 let result = '';
                 let type = 'neutral';
                 let rewards = {};
@@ -1607,7 +1606,6 @@
                 initializeLocations(); // Refresh location buttons
                 
                 return [
-                    `You rolled ${roll}`,
                     result,
                     rewardText ? `Rewards: ${rewardText}` : 'No rewards gained',
                     `Explorations remaining: ${gameState.explorationsLeft}`
@@ -1845,8 +1843,14 @@
                 const roll = Math.floor(Math.random() * 20) + 1;
                 diceFace.textContent = roll;
 
-                const details = callback ? callback() : [`You rolled ${roll}`];
-                result.innerHTML = details.join('<br>');
+                const lines = [`You rolled ${roll}`];
+                let detail = callback ? callback(roll) : null;
+                if (Array.isArray(detail)) {
+                    lines.push(...detail);
+                } else if (detail) {
+                    lines.push(detail);
+                }
+                result.innerHTML = lines.join('<br>');
             }, 1000);
         }
 
