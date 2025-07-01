@@ -15,73 +15,98 @@
 
 <body>
     <div id="app">
+        <!-- Updated Header Section for index.html -->
         <header>
-            <h1>🛡️ Dice & Castle</h1>
-
-            <!-- Main Information Grid -->
-            <div class="header-main">
-                <!-- Month & Season -->
-                <div class="stat-card month-card">
-                    <span class="stat-label">Month</span>
-                    <div class="stat-value" id="month">1</div>
-                    <div class="season" id="season">🌸 Spring</div>
-                </div>
-
-                <!-- XP & Level -->
-                <div class="stat-card xp-card">
-                    <div class="level-section">
-                        <span class="stat-label">Level</span>
-                        <span class="level-number" id="level">1</span>
+            <div class="header-summary" id="header-summary">
+                <div class="summary-left">
+                    <h1>🛡️ Dice & Castle</h1>
+                    <div class="summary-stats">
+                        <span class="summary-month">Month <span id="summary-month">1</span></span>
+                        <span class="summary-level">L<span id="summary-level">1</span></span>
+                        <span class="summary-season" id="summary-season">🌸</span>
                     </div>
-                    <progress id="xp-progress" value="0" max="100" class="xp-progress"
-                        aria-label="Experience progress"></progress>
-                    <div class="xp-amount"><span id="xp">0</span>/<span id="xp-next">100</span> XP</div>
                 </div>
-
-                <!-- Morale -->
-                <div class="stat-card morale-card">
-                    <span class="stat-label">Morale</span>
-                    <div class="morale-value" id="morale">😀 100</div>
-                </div>
-
-                <!-- Ruler Information -->
-                <div class="stat-card ruler-card">
-                    <div class="ruler-info">
-                        <div class="ruler-name">
-                            👑 <span id="ruler-name">-</span>
-                        </div>
-                        <div class="ruler-details">
-                            Age <span id="ruler-age">0</span> • Reign <span id="ruler-years">20</span> years left
-                        </div>
-                        <div class="ruler-traits" id="ruler-traits">
-                            <!-- Traits will be populated by JS -->
-                        </div>
+                <div class="summary-right">
+                    <div class="summary-resources">
+                        <span class="summary-resource" data-resource="wood">
+                            <span class="resource-icon">🪵</span>
+                            <span id="summary-wood">0</span>
+                        </span>
+                        <span class="summary-resource" data-resource="food">
+                            <span class="resource-icon">🌾</span>
+                            <span id="summary-food">10</span>
+                        </span>
+                        <span class="summary-resource" data-resource="stone">
+                            <span class="resource-icon">🗿</span>
+                            <span id="summary-stone">0</span>
+                        </span>
                     </div>
+                    <button class="header-toggle" id="header-toggle" aria-label="Toggle header details">
+                        <span class="toggle-icon">▼</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Resource Cards -->
-            <div id="resource-bar" class="resource-bar"></div>
+            <!-- Collapsible Content -->
+            <div class="header-details" id="header-details">
+                <!-- XP & Level Details -->
+                <div class="detail-section">
+                    <div class="detail-card xp-detail">
+                        <div class="level-section">
+                            <span class="stat-label">Level</span>
+                            <span class="level-number" id="level">1</span>
+                        </div>
+                        <progress id="xp-progress" value="0" max="100" class="xp-progress"
+                            aria-label="Experience progress"></progress>
+                        <div class="xp-amount"><span id="xp">0</span>/<span id="xp-next">100</span> XP</div>
+                    </div>
 
-            <!-- Quick Navigation -->
-            <nav class="quick-nav">
-                <a href="#exploration" aria-label="Jump to exploration">
-                    <span class="icon">🗺️</span>
-                    <span class="label">Explore</span>
-                </a>
-                <a href="#settlement" aria-label="Jump to settlement">
-                    <span class="icon">🏠</span>
-                    <span class="label">Settlement</span>
-                </a>
-                <a href="#event-log" aria-label="Jump to event log">
-                    <span class="icon">📜</span>
-                    <span class="label">Events</span>
-                </a>
-                <a href="#month-section" aria-label="Jump to next month controls">
-                    <span class="icon">⏭️</span>
-                    <span class="label">Next Month</span>
-                </a>
-            </nav>
+                    <div class="detail-card morale-detail">
+                        <span class="stat-label">Morale</span>
+                        <div class="morale-value" id="morale">😀 100</div>
+                    </div>
+                </div>
+
+                <!-- Ruler Information -->
+                <div class="detail-section">
+                    <div class="detail-card ruler-detail">
+                        <div class="ruler-info">
+                            <div class="ruler-name">
+                                👑 <span id="ruler-name">-</span>
+                            </div>
+                            <div class="ruler-details">
+                                Age <span id="ruler-age">0</span> • Reign <span id="ruler-years">20</span> years left
+                            </div>
+                            <div class="ruler-traits" id="ruler-traits">
+                                <!-- Traits will be populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complete Resource Bar -->
+                <div id="resource-bar" class="resource-bar"></div>
+
+                <!-- Quick Navigation -->
+                <nav class="quick-nav">
+                    <a href="#exploration" aria-label="Jump to exploration">
+                        <span class="icon">🗺️</span>
+                        <span class="label">Explore</span>
+                    </a>
+                    <a href="#settlement" aria-label="Jump to settlement">
+                        <span class="icon">🏠</span>
+                        <span class="label">Settlement</span>
+                    </a>
+                    <a href="#event-log" aria-label="Jump to event log">
+                        <span class="icon">📜</span>
+                        <span class="label">Events</span>
+                    </a>
+                    <a href="#month-section" aria-label="Jump to next month controls">
+                        <span class="icon">⏭️</span>
+                        <span class="label">Next Month</span>
+                    </a>
+                </nav>
+            </div>
         </header>
         <div class="sentinel"></div>
 
