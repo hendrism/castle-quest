@@ -2025,15 +2025,39 @@ function validateGameState(state) {
 
 // Save/Load
 function saveGame(slot = 'default') {
-    // Temporarily disable saving to simplify gameplay
-    console.log('Save feature is currently disabled.');
-    return;
+    const key = `cq-save-${slot}`;
+    try {
+        const replacer = (k, value) => {
+            if (value instanceof Set) {
+                return { __type: 'Set', value: Array.from(value) };
+            }
+            return value;
+        };
+        const data = JSON.stringify(gameState, replacer);
+        localStorage.setItem(key, data);
+        console.log('Game saved');
+    } catch (error) {
+        console.error('Failed to save game:', error);
+    }
 }
 
 function loadGame(slot = 'default') {
-    // Temporarily disable loading while save/load is suspended
-    console.log('Load feature is currently disabled.');
-    return;
+    const key = `cq-save-${slot}`;
+    try {
+        const data = localStorage.getItem(key);
+        if (!data) return;
+        const reviver = (k, value) => {
+            if (value && value.__type === 'Set') {
+                return new Set(value.value);
+            }
+            return value;
+        };
+        const loaded = JSON.parse(data, reviver);
+        Object.assign(gameState, loaded);
+        console.log('Game loaded');
+    } catch (error) {
+        console.error('Failed to load game:', error);
+    }
 }
 
 function initScrollIndicators() {
