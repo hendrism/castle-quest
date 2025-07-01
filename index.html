@@ -837,26 +837,32 @@
                     <div class="resource-compact">
                         <div class="resource-icon">🪵</div>
                         <div class="resource-amount" id="wood-amount">0</div>
+                        <div class="resource-prod" id="prod-wood"></div>
                     </div>
                     <div class="resource-compact">
                         <div class="resource-icon">🗿</div>
                         <div class="resource-amount" id="stone-amount">0</div>
+                        <div class="resource-prod" id="prod-stone"></div>
                     </div>
                     <div class="resource-compact">
                         <div class="resource-icon">⚔️</div>
                         <div class="resource-amount" id="metal-amount">0</div>
+                        <div class="resource-prod" id="prod-metal"></div>
                     </div>
                     <div class="resource-compact">
                         <div class="resource-icon">🌾</div>
                         <div class="resource-amount" id="food-amount">10</div>
+                        <div class="resource-prod" id="prod-food"></div>
                     </div>
                     <div class="resource-compact">
                         <div class="resource-icon">🔧</div>
                         <div class="resource-amount" id="tools-amount">0</div>
+                        <div class="resource-prod" id="prod-tools"></div>
                     </div>
                     <div class="resource-compact">
                         <div class="resource-icon">💎</div>
                         <div class="resource-amount" id="gems-amount">0</div>
+                        <div class="resource-prod" id="prod-gems"></div>
                     </div>
                 </div>
 
@@ -1152,6 +1158,40 @@
 
         const expandedCategories = {};
 
+        function calculateProduction() {
+            const counts = { wood: 0, stone: 0, metal: 0, food: 0, tools: 0, gems: 0 };
+            Object.values(buildingCategories).forEach(cat => {
+                cat.buildings.forEach(b => {
+                    const c = b.count;
+                    switch (b.key) {
+                        case 'farm':
+                        case 'granary':
+                            counts.food += c;
+                            break;
+                        case 'forester':
+                        case 'sawmill':
+                            counts.wood += c;
+                            break;
+                        case 'quarry':
+                            counts.stone += c;
+                            break;
+                        case 'mine':
+                        case 'smelter':
+                            counts.metal += c;
+                            break;
+                        case 'workshop':
+                        case 'barracks':
+                            counts.tools += c;
+                            break;
+                        case 'gemMine':
+                            counts.gems += c;
+                            break;
+                    }
+                });
+            });
+            return counts;
+        }
+
         // UI Management Functions
         function updateUI() {
             // Update header stats
@@ -1166,7 +1206,19 @@
             document.getElementById('xp-required').textContent = gameState.xpToNext;
             document.getElementById('xp-progress').value = gameState.xp;
             document.getElementById('xp-progress').max = gameState.xpToNext;
-            document.getElementById('morale-detailed').textContent = getMoraleDisplay(gameState.morale);
+            const moraleEl = document.getElementById('morale-detailed');
+            moraleEl.textContent = getMoraleDisplay(gameState.morale);
+            moraleEl.className = `morale-value ${getMoraleClass(gameState.morale)}`;
+
+            const prod = calculateProduction();
+            Object.keys(prod).forEach(r => {
+                const el = document.getElementById(`prod-${r}`);
+                if (el) {
+                    const val = prod[r];
+                    el.textContent = val > 0 ? `+${val}` : val < 0 ? `-${Math.abs(val)}` : '0';
+                    el.className = `resource-prod ${val>0?'positive':val<0?'negative':'zero'}`;
+                }
+            });
             
             // Update resources
             Object.keys(gameState.resources).forEach(resource => {
@@ -1235,6 +1287,23 @@
             else if (morale < 50) face = '😟';
             else if (morale < 75) face = '🙂';
             return `${face} ${morale}`;
+        }
+
+        function getMoraleClass(morale) {
+            if (morale < 25) return 'morale-bad';
+            if (morale < 50) return 'morale-poor';
+            if (morale < 75) return 'morale-ok';
+            return 'morale-good';
+        }
+
+        function gainXP(amount) {
+            gameState.xp += amount;
+            while (gameState.xp >= gameState.xpToNext) {
+                gameState.xp -= gameState.xpToNext;
+                gameState.level++;
+                gameState.xpToNext = Math.floor(gameState.xpToNext * 1.2);
+                addLogEntry(`🎉 Level up! You are now level ${gameState.level}!`, 'success');
+            }
         }
 
         function capitalizeFirst(str) {
@@ -1320,6 +1389,7 @@
                 categoryDiv.innerHTML = `
                     <div class="building-category-header" onclick="toggleCategory('${categoryKey}')">
                         <span>${category.icon} ${category.name}</span>
+                        <span class="build-alert" id="alert-${categoryKey}"></span>
                         <span class="category-toggle">▼</span>
                     </div>
                     <div class="building-category-content" id="category-${categoryKey}">
@@ -1335,8 +1405,10 @@
                 
                 // Add buildings to category
                 const buildingsList = document.getElementById(`buildings-${categoryKey}`);
+                let available = false;
                 category.buildings.forEach(building => {
                     const canBuild = gameState.level >= building.level && building.count < building.max;
+                    if (canBuild) available = true;
                     const buildingDiv = document.createElement('div');
                     buildingDiv.className = 'building-item';
                     buildingDiv.innerHTML = `
@@ -1355,6 +1427,10 @@
                     `;
                     buildingsList.appendChild(buildingDiv);
                 });
+                const alertEl = document.getElementById(`alert-${categoryKey}`);
+                if (alertEl) {
+                    alertEl.textContent = available ? '!' : '';
+                }
             });
         }
 
@@ -1411,7 +1487,11 @@
                         gameState.resources[resource] += rewards[resource];
                     }
                 });
-                
+
+                // Gain experience based on roll
+                const xpGain = 10 + (roll >= 15 ? 10 : 0);
+                gainXP(xpGain);
+
                 // Create reward text
                 const rewardText = Object.keys(rewards)
                     .filter(r => rewards[r] > 0)
@@ -1488,6 +1568,7 @@
             });
             gameState.settlement.home = current.upgradeTo;
             addLogEntry(`🏠 Upgraded home to ${capitalizeFirst(current.upgradeTo)}.`, 'success');
+            gainXP(20);
             updateUI();
         }
 
@@ -1500,6 +1581,7 @@
             });
             gameState.settlement.walls = current.upgradeTo;
             addLogEntry(`🛡️ Built ${capitalizeFirst(current.upgradeTo)} walls.`, 'success');
+            gainXP(15);
             updateUI();
         }
 
@@ -1527,7 +1609,9 @@
             // For demo, just add the building
             building.count++;
             addLogEntry(`🏗️ Started building ${name}! It will be ready next month.`, 'success');
+            gainXP(5);
             initializeBuildings(); // Refresh the display
+            updateUI();
         }
 
         function advanceMonth() {
