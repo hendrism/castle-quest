@@ -2181,26 +2181,33 @@ function setupCollapsibleHeader() {
 }
 
 function updateHeaderSummary() {
-    // Update summary month
-    const summaryMonth = document.getElementById('summary-month');
-    if (summaryMonth) summaryMonth.textContent = gameState.month;
-    
-    // Update summary level
-    const summaryLevel = document.getElementById('summary-level');
-    if (summaryLevel) summaryLevel.textContent = gameState.level;
-    
-    // Update summary season
-    const summarySeason = document.getElementById('summary-season');
-    if (summarySeason) summarySeason.textContent = seasons[gameState.season].icon;
-    
-    // Update summary resources (top 3 most important)
-    const summaryWood = document.getElementById('summary-wood');
-    const summaryFood = document.getElementById('summary-food');
-    const summaryStone = document.getElementById('summary-stone');
-    
-    if (summaryWood) summaryWood.textContent = gameState.resources.wood;
-    if (summaryFood) summaryFood.textContent = gameState.resources.food;
-    if (summaryStone) summaryStone.textContent = gameState.resources.stone;
+    // Top row stats
+    const monthEl = document.getElementById('stat-month');
+    if (monthEl) monthEl.textContent = gameState.month;
+
+    const levelEl = document.getElementById('stat-level');
+    if (levelEl) levelEl.textContent = gameState.level;
+
+    const moraleEl = document.getElementById('stat-morale');
+    if (moraleEl) moraleEl.textContent = gameState.morale;
+
+    const seasonEl = document.getElementById('stat-season');
+    if (seasonEl) seasonEl.textContent = seasons[gameState.season].icon;
+
+    // Bottom row resources
+    const woodEl = document.getElementById('res-wood');
+    const stoneEl = document.getElementById('res-stone');
+    const militaryEl = document.getElementById('res-military');
+    const foodEl = document.getElementById('res-food');
+    const toolsEl = document.getElementById('res-tools');
+    const gemsEl = document.getElementById('res-gems');
+
+    if (woodEl) woodEl.textContent = gameState.resources.wood;
+    if (stoneEl) stoneEl.textContent = gameState.resources.stone;
+    if (militaryEl) militaryEl.textContent = gameState.resources.military ?? 0;
+    if (foodEl) foodEl.textContent = gameState.resources.food;
+    if (toolsEl) toolsEl.textContent = gameState.resources.tools;
+    if (gemsEl) gemsEl.textContent = gameState.resources.gems;
 }
 
 function setupNavigationDrawer() {

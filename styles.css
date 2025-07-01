@@ -69,8 +69,9 @@ header {
 /* Header Summary - Always Visible */
 .header-summary {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   cursor: pointer;
   user-select: none;
 }
@@ -132,6 +133,56 @@ header {
 
 .summary-resource .resource-icon {
   font-size: 0.9rem;
+}
+
+/* New compact header panel */
+.header-panel {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  flex: 1;
+  gap: 0.25rem;
+}
+
+.stats-row,
+.resource-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+
+.stat-card {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  font-size: clamp(0.6rem, 2vw, 0.9rem);
+}
+
+.stat-card .stat-value {
+  font-weight: 700;
+  font-size: clamp(0.8rem, 3vw, 1rem);
+  line-height: 1.1;
+}
+
+.stat-card .stat-label {
+  font-size: clamp(0.55rem, 1.5vw, 0.75rem);
+  opacity: 0.8;
+}
+
+.resource-card {
+  font-size: clamp(0.6rem, 1.8vw, 0.85rem);
+}
+.resource-card .stat-icon {
+  font-size: 1rem;
 }
 
 /* Header Toggle Button */
