@@ -1486,16 +1486,7 @@ function updateBuildingsUI() {
         farmInProgress > 0 ? `Build Farm (${farmInProgress} in progress)` : 'Build Farm';
     farmBtn.querySelector('.build-cost').textContent = farmCostText;
 
-    const farmsContainer = document.getElementById('farms-container');
-    farmsContainer.innerHTML = '';
-    gameState.settlement.farms.forEach(farm => {
-        const farmElement = createBuildingElement('farm', farm);
-        farmsContainer.appendChild(farmElement);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'farm').forEach(b => {
-        const el = createConstructionElement('farm');
-        farmsContainer.appendChild(el);
-    });
+    renderBuildingList('farm', 'farms-container');
 
     // Foresters
     const foresterLimit = getBuildingLimit('forester');
@@ -1515,16 +1506,7 @@ function updateBuildingsUI() {
         foresterInProgress > 0 ? `Build Forester Hut (${foresterInProgress} in progress)` : 'Build Forester Hut';
     foresterBtn.querySelector('.build-cost').textContent = foresterCostText;
 
-    const forestersContainer = document.getElementById('foresters-container');
-    forestersContainer.innerHTML = '';
-    gameState.settlement.foresters.forEach(f => {
-        const el = createBuildingElement('forester', f);
-        forestersContainer.appendChild(el);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'forester').forEach(b => {
-        const el = createConstructionElement('forester');
-        forestersContainer.appendChild(el);
-    });
+    renderBuildingList('forester', 'foresters-container');
 
     // Quarries
     const quarryLimit = getBuildingLimit('quarry');
@@ -1544,16 +1526,7 @@ function updateBuildingsUI() {
         quarryInProgress > 0 ? `Build Quarry (${quarryInProgress} in progress)` : 'Build Quarry';
     quarryBtn.querySelector('.build-cost').textContent = quarryCostText;
 
-    const quarriesContainer = document.getElementById('quarries-container');
-    quarriesContainer.innerHTML = '';
-    gameState.settlement.quarries.forEach(quarry => {
-        const quarryElement = createBuildingElement('quarry', quarry);
-        quarriesContainer.appendChild(quarryElement);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'quarry').forEach(b => {
-        const el = createConstructionElement('quarry');
-        quarriesContainer.appendChild(el);
-    });
+    renderBuildingList('quarry', 'quarries-container');
 
     // Mines
     const mineLimit = getBuildingLimit('mine');
@@ -1573,16 +1546,7 @@ function updateBuildingsUI() {
         mineInProgress > 0 ? `Build Mine (${mineInProgress} in progress)` : 'Build Mine';
     mineBtn.querySelector('.build-cost').textContent = mineCostText;
 
-    const minesContainer = document.getElementById('mines-container');
-    minesContainer.innerHTML = '';
-    gameState.settlement.mines.forEach(mine => {
-        const mineElement = createBuildingElement('mine', mine);
-        minesContainer.appendChild(mineElement);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'mine').forEach(b => {
-        const el = createConstructionElement('mine');
-        minesContainer.appendChild(el);
-    });
+    renderBuildingList('mine', 'mines-container');
 
     // Gem Mines
     const gemMineLimit = getBuildingLimit('gemMine');
@@ -1602,16 +1566,7 @@ function updateBuildingsUI() {
         gemMineInProgress > 0 ? `Build Gem Mine (${gemMineInProgress} in progress)` : 'Build Gem Mine';
     gemMineBtn.querySelector('.build-cost').textContent = gemMineCostText;
 
-    const gemMinesContainer = document.getElementById('gemMines-container');
-    gemMinesContainer.innerHTML = '';
-    gameState.settlement.gemMines.forEach(gm => {
-        const el = createBuildingElement('gemMine', gm);
-        gemMinesContainer.appendChild(el);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'gemMine').forEach(b => {
-        const el = createConstructionElement('gemMine');
-        gemMinesContainer.appendChild(el);
-    });
+    renderBuildingList('gemMine', 'gemMines-container');
 
     // Workshops
     const workshopLimit = getBuildingLimit('workshop');
@@ -1631,16 +1586,7 @@ function updateBuildingsUI() {
         workshopInProgress > 0 ? `Build Workshop (${workshopInProgress} in progress)` : 'Build Workshop';
     workshopBtn.querySelector('.build-cost').textContent = workshopCostText;
 
-    const workshopsContainer = document.getElementById('workshops-container');
-    workshopsContainer.innerHTML = '';
-    gameState.settlement.workshops.forEach(ws => {
-        const wsElement = createBuildingElement('workshop', ws);
-        workshopsContainer.appendChild(wsElement);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'workshop').forEach(b => {
-        const el = createConstructionElement('workshop');
-        workshopsContainer.appendChild(el);
-    });
+    renderBuildingList('workshop', 'workshops-container');
 
     // Sawmills
     const sawmillLimit = getBuildingLimit('sawmill');
@@ -1659,16 +1605,7 @@ function updateBuildingsUI() {
         sawmillInProgress > 0 ? `Build Sawmill (${sawmillInProgress} in progress)` : 'Build Sawmill';
     sawmillBtn.querySelector('.build-cost').textContent = formatCost(sawmillCost);
 
-    const sawmillsContainer = document.getElementById('sawmills-container');
-    sawmillsContainer.innerHTML = '';
-    gameState.settlement.sawmills.forEach(sm => {
-        const el = createBuildingElement('sawmill', sm);
-        sawmillsContainer.appendChild(el);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'sawmill').forEach(b => {
-        const el = createConstructionElement('sawmill');
-        sawmillsContainer.appendChild(el);
-    });
+    renderBuildingList('sawmill', 'sawmills-container');
 
     // Granaries
     const granaryLimit = getBuildingLimit('granary');
@@ -1687,16 +1624,7 @@ function updateBuildingsUI() {
         granaryInProgress > 0 ? `Build Granary (${granaryInProgress} in progress)` : 'Build Granary';
     granaryBtn.querySelector('.build-cost').textContent = formatCost(granaryCost);
 
-    const granariesContainer = document.getElementById('granaries-container');
-    granariesContainer.innerHTML = '';
-    gameState.settlement.granaries.forEach(g => {
-        const el = createBuildingElement('granary', g);
-        granariesContainer.appendChild(el);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'granary').forEach(b => {
-        const el = createConstructionElement('granary');
-        granariesContainer.appendChild(el);
-    });
+    renderBuildingList('granary', 'granaries-container');
 
     // Smelters
     const smelterLimit = getBuildingLimit('smelter');
@@ -1715,16 +1643,7 @@ function updateBuildingsUI() {
         smelterInProgress > 0 ? `Build Smelter (${smelterInProgress} in progress)` : 'Build Smelter';
     smelterBtn.querySelector('.build-cost').textContent = formatCost(smelterCost);
 
-    const smeltersContainer = document.getElementById('smelters-container');
-    smeltersContainer.innerHTML = '';
-    gameState.settlement.smelters.forEach(s => {
-        const el = createBuildingElement('smelter', s);
-        smeltersContainer.appendChild(el);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'smelter').forEach(b => {
-        const el = createConstructionElement('smelter');
-        smeltersContainer.appendChild(el);
-    });
+    renderBuildingList('smelter', 'smelters-container');
 
     // Barracks
     const barracksLimit = getBuildingLimit('barracks');
@@ -1743,18 +1662,24 @@ function updateBuildingsUI() {
         barracksInProgress > 0 ? `Build Barracks (${barracksInProgress} in progress)` : 'Build Barracks';
     barracksBtn.querySelector('.build-cost').textContent = formatCost(barracksCost);
 
-    const barracksContainer = document.getElementById('barracks-container');
-    barracksContainer.innerHTML = '';
-    gameState.settlement.barracks.forEach(b => {
-        const el = createBuildingElement('barracks', b);
-        barracksContainer.appendChild(el);
-    });
-    gameState.settlement.constructionQueue.filter(b => b.type === 'barracks').forEach(b => {
-        const el = createConstructionElement('barracks');
-        barracksContainer.appendChild(el);
-    });
+    renderBuildingList('barracks', 'barracks-container');
     updateResearchUI();
 
+}
+
+function renderBuildingList(type, containerId) {
+    const key = getBuildingKey(type);
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    gameState.settlement[key].forEach(b => {
+        container.appendChild(createBuildingElement(type, b));
+    });
+    gameState.settlement.constructionQueue
+        .filter(q => q.type === type)
+        .forEach(() => {
+            container.appendChild(createConstructionElement(type));
+        });
 }
 
 function createBuildingElement(type, building) {
