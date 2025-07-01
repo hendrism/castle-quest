@@ -1,447 +1,1376 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>🛡️ Dice & Castle</title>
-    <link rel="stylesheet" href="./styles.css">
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#2c3e50">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-</head>
+    <style>
+        /* Reset and Variables */
+        :root {
+            --primary-blue: #3498db;
+            --primary-purple: #8e44ad;
+            --success-green: #27ae60;
+            --warning-orange: #f39c12;
+            --danger-red: #e74c3c;
+            --dark-blue: #2c3e50;
+            --light-gray: #ecf0f1;
+            --white: #ffffff;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-strong: 0 4px 20px rgba(0,0,0,0.15);
+            --border-radius: 12px;
+            --border-radius-small: 8px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --safe-area-top: env(safe-area-inset-top, 0);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark-blue);
+            min-height: 100vh;
+            padding-top: var(--safe-area-top);
+            padding-bottom: var(--safe-area-bottom);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #app {
+            max-width: 428px;
+            margin: 0 auto;
+            background: var(--white);
+            min-height: 100vh;
+            box-shadow: var(--shadow-strong);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Improved Header */
+        header {
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.98) 0%, rgba(52, 73, 94, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--white);
+            padding: var(--spacing-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .game-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-toggle {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius-small);
+            color: var(--white);
+            padding: var(--spacing-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-toggle:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.95);
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .header-toggle.expanded .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Compact Stats Row */
+        .stats-compact {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-compact {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius-small);
+            padding: var(--spacing-sm);
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Resources Row */
+        .resources-compact {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: var(--spacing-xs);
+        }
+
+        .resource-compact {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: var(--border-radius-small);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 50px;
+            justify-content: center;
+        }
+
+        .resource-icon {
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .resource-amount {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Expandable Details */
+        .header-details {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.4s ease;
+            margin-top: var(--spacing-sm);
+        }
+
+        .header-details.expanded {
+            max-height: 300px;
+            opacity: 1;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .detail-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+        }
+
+        .xp-detail {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(155, 89, 182, 0.3));
+        }
+
+        .morale-detail {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.3), rgba(39, 174, 96, 0.3));
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .level-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .level-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .xp-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .xp-progress::-webkit-progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .xp-progress::-webkit-progress-value {
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
+            border-radius: 4px;
+        }
+
+        .morale-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Main Content */
+        main {
+            padding: var(--spacing-md);
+            padding-bottom: calc(80px + var(--safe-area-bottom));
+        }
+
+        .section {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--light-gray) 0%, #ddd 100%);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid #ddd;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .section-content {
+            padding: var(--spacing-md);
+        }
+
+        /* Exploration Section */
+        .exploration-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-small);
+            margin-bottom: var(--spacing-md);
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .challenge-text {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .explorations-remaining {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .locations-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
+        }
+
+        .location-card {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .location-card:active {
+            transform: scale(0.98);
+        }
+
+        .location-card:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .location-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+            pointer-events: none;
+        }
+
+        .location-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .location-icon {
+            font-size: 2rem;
+            margin-right: var(--spacing-md);
+        }
+
+        .location-info {
+            flex: 1;
+        }
+
+        .location-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .location-desc {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .location-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .location-rewards {
+            background: rgba(0, 0, 0, 0.2);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+        }
+
+        /* Settlement Section */
+        .settlement-overview {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .settlement-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius-small);
+            padding: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            box-shadow: var(--shadow);
+        }
+
+        .settlement-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .settlement-details {
+            flex: 1;
+        }
+
+        .settlement-name {
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .settlement-status {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .upgrade-button {
+            background: linear-gradient(135deg, var(--success-green) 0%, #2ecc71 100%);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius-small);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .upgrade-button:active {
+            transform: scale(0.95);
+        }
+
+        .upgrade-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Buildings Section */
+        .buildings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
+        }
+
+        .building-category {
+            background: #f8f9fa;
+            border-radius: var(--border-radius-small);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .building-category-header {
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #34495e 100%);
+            color: var(--white);
+            padding: var(--spacing-md);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .category-toggle {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .building-category.expanded .category-toggle {
+            transform: rotate(180deg);
+        }
+
+        .building-category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .building-category.expanded .building-category-content {
+            max-height: 500px;
+        }
+
+        .building-list {
+            padding: var(--spacing-md);
+        }
+
+        .building-item {
+            background: var(--white);
+            border-radius: var(--border-radius-small);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .building-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .building-info {
+            flex: 1;
+        }
+
+        .building-name {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .building-stats {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .build-button {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius-small);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .build-button:active {
+            transform: scale(0.95);
+        }
+
+        .build-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Action Button */
+        .primary-action {
+            background: linear-gradient(135deg, var(--primary-purple) 0%, #9b59b6 100%);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: var(--spacing-lg) 0;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+        }
+
+        .primary-action:active {
+            transform: scale(0.98);
+        }
+
+        .primary-action:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Event Log */
+        .log-container {
+            background: var(--white);
+            border-radius: var(--border-radius-small);
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+
+        .log-entry {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-entry.success {
+            background: #d4edda;
+            border-left: 3px solid var(--success-green);
+        }
+
+        .log-entry.failure {
+            background: #f8d7da;
+            border-left: 3px solid var(--danger-red);
+        }
+
+        .log-entry.neutral {
+            background: #fff3cd;
+            border-left: 3px solid var(--warning-orange);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: var(--safe-area-bottom);
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 428px;
+            width: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            padding: var(--spacing-md);
+            z-index: 999;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 1.5rem;
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius-small);
+            transition: all 0.3s ease;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item:active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.9);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: var(--shadow-strong);
+            position: relative;
+        }
+
+        .dice-container {
+            margin: var(--spacing-lg) 0;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-strong);
+            animation: bounce 0.6s ease-in-out;
+        }
+
+        .dice.rolling {
+            animation: spin 1s ease-in-out;
+        }
+
+        .dice-face {
+            color: var(--white);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .roll-result {
+            margin: var(--spacing-lg) 0;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--dark-blue);
+        }
+
+        .modal-button {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius-small);
+            padding: var(--spacing-md) var(--spacing-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .modal-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Animations */
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(720deg); }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .hidden { display: none; }
+        .mt-1 { margin-top: var(--spacing-sm); }
+        .mb-1 { margin-bottom: var(--spacing-sm); }
+
+        /* Responsive adjustments */
+        @media (max-width: 380px) {
+            .stats-compact {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .resources-compact {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .game-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            body {
+                text-rendering: optimizeLegibility;
+            }
+        }
+    </style>
+</head>
 <body>
     <div id="app">
-        <!-- Updated Header Section for index.html -->
+        <!-- Improved Header -->
         <header>
-            <div class="header-summary" id="header-summary">
-                <div class="header-panel">
-                    <div class="stats-row">
-                        <div class="stat-card">
-                            <span class="stat-value" id="stat-month">1</span>
-                            <span class="stat-label">Month</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-value" id="stat-level">1</span>
-                            <span class="stat-label">Level</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-value" id="stat-morale">100</span>
-                            <span class="stat-label">Morale</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-value" id="stat-season">🌸</span>
-                            <span class="stat-label">Season</span>
-                        </div>
-                    </div>
-                    <div class="resource-row">
-                        <div class="stat-card resource-card">
-                            <span class="stat-icon">🪵</span>
-                            <span class="stat-value" id="res-wood">0</span>
-                        </div>
-                        <div class="stat-card resource-card">
-                            <span class="stat-icon">🗿</span>
-                            <span class="stat-value" id="res-stone">0</span>
-                        </div>
-                        <div class="stat-card resource-card">
-                            <span class="stat-icon">⚔️</span>
-                            <span class="stat-value" id="res-military">0</span>
-                        </div>
-                        <div class="stat-card resource-card">
-                            <span class="stat-icon">🌾</span>
-                            <span class="stat-value" id="res-food">10</span>
-                        </div>
-                        <div class="stat-card resource-card">
-                            <span class="stat-icon">🔧</span>
-                            <span class="stat-value" id="res-tools">0</span>
-                        </div>
-                        <div class="stat-card resource-card">
-                            <span class="stat-icon">💎</span>
-                            <span class="stat-value" id="res-gems">0</span>
-                        </div>
-                    </div>
+            <div class="header-content">
+                <div class="header-top">
+                    <h1 class="game-title">🛡️ Dice & Castle</h1>
+                    <button class="header-toggle" id="header-toggle" aria-label="Toggle details">
+                        <span class="toggle-icon">▼</span>
+                    </button>
                 </div>
-                <button class="header-toggle" id="header-toggle" aria-label="Toggle header details">
-                    <span class="toggle-icon">▼</span>
-                </button>
-            </div>
-
-            <!-- Collapsible Content -->
-            <div class="header-details" id="header-details">
-                <!-- XP & Level Details -->
-                <div class="detail-section">
-                    <div class="detail-card xp-detail">
-                        <div class="level-section">
-                            <span class="stat-label">Level</span>
-                            <span class="level-number" id="level">1</span>
-                        </div>
-                        <progress id="xp-progress" value="0" max="100" class="xp-progress"
-                            aria-label="Experience progress"></progress>
-                        <div class="xp-amount"><span id="xp">0</span>/<span id="xp-next">100</span> XP</div>
+                
+                <!-- Compact Stats -->
+                <div class="stats-compact">
+                    <div class="stat-compact">
+                        <div class="stat-value" id="month-display">1</div>
+                        <div class="stat-label">Month</div>
                     </div>
-
-                    <div class="detail-card morale-detail">
-                        <span class="stat-label">Morale</span>
-                        <div class="morale-value" id="morale">😀 100</div>
+                    <div class="stat-compact">
+                        <div class="stat-value" id="level-display">1</div>
+                        <div class="stat-label">Level</div>
+                    </div>
+                    <div class="stat-compact">
+                        <div class="stat-value" id="morale-display">100</div>
+                        <div class="stat-label">Morale</div>
+                    </div>
+                    <div class="stat-compact">
+                        <div class="stat-value" id="season-display">🌸</div>
+                        <div class="stat-label">Season</div>
                     </div>
                 </div>
 
-                <!-- Ruler Information -->
-                <div class="detail-section">
-                    <div class="detail-card ruler-detail">
+                <!-- Compact Resources -->
+                <div class="resources-compact">
+                    <div class="resource-compact">
+                        <div class="resource-icon">🪵</div>
+                        <div class="resource-amount" id="wood-amount">0</div>
+                    </div>
+                    <div class="resource-compact">
+                        <div class="resource-icon">🗿</div>
+                        <div class="resource-amount" id="stone-amount">0</div>
+                    </div>
+                    <div class="resource-compact">
+                        <div class="resource-icon">⚔️</div>
+                        <div class="resource-amount" id="metal-amount">0</div>
+                    </div>
+                    <div class="resource-compact">
+                        <div class="resource-icon">🌾</div>
+                        <div class="resource-amount" id="food-amount">10</div>
+                    </div>
+                    <div class="resource-compact">
+                        <div class="resource-icon">🔧</div>
+                        <div class="resource-amount" id="tools-amount">0</div>
+                    </div>
+                    <div class="resource-compact">
+                        <div class="resource-icon">💎</div>
+                        <div class="resource-amount" id="gems-amount">0</div>
+                    </div>
+                </div>
+
+                <!-- Expandable Details -->
+                <div class="header-details" id="header-details">
+                    <div class="details-grid">
+                        <div class="detail-card xp-detail">
+                            <div class="level-display">
+                                <span class="stat-label">Level</span>
+                                <span class="level-number" id="level-detailed">1</span>
+                            </div>
+                            <progress class="xp-progress" id="xp-progress" value="0" max="100"></progress>
+                            <div class="text-center">
+                                <span id="xp-current">0</span>/<span id="xp-required">100</span> XP
+                            </div>
+                        </div>
+                        
+                        <div class="detail-card morale-detail">
+                            <div class="stat-label">Morale</div>
+                            <div class="morale-value" id="morale-detailed">😀 100</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-card">
                         <div class="ruler-info">
-                            <div class="ruler-name">
-                                👑 <span id="ruler-name">-</span>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                                👑 <span id="ruler-name">Ruler Name</span>
                             </div>
-                            <div class="ruler-details">
-                                Age <span id="ruler-age">0</span> • Reign <span id="ruler-years">20</span> years left
+                            <div style="font-size: 0.9rem; opacity: 0.8;">
+                                Age <span id="ruler-age">20</span> • <span id="ruler-years">20</span> years remaining
                             </div>
-                            <div class="ruler-traits" id="ruler-traits">
-                                <!-- Traits will be populated by JS -->
+                            <div style="font-size: 0.85rem; opacity: 0.7; margin-top: 0.25rem;" id="ruler-traits">
+                                Traits: Builder, Explorer
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Complete Resource Bar -->
-                <div id="resource-bar" class="resource-bar"></div>
-
             </div>
         </header>
-        
-        <div class="sentinel"></div>
 
         <main>
-            <!-- Exploration -->
-            <section class="exploration" id="exploration">
-                <h2>Exploration</h2>
-                <div class="exploration-info">
-                    <p>Explorations remaining this month: <span id="explorations-left">5</span>/<span
-                            id="exploration-max">5</span></p>
-                    <p>Monthly Challenge: <span id="daily-challenge-text">Explore all locations</span> (<span
-                            id="daily-challenge-progress">0/0</span>)</p>
+            <!-- Exploration Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🗺️ Exploration</h2>
                 </div>
-
-                <div class="locations scroll-container">
-                    <button class="location-btn location-forest" data-location="forest"
-                        aria-label="Explore Deep Forest">
-                        <span class="location-icon">🌲</span>
-                        <span class="location-info">
-                            <span class="location-name">Deep Forest</span>
-                            <span class="location-desc">Rich in wood and wildlife</span>
-                            <span class="location-rewards animated-rewards">🪵1-4 🌾0-2</span>
-                            <span class="location-level">Unlocks at level 1</span>
-                            <span class="location-difficulty" id="forest-difficulty"></span>
-                            <span class="success-chance" id="forest-chance"></span>
-                        </span>
-                    </button>
-                    <button class="location-btn location-quarry" data-location="quarry"
-                        aria-label="Explore Stone Quarry">
-                        <span class="location-icon">⛰️</span>
-                        <span class="location-info">
-                            <span class="location-name">Stone Quarry</span>
-                            <span class="location-desc">Source of stone and metal</span>
-                            <span class="location-rewards animated-rewards">🗿1-3 ⚔️0-1</span>
-                            <span class="location-level">Unlocks at level 1</span>
-                            <span class="location-difficulty" id="quarry-difficulty"></span>
-                            <span class="success-chance" id="quarry-chance"></span>
-                        </span>
-                    </button>
-                    <button class="location-btn location-plains" data-location="plains"
-                        aria-label="Explore Fertile Plains">
-                        <span class="location-icon">🌾</span>
-                        <span class="location-info">
-                            <span class="location-name">Fertile Plains</span>
-                            <span class="location-desc">Food and farming supplies</span>
-                            <span class="location-rewards animated-rewards">🌾1-3 🪵0-1</span>
-                            <span class="location-level">Unlocks at level 1</span>
-                            <span class="location-difficulty" id="plains-difficulty"></span>
-                            <span class="success-chance" id="plains-chance"></span>
-                        </span>
-                    </button>
-                    <button class="location-btn location-ruins" data-location="ruins"
-                        aria-label="Explore Ancient Ruins">
-                        <span class="location-icon">🏛️</span>
-                        <span class="location-info">
-                            <span class="location-name">Ancient Ruins</span>
-                            <span class="location-desc">Mysterious treasures await</span>
-                            <span class="location-rewards animated-rewards">🪵0-2 🗿0-2 ⚔️0-2 🌾0-1 💎0-1</span>
-                            <span class="location-level">Unlocks at level 2</span>
-                            <span class="location-difficulty" id="ruins-difficulty"></span>
-                            <span class="success-chance" id="ruins-chance"></span>
-                        </span>
-                    </button>
-                    <button class="location-btn location-swamp" data-location="swamp" aria-label="Explore Misty Swamp">
-                        <span class="location-icon">🐸</span>
-                        <span class="location-info">
-                            <span class="location-name">Misty Swamp</span>
-                            <span class="location-desc">Treacherous wetlands rich in herbs</span>
-                            <span class="location-rewards animated-rewards">🌾0-2 🪵0-1 🗿0-1</span>
-                            <span class="location-level">Unlocks at level 2</span>
-                            <span class="location-difficulty" id="swamp-difficulty"></span>
-                            <span class="success-chance" id="swamp-chance"></span>
-                        </span>
-                    </button>
-                    <button class="location-btn location-mountains" data-location="mountains"
-                        aria-label="Explore High Mountains">
-                        <span class="location-icon">🏔️</span>
-                        <span class="location-info">
-                            <span class="location-name">High Mountains</span>
-                            <span class="location-desc">Metal and gems hidden in the peaks</span>
-                            <span class="location-rewards animated-rewards">🗿1-3 ⚔️1-2 💎0-1</span>
-                            <span class="location-level">Unlocks at level 3</span>
-                            <span class="location-difficulty" id="mountains-difficulty"></span>
-                            <span class="success-chance" id="mountains-chance"></span>
-                        </span>
-                    </button>
-                    <button class="location-btn location-cavern" data-location="cavern"
-                        aria-label="Explore Crystal Cavern">
-                        <span class="location-icon">🕳️</span>
-                        <span class="location-info">
-                            <span class="location-name">Crystal Cavern</span>
-                            <span class="location-desc">Shimmering crystals line the walls</span>
-                            <span class="location-rewards animated-rewards">💎0-2 ⚔️0-1</span>
-                            <span class="location-level">Unlocks at level 4</span>
-                            <span class="location-difficulty" id="cavern-difficulty"></span>
-                            <span class="success-chance" id="cavern-chance"></span>
-                        </span>
-                    </button>
-                    <button class="location-btn location-lake" data-location="lake" aria-label="Explore Serene Lake">
-                        <span class="location-icon">🌊</span>
-                        <span class="location-info">
-                            <span class="location-name">Serene Lake</span>
-                            <span class="location-desc">Plentiful fish and clean water</span>
-                            <span class="location-rewards animated-rewards">🌾1-3 🪵0-1</span>
-                            <span class="location-level">Unlocks at level 2</span>
-                            <span class="location-difficulty" id="lake-difficulty"></span>
-                            <span class="success-chance" id="lake-chance"></span>
-                        </span>
-                    </button>
+                <div class="section-content">
+                    <div class="exploration-info">
+                        <div class="challenge-text" id="challenge-text">
+                            Monthly Challenge: Explore all locations
+                        </div>
+                        <div class="explorations-remaining">
+                            Explorations: <span id="explorations-left">5</span>/<span id="explorations-max">5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="locations-grid" id="locations-grid">
+                        <!-- Locations will be populated by JavaScript -->
+                    </div>
                 </div>
+            </div>
 
-            </section>
-
-            <!-- Event Log -->
-            <section class="event-log" id="event-log">
-                <h2>Event Log</h2>
-                <div class="log-controls">
-                    <button id="clear-log-btn" aria-label="Clear event log">Clear Log</button>
-                    <input type="text" id="log-search" placeholder="Search log..." aria-label="Search event log">
-                    <select id="text-size-select">
-                        <option value="small">Small Text</option>
-                        <option value="medium" selected>Medium Text</option>
-                        <option value="large">Large Text</option>
-                    </select>
+            <!-- Settlement Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🏠 Settlement</h2>
                 </div>
-                <div id="event-log-content" class="log-content"></div>
-            </section>
-
-
-            <!-- Settlement -->
-            <section class="settlement" id="settlement">
-                <h2>Your Settlement</h2>
-
-                <div class="settlement-dashboard">
-                    <div id="building-overview" class="dashboard-section"></div>
-                    <div id="happiness-meter" class="dashboard-section"></div>
-                    <div id="construction-progress" class="dashboard-section"></div>
-                    <div id="settlement-stats" class="dashboard-section"></div>
-                </div>
-
-                <div class="settlement-overview">
-                    <div class="settlement-item">
-                        <span class="settlement-icon">🏠</span>
-                        <div class="settlement-info">
-                            <div class="settlement-name">Home: <span id="home-level">Camp</span></div>
-                            <button class="upgrade-btn" id="home-upgrade-btn" aria-label="Upgrade home">
-                                <span class="upgrade-text">Upgrade to House</span>
-                                <span class="upgrade-cost">5 🪵</span>
+                <div class="section-content">
+                    <div class="settlement-overview">
+                        <div class="settlement-card">
+                            <div class="settlement-icon">🏠</div>
+                            <div class="settlement-details">
+                                <div class="settlement-name">Home: <span id="home-type">Camp</span></div>
+                                <div class="settlement-status">Population: <span id="population">5</span></div>
+                            </div>
+                            <button class="upgrade-button" id="upgrade-home">
+                                Upgrade
+                            </button>
+                        </div>
+                        
+                        <div class="settlement-card">
+                            <div class="settlement-icon">🛡️</div>
+                            <div class="settlement-details">
+                                <div class="settlement-name">Walls: <span id="walls-type">None</span></div>
+                                <div class="settlement-status">Defense bonus: <span id="wall-bonus">0</span></div>
+                            </div>
+                            <button class="upgrade-button" id="upgrade-walls">
+                                Build
                             </button>
                         </div>
                     </div>
 
-                    <div class="settlement-item">
-                        <span class="settlement-icon">🛡️</span>
-                        <div class="settlement-info">
-                            <div class="settlement-name">Walls: <span id="walls-level">None</span></div>
-                            <button class="upgrade-btn" id="walls-upgrade-btn" aria-label="Upgrade walls">
-                                <span class="upgrade-text">Build Earthen Walls</span>
-                                <span class="upgrade-cost">5 🪵</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="settlement-item">
-                        <span class="settlement-icon">👥</span>
-                        <div class="settlement-info">
-                            <div class="settlement-name">Population: <span id="population-count">5</span> (Food: <span
-                                    id="population-food">5</span>)</div>
-                        </div>
+                    <!-- Buildings -->
+                    <div class="buildings-grid" id="buildings-grid">
+                        <!-- Buildings will be populated by JavaScript -->
                     </div>
                 </div>
+            </div>
 
-                <div class="buildings scroll-container">
-                    <details class="building-section" open>
-                        <summary>Farms (Camp) (<span id="farm-count">0</span>/<span id="farm-max">2</span>)</summary>
-                        <div id="farms-container"></div>
-                        <button class="build-btn" id="build-farm-btn" aria-label="Build Farm">
-                            <span class="build-text">Build Farm</span>
-                            <span class="build-cost">1 🪵 1 🗿</span>
-                        </button>
-                    </details>
-
-                    <details class="building-section" open>
-                        <summary>Forester Huts (Camp) (<span id="forester-count">0</span>/<span
-                                id="forester-max">2</span>)</summary>
-                        <div id="foresters-container"></div>
-                        <button class="build-btn" id="build-forester-btn" aria-label="Build Forester Hut">
-                            <span class="build-text">Build Forester Hut</span>
-                            <span class="build-cost">2 🪵 1 🗿</span>
-                        </button>
-                    </details>
-
-                    <details class="building-section" open>
-                        <summary>Quarries (Camp) (<span id="quarry-count">0</span>/<span id="quarry-max">2</span>)
-                        </summary>
-                        <div id="quarries-container"></div>
-                        <button class="build-btn" id="build-quarry-btn" aria-label="Build Quarry">
-                            <span class="build-text">Build Quarry</span>
-                            <span class="build-cost">1 🪵 2 🗿</span>
-                        </button>
-                    </details>
-                    <details class="building-section" open>
-                        <summary>Mines (House) (<span id="mine-count">0</span>/<span id="mine-max">2</span>)</summary>
-                        <div id="mines-container"></div>
-                        <button class="build-btn" id="build-mine-btn" aria-label="Build Mine">
-                            <span class="build-text">Build Mine</span>
-                            <span class="build-cost">2 🪵 2 🗿</span>
-                        </button>
-                    </details>
-
-                    <details class="building-section" open>
-                        <summary>Gem Mines (Fortress) (<span id="gemMine-count">0</span>/<span
-                                id="gemMine-max">2</span>)</summary>
-                        <div id="gemMines-container"></div>
-                        <button class="build-btn" id="build-gemMine-btn" aria-label="Build Gem Mine">
-                            <span class="build-text">Build Gem Mine</span>
-                            <span class="build-cost">2 🪵 2 🗿 1 ⚔️</span>
-                        </button>
-                    </details>
-                    <details class="building-section" open>
-                        <summary>Workshops (Hall) (<span id="workshop-count">0</span>/<span id="workshop-max">2</span>)
-                        </summary>
-                        <div id="workshops-container"></div>
-                        <button class="build-btn" id="build-workshop-btn" aria-label="Build Workshop">
-                            <span class="build-text">Build Workshop</span>
-                            <span class="build-cost">2 🪵 1 🗿</span>
-                        </button>
-                    </details>
-                    <details class="building-section" open>
-                        <summary>Sawmills (House) (<span id="sawmill-count">0</span>/<span id="sawmill-max">1</span>)
-                        </summary>
-                        <div id="sawmills-container"></div>
-                        <button class="build-btn" id="build-sawmill-btn" aria-label="Build Sawmill">
-                            <span class="build-text">Build Sawmill</span>
-                            <span class="build-cost">3 🪵 2 🗿</span>
-                        </button>
-                    </details>
-                    <details class="building-section" open>
-                        <summary>Granaries (House) (<span id="granary-count">0</span>/<span id="granary-max">1</span>)
-                        </summary>
-                        <div id="granaries-container"></div>
-                        <button class="build-btn" id="build-granary-btn" aria-label="Build Granary">
-                            <span class="build-text">Build Granary</span>
-                            <span class="build-cost">2 🪵 2 🗿</span>
-                        </button>
-                    </details>
-                    <details class="building-section" open>
-                        <summary>Smelters (Hall) (<span id="smelter-count">0</span>/<span id="smelter-max">1</span>)
-                        </summary>
-                        <div id="smelters-container"></div>
-                        <button class="build-btn" id="build-smelter-btn" aria-label="Build Smelter">
-                            <span class="build-text">Build Smelter</span>
-                            <span class="build-cost">2 🪵 3 🗿 1 ⚔️</span>
-                        </button>
-                    </details>
-                    <details class="building-section" open>
-                        <summary>Barracks (Fortress) (<span id="barracks-count">0</span>/<span
-                                id="barracks-max">1</span>)</summary>
-                        <div id="barracks-container"></div>
-                        <button class="build-btn" id="build-barracks-btn" aria-label="Build Barracks">
-                            <span class="build-text">Build Barracks</span>
-                            <span class="build-cost">3 🪵 3 🗿 2 ⚔️</span>
-                        </button>
-                    </details>
+            <!-- Event Log Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📜 Event Log</h2>
                 </div>
-
-                <div class="crafting">
-                    <h3>Crafting</h3>
-                    <div class="craft-items scroll-container">
-                        <div class="craft-item">
-                            <span class="craft-icon">🍀</span>
-                            <span class="craft-name">Lucky Charm</span>
-                            <span class="craft-owned" id="lucky-charm-count">0</span>
-                            <div class="craft-desc">Adds +2 to your next 3 rolls.</div>
-                            <button class="craft-btn" id="craft-lucky-charm" aria-label="Craft Lucky Charm">
-                                <span class="craft-cost">3 🪵 2 🗿</span>
-                            </button>
-                            <!-- Repair option removed -->
-                        </div>
-                        <div class="craft-item">
-                            <span class="craft-icon">📜</span>
-                            <span class="craft-name">Magic Scroll</span>
-                            <span class="craft-owned" id="magic-scroll-count">0</span>
-                            <div class="craft-desc">Craft to gain 20 XP instantly.</div>
-                            <button class="craft-btn" id="craft-magic-scroll" aria-label="Craft Magic Scroll">
-                                <span class="craft-cost">2 🪵 1 💎</span>
-                            </button>
-                        </div>
+                <div class="section-content">
+                    <div class="log-container" id="event-log">
+                        <!-- Log entries will be populated by JavaScript -->
                     </div>
                 </div>
+            </div>
 
-                <div class="research">
-                    <h3>Research</h3>
-                    <div>Current: <span id="current-research">None</span> <span id="research-progress"></span></div>
-                    <select id="research-select"></select>
-                    <button id="start-research-btn">Start Research</button>
-                </div>
-            </section>
-
-            <section class="sleep-section" id="month-section">
-                <button id="next-month-btn" class="sleep-btn" disabled aria-label="Advance to next month">
-                    <span class="sleep-icon">😴</span>
-                    Go To Next Month
-                </button>
-            </section>
-
+            <!-- Next Month Action -->
+            <button class="primary-action" id="next-month-btn" disabled>
+                <span>😴</span>
+                <span>Go To Next Month</span>
+            </button>
         </main>
 
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#exploration" class="nav-item" aria-label="Exploration">🗺️</a>
+            <a href="#settlement" class="nav-item" aria-label="Settlement">🏠</a>
+            <a href="#event-log" class="nav-item" aria-label="Event Log">📜</a>
+        </nav>
+
         <!-- Dice Roll Modal -->
-        <div id="dice-modal" class="modal">
+        <div class="modal" id="dice-modal">
             <div class="modal-content">
-                <button class="modal-close-btn" aria-label="Close">&times;</button>
                 <div class="dice-container">
                     <div class="dice" id="dice">
-                        <div class="dice-face">?</div>
+                        <div class="dice-face" id="dice-face">?</div>
                     </div>
                 </div>
-                <div class="roll-result" id="roll-result"></div>
-                <button id="close-modal-btn" class="modal-btn">Continue</button>
+                <div class="roll-result" id="roll-result">Rolling...</div>
+                <button class="modal-button" id="modal-continue">Continue</button>
             </div>
         </div>
-        <button id="fab-next-month" class="fab" aria-label="Advance to next month">⏭️</button>
-        <nav class="bottom-nav">
-            <a href="#exploration" aria-label="Jump to exploration">🗺️</a>
-            <a href="#settlement" aria-label="Jump to settlement">🏠</a>
-            <a href="#event-log" aria-label="Jump to event log">📜</a>
-        </nav>
     </div>
 
-    <!-- Load the main script as an ES module -->
-    <script type="module" src="./app.js"></script>
+    <script>
+        // Game State (simplified for demo)
+        const gameState = {
+            month: 1,
+            level: 1,
+            xp: 0,
+            xpToNext: 100,
+            morale: 100,
+            season: 'spring',
+            explorationsLeft: 5,
+            explorationsMax: 5,
+            resources: {
+                wood: 0,
+                stone: 0,
+                metal: 0,
+                food: 10,
+                tools: 0,
+                gems: 0
+            },
+            settlement: {
+                home: 'camp',
+                walls: 'none',
+                population: 5
+            },
+            ruler: {
+                name: 'Arthur',
+                age: 20,
+                yearsRemaining: 20,
+                traits: ['builder', 'explorer']
+            },
+            eventLog: [
+                { message: '🌅 Welcome to Dice & Castle! Your adventure begins.', type: 'neutral', timestamp: 'Game Start' }
+            ]
+        };
 
+        const locations = {
+            forest: {
+                name: 'Deep Forest',
+                icon: '🌲',
+                description: 'Rich in wood and wildlife',
+                rewards: 'Wood 1-4, Food 0-2',
+                level: 1,
+                gradient: 'linear-gradient(135deg, #2ecc71, #27ae60)'
+            },
+            quarry: {
+                name: 'Stone Quarry',
+                icon: '⛰️',
+                description: 'Source of stone and metal',
+                rewards: 'Stone 1-3, Metal 0-1',
+                level: 1,
+                gradient: 'linear-gradient(135deg, #7f8c8d, #95a5a6)'
+            },
+            plains: {
+                name: 'Fertile Plains',
+                icon: '🌾',
+                description: 'Food and farming supplies',
+                rewards: 'Food 1-3, Wood 0-1',
+                level: 1,
+                gradient: 'linear-gradient(135deg, #f1c40f, #e67e22)'
+            },
+            ruins: {
+                name: 'Ancient Ruins',
+                icon: '🏛️',
+                description: 'Mysterious treasures await',
+                rewards: 'Mixed rewards',
+                level: 2,
+                gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)'
+            }
+        };
+
+        const buildingCategories = {
+            production: {
+                name: 'Production Buildings',
+                icon: '🏭',
+                buildings: [
+                    { name: 'Farm', icon: '🌾', cost: '1 🪵 1 🗿', production: '+1 Food', count: 0, max: 2 },
+                    { name: 'Quarry', icon: '⛏️', cost: '1 🪵 2 🗿', production: '+1 Stone', count: 0, max: 2 },
+                    { name: 'Mine', icon: '⚒️', cost: '2 🪵 2 🗿', production: '+1 Metal', count: 0, max: 1 }
+                ]
+            },
+            utility: {
+                name: 'Utility Buildings',
+                icon: '🔧',
+                buildings: [
+                    { name: 'Workshop', icon: '🔧', cost: '2 🪵 1 🗿', production: '+1 Tools', count: 0, max: 1 },
+                    { name: 'Granary', icon: '🍞', cost: '2 🪵 2 🗿', production: '+1 Food', count: 0, max: 1 }
+                ]
+            }
+        };
+
+        // UI Management Functions
+        function updateUI() {
+            // Update header stats
+            document.getElementById('month-display').textContent = gameState.month;
+            document.getElementById('level-display').textContent = gameState.level;
+            document.getElementById('morale-display').textContent = gameState.morale;
+            document.getElementById('season-display').textContent = getSeasonIcon(gameState.season);
+            
+            // Update detailed stats
+            document.getElementById('level-detailed').textContent = gameState.level;
+            document.getElementById('xp-current').textContent = gameState.xp;
+            document.getElementById('xp-required').textContent = gameState.xpToNext;
+            document.getElementById('xp-progress').value = gameState.xp;
+            document.getElementById('xp-progress').max = gameState.xpToNext;
+            document.getElementById('morale-detailed').textContent = getMoraleDisplay(gameState.morale);
+            
+            // Update resources
+            Object.keys(gameState.resources).forEach(resource => {
+                const element = document.getElementById(`${resource}-amount`);
+                if (element) {
+                    element.textContent = gameState.resources[resource];
+                }
+            });
+            
+            // Update ruler info
+            document.getElementById('ruler-name').textContent = gameState.ruler.name;
+            document.getElementById('ruler-age').textContent = gameState.ruler.age;
+            document.getElementById('ruler-years').textContent = gameState.ruler.yearsRemaining;
+            document.getElementById('ruler-traits').textContent = `Traits: ${gameState.ruler.traits.join(', ')}`;
+            
+            // Update exploration
+            document.getElementById('explorations-left').textContent = gameState.explorationsLeft;
+            document.getElementById('explorations-max').textContent = gameState.explorationsMax;
+            
+            // Update settlement
+            document.getElementById('home-type').textContent = capitalizeFirst(gameState.settlement.home);
+            document.getElementById('walls-type').textContent = capitalizeFirst(gameState.settlement.walls);
+            document.getElementById('population').textContent = gameState.settlement.population;
+            
+            // Update next month button
+            document.getElementById('next-month-btn').disabled = gameState.explorationsLeft > 0;
+            
+            updateEventLog();
+        }
+
+        function getSeasonIcon(season) {
+            const icons = {
+                spring: '🌸',
+                summer: '☀️',
+                autumn: '🍂',
+                winter: '❄️'
+            };
+            return icons[season] || '🌸';
+        }
+
+        function getMoraleDisplay(morale) {
+            let face = '😀';
+            if (morale < 25) face = '😠';
+            else if (morale < 50) face = '😟';
+            else if (morale < 75) face = '🙂';
+            return `${face} ${morale}`;
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function updateEventLog() {
+            const logContainer = document.getElementById('event-log');
+            logContainer.innerHTML = '';
+            
+            gameState.eventLog.slice(-10).reverse().forEach(entry => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${entry.type}`;
+                logEntry.innerHTML = `
+                    <strong>${entry.timestamp}</strong><br>
+                    ${entry.message}
+                `;
+                logContainer.appendChild(logEntry);
+            });
+        }
+
+        function addLogEntry(message, type = 'neutral') {
+            const timestamp = new Date().toLocaleTimeString();
+            gameState.eventLog.push({
+                message,
+                type,
+                timestamp: `Month ${gameState.month} - ${timestamp}`
+            });
+            updateEventLog();
+        }
+
+        function initializeLocations() {
+            const locationsGrid = document.getElementById('locations-grid');
+            locationsGrid.innerHTML = '';
+            
+            Object.entries(locations).forEach(([key, location]) => {
+                const locationCard = document.createElement('button');
+                locationCard.className = 'location-card';
+                locationCard.style.background = location.gradient;
+                locationCard.disabled = gameState.level < location.level || gameState.explorationsLeft <= 0;
+                
+                locationCard.innerHTML = `
+                    <div class="location-header">
+                        <div class="location-icon">${location.icon}</div>
+                        <div class="location-info">
+                            <div class="location-name">${location.name}</div>
+                            <div class="location-desc">${location.description}</div>
+                        </div>
+                    </div>
+                    <div class="location-meta">
+                        <span>Level ${location.level}</span>
+                        <div class="location-rewards">${location.rewards}</div>
+                    </div>
+                `;
+                
+                locationCard.addEventListener('click', () => exploreLocation(key, location));
+                locationsGrid.appendChild(locationCard);
+            });
+        }
+
+        function initializeBuildings() {
+            const buildingsGrid = document.getElementById('buildings-grid');
+            buildingsGrid.innerHTML = '';
+            
+            Object.entries(buildingCategories).forEach(([categoryKey, category]) => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'building-category';
+                
+                categoryDiv.innerHTML = `
+                    <div class="building-category-header" onclick="toggleCategory('${categoryKey}')">
+                        <span>${category.icon} ${category.name}</span>
+                        <span class="category-toggle">▼</span>
+                    </div>
+                    <div class="building-category-content" id="category-${categoryKey}">
+                        <div class="building-list" id="buildings-${categoryKey}"></div>
+                    </div>
+                `;
+                
+                buildingsGrid.appendChild(categoryDiv);
+                
+                // Add buildings to category
+                const buildingsList = document.getElementById(`buildings-${categoryKey}`);
+                category.buildings.forEach(building => {
+                    const buildingDiv = document.createElement('div');
+                    buildingDiv.className = 'building-item';
+                    buildingDiv.innerHTML = `
+                        <div class="building-info">
+                            <div class="building-name">${building.icon} ${building.name} (${building.count}/${building.max})</div>
+                            <div class="building-stats">${building.production} • Cost: ${building.cost}</div>
+                        </div>
+                        <button class="build-button" onclick="buildBuilding('${building.name}')" 
+                                ${building.count >= building.max ? 'disabled' : ''}>
+                            Build
+                        </button>
+                    `;
+                    buildingsList.appendChild(buildingDiv);
+                });
+            });
+        }
+
+        function toggleCategory(categoryKey) {
+            const category = document.querySelector(`#category-${categoryKey}`).parentElement;
+            category.classList.toggle('expanded');
+        }
+
+        function exploreLocation(key, location) {
+            if (gameState.explorationsLeft <= 0) return;
+            
+            gameState.explorationsLeft--;
+            showDiceRoll(() => {
+                const roll = Math.floor(Math.random() * 20) + 1;
+                let result = '';
+                let type = 'neutral';
+                
+                if (roll >= 15) {
+                    result = `🎉 Excellent exploration! Found valuable resources.`;
+                    type = 'success';
+                    gameState.resources.wood += 3;
+                    gameState.resources.stone += 2;
+                } else if (roll >= 8) {
+                    result = `📦 Successful exploration! Found some resources.`;
+                    type = 'success';
+                    gameState.resources.wood += 1;
+                    gameState.resources.food += 1;
+                } else {
+                    result = `😞 Poor exploration. Found very little.`;
+                    type = 'failure';
+                }
+                
+                addLogEntry(`🎲 Rolled ${roll}: ${result}`, type);
+                updateUI();
+                
+                return [`You rolled ${roll}`, result, `Explorations remaining: ${gameState.explorationsLeft}`];
+            });
+        }
+
+        function buildBuilding(name) {
+            addLogEntry(`🏗️ Started building ${name}`, 'success');
+            updateUI();
+        }
+
+        function advanceMonth() {
+            gameState.month++;
+            gameState.explorationsLeft = gameState.explorationsMax;
+            
+            // Monthly production
+            gameState.resources.food += 2;
+            gameState.resources.wood += 1;
+            
+            showDiceRoll(() => {
+                const roll = Math.floor(Math.random() * 20) + 1;
+                let event = '';
+                let type = 'neutral';
+                
+                if (roll >= 15) {
+                    event = '🌟 A prosperous month! Bonus resources gained.';
+                    type = 'success';
+                    gameState.resources.wood += 2;
+                    gameState.resources.stone += 1;
+                } else if (roll <= 5) {
+                    event = '⚠️ A challenging month. Some resources lost.';
+                    type = 'failure';
+                    gameState.resources.food = Math.max(0, gameState.resources.food - 2);
+                } else {
+                    event = '🌙 A peaceful month passes.';
+                    type = 'neutral';
+                }
+                
+                // Age ruler
+                gameState.ruler.age++;
+                gameState.ruler.yearsRemaining--;
+                
+                addLogEntry(`🌅 Month ${gameState.month} begins.`, 'neutral');
+                addLogEntry(event, type);
+                updateUI();
+                
+                return [`Month ${gameState.month}`, event, 'Monthly production collected'];
+            });
+        }
+
+        function showDiceRoll(callback) {
+            const modal = document.getElementById('dice-modal');
+            const dice = document.getElementById('dice');
+            const diceFace = document.getElementById('dice-face');
+            const result = document.getElementById('roll-result');
+            
+            modal.classList.add('show');
+            dice.classList.add('rolling');
+            diceFace.textContent = '?';
+            result.textContent = 'Rolling...';
+            
+            setTimeout(() => {
+                dice.classList.remove('rolling');
+                const roll = Math.floor(Math.random() * 20) + 1;
+                diceFace.textContent = roll;
+                
+                const details = callback ? callback() : [`You rolled ${roll}`];
+                result.innerHTML = details.join('<br>');
+            }, 1000);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Header toggle
+            document.getElementById('header-toggle').addEventListener('click', () => {
+                const toggle = document.getElementById('header-toggle');
+                const details = document.getElementById('header-details');
+                
+                toggle.classList.toggle('expanded');
+                details.classList.toggle('expanded');
+            });
+            
+            // Next month button
+            document.getElementById('next-month-btn').addEventListener('click', advanceMonth);
+            
+            // Modal continue button
+            document.getElementById('modal-continue').addEventListener('click', () => {
+                document.getElementById('dice-modal').classList.remove('show');
+            });
+            
+            // Smooth scrolling for navigation
+            document.querySelectorAll('.nav-item').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = document.querySelector(link.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // Initialize game
+            initializeLocations();
+            initializeBuildings();
+            updateUI();
+            
+            // Expand first building category by default
+            document.querySelector('.building-category').classList.add('expanded');
+        });
+
+        // Touch feedback for better mobile experience
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.matches('button, .nav-item, .location-card')) {
+                e.target.style.transform = 'scale(0.98)';
+            }
+        });
+
+        document.addEventListener('touchend', (e) => {
+            if (e.target.matches('button, .nav-item, .location-card')) {
+                setTimeout(() => {
+                    e.target.style.transform = '';
+                }, 100);
+            }
+        });
+    </script>
 </body>
-
 </html>
