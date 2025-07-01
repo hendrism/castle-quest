@@ -1852,13 +1852,10 @@ function setupResourceBar() {
         const icon = getResourceIcon(r);
         const name = r.charAt(0).toUpperCase() + r.slice(1);
         const amount = gameState.resources[r];
-        const color = getResourceColor(r);
         return `
-            <div class="resource" title="${name}">
-                <div class="resource-circle" id="circle-${r}" style="--progress:${Math.min(100, amount)};--color:${color}">
-                    <span class="resource-icon">${icon}</span>
-                    <span class="resource-amount" id="bar-${r}">${amount}</span>
-                </div>
+            <div class="resource" data-resource="${r}" title="${name}">
+                <div class="resource-icon">${icon}</div>
+                <div class="resource-amount" id="bar-${r}">${amount}</div>
                 <div class="resource-production" id="bar-prod-${r}"></div>
             </div>`;
     }).join('');
