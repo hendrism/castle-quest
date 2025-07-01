@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>PWA Header Demo</title>
+  <style>
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    .scroll-area {
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding-top: env(safe-area-inset-top);
+      height: clamp(3rem, 5vh + 1rem, 6rem);
+      background: #203040;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      transition: height .3s, padding .3s, transform .3s;
+      z-index: 10;
+    }
+    .header--collapsed {
+      height: 3rem;
+      padding: 0 .75rem;
+    }
+    .header--hidden {
+      transform: translateY(-100%);
+    }
+    .sentinel { height: 1px; }
+    .bottom-nav {
+      position: fixed;
+      bottom: env(safe-area-inset-bottom);
+      left: 0; right: 0;
+      background: #203040;
+      display: flex;
+      justify-content: space-around;
+      padding: .5rem 0;
+      color: #fff;
+    }
+    .bottom-nav button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">My Game</header>
+  <div class="scroll-area">
+    <div class="sentinel"></div>
+    <div style="padding:1rem;">
+      <p>…long scrollable content…</p>
+      <p>…long scrollable content…</p>
+      <p>…long scrollable content…</p>
+      <p>…long scrollable content…</p>
+      <p>…long scrollable content…</p>
+      <p>…long scrollable content…</p>
+      <p>…long scrollable content…</p>
+      <p>…long scrollable content…</p>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button>🗺️</button>
+    <button>🏠</button>
+    <button>📜</button>
+  </nav>
+  <script>
+    const header = document.querySelector('.header');
+    const scrollArea = document.querySelector('.scroll-area');
+    let lastY = 0;
+    let inactivity;
+
+    new IntersectionObserver(entries => {
+      for (const e of entries) {
+        header.classList.toggle('header--collapsed', !e.isIntersecting);
+      }
+    }).observe(document.querySelector('.sentinel'));
+
+    function hideAfterDelay() {
+      clearTimeout(inactivity);
+      inactivity = setTimeout(() => header.classList.add('header--hidden'), 2000);
+    }
+
+    scrollArea.addEventListener('scroll', () => {
+      const y = scrollArea.scrollTop;
+      if (y > lastY && y > 50) {
+        header.classList.add('header--hidden');
+      } else {
+        header.classList.remove('header--hidden');
+        if (y > 50) header.classList.add('header--collapsed');
+      }
+      lastY = y;
+      hideAfterDelay();
+    });
+
+    ['touchstart','mousemove','scroll'].forEach(evt =>
+      scrollArea.addEventListener(evt, () => {
+        clearTimeout(inactivity);
+        header.classList.remove('header--hidden');
+      })
+    );
+
+    hideAfterDelay();
+  </script>
+</body>
+</html>
