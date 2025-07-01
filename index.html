@@ -1098,6 +1098,21 @@
             }
         };
 
+        // Settlement upgrade data
+        const homeTypes = {
+            camp: { name: 'Camp', upgradeTo: 'house', cost: { wood: 5 } },
+            house: { name: 'House', upgradeTo: 'hall', cost: { wood: 10, stone: 5 } },
+            hall: { name: 'Hall', upgradeTo: 'fortress', cost: { stone: 20, metal: 5 } },
+            fortress: { name: 'Fortress', upgradeTo: null, cost: null }
+        };
+
+        const wallTypes = {
+            none: { name: 'None', upgradeTo: 'earthen', cost: { wood: 5 } },
+            earthen: { name: 'Earthen', upgradeTo: 'wood', cost: { wood: 10 } },
+            wood: { name: 'Wood', upgradeTo: 'stone', cost: { stone: 20 } },
+            stone: { name: 'Stone', upgradeTo: null, cost: null }
+        };
+
         const buildingCategories = {
             basic: {
                 name: 'Basic Production',
@@ -1175,6 +1190,28 @@
             document.getElementById('home-type').textContent = capitalizeFirst(gameState.settlement.home);
             document.getElementById('walls-type').textContent = capitalizeFirst(gameState.settlement.walls);
             document.getElementById('population').textContent = gameState.settlement.population;
+
+            const homeBtn = document.getElementById('upgrade-home');
+            const currentHome = homeTypes[gameState.settlement.home];
+            if (currentHome.upgradeTo) {
+                const cost = currentHome.cost;
+                homeBtn.style.display = 'inline-block';
+                homeBtn.textContent = `Upgrade (${formatCost(cost)})`;
+                homeBtn.disabled = !canAfford(cost);
+            } else {
+                homeBtn.style.display = 'none';
+            }
+
+            const wallsBtn = document.getElementById('upgrade-walls');
+            const currentWalls = wallTypes[gameState.settlement.walls];
+            if (currentWalls.upgradeTo) {
+                const cost = currentWalls.cost;
+                wallsBtn.style.display = 'inline-block';
+                wallsBtn.textContent = `Build (${formatCost(cost)})`;
+                wallsBtn.disabled = !canAfford(cost);
+            } else {
+                wallsBtn.style.display = 'none';
+            }
             
             // Update next month button
             document.getElementById('next-month-btn').disabled = gameState.explorationsLeft > 0;
@@ -1432,6 +1469,40 @@
             return icons[resource] || resource;
         }
 
+        function canAfford(cost) {
+            return Object.keys(cost).every(r => (gameState.resources[r] || 0) >= cost[r]);
+        }
+
+        function formatCost(cost) {
+            return Object.entries(cost)
+                .map(([r, amt]) => `${amt} ${getResourceIcon(r)}`)
+                .join(' ');
+        }
+
+        function upgradeHome() {
+            const current = homeTypes[gameState.settlement.home];
+            if (!current.upgradeTo || !current.cost) return;
+            if (!canAfford(current.cost)) return;
+            Object.keys(current.cost).forEach(r => {
+                gameState.resources[r] -= current.cost[r];
+            });
+            gameState.settlement.home = current.upgradeTo;
+            addLogEntry(`🏠 Upgraded home to ${capitalizeFirst(current.upgradeTo)}.`, 'success');
+            updateUI();
+        }
+
+        function upgradeWalls() {
+            const current = wallTypes[gameState.settlement.walls];
+            if (!current.upgradeTo || !current.cost) return;
+            if (!canAfford(current.cost)) return;
+            Object.keys(current.cost).forEach(r => {
+                gameState.resources[r] -= current.cost[r];
+            });
+            gameState.settlement.walls = current.upgradeTo;
+            addLogEntry(`🛡️ Built ${capitalizeFirst(current.upgradeTo)} walls.`, 'success');
+            updateUI();
+        }
+
         function buildBuilding(key, name) {
             // Find the building in categories
             let building = null;
@@ -1493,7 +1564,8 @@
                 addLogEntry(`🌅 Month ${gameState.month} begins.`, 'neutral');
                 addLogEntry(event, type);
                 updateUI();
-                
+                initializeLocations();
+
                 return [`Month ${gameState.month}`, event, 'Monthly production collected'];
             });
         }
@@ -1532,6 +1604,9 @@
             
             // Next month button
             document.getElementById('next-month-btn').addEventListener('click', advanceMonth);
+
+            document.getElementById('upgrade-home').addEventListener('click', upgradeHome);
+            document.getElementById('upgrade-walls').addEventListener('click', upgradeWalls);
             
             // Modal continue button
             document.getElementById('modal-continue').addEventListener('click', () => {
