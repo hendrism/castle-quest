@@ -90,7 +90,7 @@
         /* Compact Stats Row */
         .stats-compact {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: var(--spacing-sm);
             margin-bottom: var(--spacing-sm);
         }
@@ -142,11 +142,17 @@
         .resource-icon {
             font-size: 1rem;
             margin-bottom: 2px;
+            color: var(--white);
         }
 
         .resource-amount {
             font-size: 0.8rem;
             font-weight: 600;
+            color: var(--white);
+        }
+
+        .resource-prod {
+            color: var(--white);
         }
 
         /* Expandable Details */
@@ -623,6 +629,25 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .toast {
+            position: fixed;
+            bottom: calc(80px + var(--safe-area-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--white);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-small);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -759,14 +784,6 @@
                     <div class="stat-compact">
                         <div class="stat-value" id="month-display">1</div>
                         <div class="stat-label">Month</div>
-                    </div>
-                    <div class="stat-compact">
-                        <div class="stat-value" id="level-display">1</div>
-                        <div class="stat-label">Level</div>
-                    </div>
-                    <div class="stat-compact">
-                        <div class="stat-value" id="morale-display">100</div>
-                        <div class="stat-label">Morale</div>
                     </div>
                     <div class="stat-compact">
                         <div class="stat-value" id="season-display">🌸</div>
@@ -926,6 +943,8 @@
                 </div>
             </div>
         </div>
+
+        <div id="toast" class="toast"></div>
 
         <!-- Dice Roll Modal -->
         <div class="modal" id="dice-modal">
@@ -1240,8 +1259,6 @@
         function updateUI() {
             // Update header stats
             document.getElementById('month-display').textContent = gameState.month;
-            document.getElementById('level-display').textContent = gameState.level;
-            document.getElementById('morale-display').textContent = gameState.morale;
             document.getElementById('season-display').textContent = getSeasonIcon(gameState.season);
             
             // Update detailed stats
@@ -1384,6 +1401,13 @@
             updateEventLog();
         }
 
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
         function initializeLocations() {
             const locationsGrid = document.getElementById('locations-grid');
             locationsGrid.innerHTML = '';
@@ -1456,7 +1480,8 @@
                 const buildingsList = document.getElementById(`buildings-${categoryKey}`);
                 let available = false;
                 category.buildings.forEach(building => {
-                    const canBuild = gameState.level >= building.level && building.count < building.max;
+                    const cost = BUILDING_TYPES[building.key].buildCost;
+                    const canBuild = gameState.level >= building.level && building.count < building.max && canAfford(cost);
                     if (canBuild) available = true;
                     const bt = BUILDING_TYPES[building.key];
                     const tierData = bt.levels[building.tier];
@@ -1477,8 +1502,12 @@
 
                     const buildBtn = document.createElement('button');
                     buildBtn.className = 'build-button';
-                    buildBtn.textContent = building.count >= building.max ? 'Max' : gameState.level < building.level ? `Lv${building.level}` : 'Build';
+                    let label = 'Build';
+                    if (building.count >= building.max) label = 'Max';
+                    else if (gameState.level < building.level) label = `Lv${building.level}`;
+                    buildBtn.textContent = label;
                     buildBtn.disabled = !canBuild;
+                    buildBtn.title = `Cost: ${formatCost(bt.buildCost)}`;
                     buildBtn.addEventListener('click', () => buildBuilding(building.key, building.name));
                     buildingDiv.appendChild(buildBtn);
 
@@ -1638,6 +1667,7 @@
             });
             gameState.settlement.home = current.upgradeTo;
             addLogEntry(`🏠 Upgraded home to ${capitalizeFirst(current.upgradeTo)}.`, 'success');
+            showToast(`Home upgraded to ${capitalizeFirst(current.upgradeTo)}`);
             gainXP(20);
             updateUI();
         }
@@ -1651,6 +1681,7 @@
             });
             gameState.settlement.walls = current.upgradeTo;
             addLogEntry(`🛡️ Built ${capitalizeFirst(current.upgradeTo)} walls.`, 'success');
+            showToast(`Walls upgraded to ${capitalizeFirst(current.upgradeTo)}`);
             gainXP(15);
             updateUI();
         }
@@ -1688,6 +1719,7 @@
 
             building.count++;
             addLogEntry(`🏗️ Built ${name}!`, 'success');
+            showToast(`Built ${name}`);
             gainXP(5);
             initializeBuildings();
             updateUI();
@@ -1717,6 +1749,7 @@
             building.tier = current.upgradeTo;
             const newName = BUILDING_TYPES[key].levels[building.tier].name;
             addLogEntry(`⬆️ Upgraded ${name} to ${newName}.`, 'success');
+            showToast(`Upgraded to ${newName}`);
             gainXP(10 * building.count);
             initializeBuildings();
             updateUI();
