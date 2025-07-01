@@ -1030,28 +1030,77 @@
                 name: 'Ancient Ruins',
                 icon: '🏛️',
                 description: 'Mysterious treasures await',
-                rewards: 'Mixed rewards',
+                rewards: 'Wood 0-2, Stone 0-2, Metal 0-2, Food 0-1, Gems 0-1',
                 level: 2,
                 gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)'
+            },
+            swamp: {
+                name: 'Misty Swamp',
+                icon: '🐸',
+                description: 'Treacherous wetlands rich in herbs',
+                rewards: 'Food 0-2, Wood 0-1, Stone 0-1',
+                level: 2,
+                gradient: 'linear-gradient(135deg, #16a085, #27ae60)'
+            },
+            mountains: {
+                name: 'High Mountains',
+                icon: '🏔️',
+                description: 'Metal and gems hidden in the peaks',
+                rewards: 'Stone 1-3, Metal 1-2, Gems 0-1',
+                level: 3,
+                gradient: 'linear-gradient(135deg, #bdc3c7, #2c3e50)'
+            },
+            cavern: {
+                name: 'Crystal Cavern',
+                icon: '🕳️',
+                description: 'Shimmering crystals line the walls',
+                rewards: 'Gems 0-2, Metal 0-1',
+                level: 4,
+                gradient: 'linear-gradient(135deg, #34495e, #2c3e50)'
+            },
+            lake: {
+                name: 'Serene Lake',
+                icon: '🌊',
+                description: 'Plentiful fish and clean water',
+                rewards: 'Food 1-3, Wood 0-1',
+                level: 2,
+                gradient: 'linear-gradient(135deg, #3498db, #2980b9)'
             }
         };
 
         const buildingCategories = {
-            production: {
-                name: 'Production Buildings',
+            basic: {
+                name: 'Basic Production',
                 icon: '🏭',
                 buildings: [
-                    { name: 'Farm', icon: '🌾', cost: '1 🪵 1 🗿', production: '+1 Food', count: 0, max: 2 },
-                    { name: 'Quarry', icon: '⛏️', cost: '1 🪵 2 🗿', production: '+1 Stone', count: 0, max: 2 },
-                    { name: 'Mine', icon: '⚒️', cost: '2 🪵 2 🗿', production: '+1 Metal', count: 0, max: 1 }
+                    { key: 'farm', name: 'Farm', icon: '🌾', cost: '1 🪵 1 🗿', production: '+1 Food', count: 0, max: 2, level: 1 },
+                    { key: 'forester', name: 'Forester Hut', icon: '🌳', cost: '2 🪵 1 🗿', production: '+1 Wood', count: 0, max: 2, level: 2 },
+                    { key: 'quarry', name: 'Quarry', icon: '⛏️', cost: '1 🪵 2 🗿', production: '+1 Stone', count: 0, max: 2, level: 1 }
+                ]
+            },
+            advanced: {
+                name: 'Advanced Production',
+                icon: '⚒️',
+                buildings: [
+                    { key: 'mine', name: 'Mine', icon: '⚒️', cost: '2 🪵 2 🗿', production: '+1 Metal', count: 0, max: 1, level: 2 },
+                    { key: 'gemMine', name: 'Gem Mine', icon: '💎', cost: '2 🪵 2 🗿 1 ⚔️', production: '+1 Gems', count: 0, max: 2, level: 4 },
+                    { key: 'sawmill', name: 'Sawmill', icon: '🪚', cost: '3 🪵 2 🗿', production: '+1 Wood', count: 0, max: 2, level: 2 }
                 ]
             },
             utility: {
                 name: 'Utility Buildings',
                 icon: '🔧',
                 buildings: [
-                    { name: 'Workshop', icon: '🔧', cost: '2 🪵 1 🗿', production: '+1 Tools', count: 0, max: 1 },
-                    { name: 'Granary', icon: '🍞', cost: '2 🪵 2 🗿', production: '+1 Food', count: 0, max: 1 }
+                    { key: 'workshop', name: 'Workshop', icon: '🔧', cost: '2 🪵 1 🗿', production: '+1 Tools (costs wood)', count: 0, max: 2, level: 3 },
+                    { key: 'granary', name: 'Granary', icon: '🍞', cost: '2 🪵 2 🗿', production: '+1 Food', count: 0, max: 2, level: 2 },
+                    { key: 'smelter', name: 'Smelter', icon: '🔥', cost: '2 🪵 3 🗿 1 ⚔️', production: '+1 Metal', count: 0, max: 1, level: 3 }
+                ]
+            },
+            military: {
+                name: 'Military Buildings',
+                icon: '🏹',
+                buildings: [
+                    { key: 'barracks', name: 'Barracks', icon: '🏹', cost: '3 🪵 3 🗿 2 ⚔️', production: '+1 Tools', count: 0, max: 1, level: 4 }
                 ]
             }
         };
@@ -1200,16 +1249,17 @@
                 // Add buildings to category
                 const buildingsList = document.getElementById(`buildings-${categoryKey}`);
                 category.buildings.forEach(building => {
+                    const canBuild = gameState.level >= building.level && building.count < building.max;
                     const buildingDiv = document.createElement('div');
                     buildingDiv.className = 'building-item';
                     buildingDiv.innerHTML = `
                         <div class="building-info">
                             <div class="building-name">${building.icon} ${building.name} (${building.count}/${building.max})</div>
-                            <div class="building-stats">${building.production} • Cost: ${building.cost}</div>
+                            <div class="building-stats">${building.production} • Cost: ${building.cost} • Level ${building.level}</div>
                         </div>
-                        <button class="build-button" onclick="buildBuilding('${building.name}')" 
-                                ${building.count >= building.max ? 'disabled' : ''}>
-                            Build
+                        <button class="build-button" onclick="buildBuilding('${building.key}', '${building.name}')" 
+                                ${!canBuild ? 'disabled' : ''}>
+                            ${building.count >= building.max ? 'Max' : gameState.level < building.level ? `Lv${building.level}` : 'Build'}
                         </button>
                     `;
                     buildingsList.appendChild(buildingDiv);
@@ -1223,39 +1273,135 @@
         }
 
         function exploreLocation(key, location) {
-            if (gameState.explorationsLeft <= 0) return;
+            if (gameState.explorationsLeft <= 0) {
+                addLogEntry('❌ No explorations remaining this month!', 'failure');
+                return;
+            }
+            
+            if (gameState.level < location.level) {
+                addLogEntry(`❌ Need level ${location.level} to explore ${location.name}`, 'failure');
+                return;
+            }
             
             gameState.explorationsLeft--;
             showDiceRoll(() => {
                 const roll = Math.floor(Math.random() * 20) + 1;
                 let result = '';
                 let type = 'neutral';
+                let rewards = {};
                 
-                if (roll >= 15) {
-                    result = `🎉 Excellent exploration! Found valuable resources.`;
-                    type = 'success';
-                    gameState.resources.wood += 3;
-                    gameState.resources.stone += 2;
-                } else if (roll >= 8) {
-                    result = `📦 Successful exploration! Found some resources.`;
-                    type = 'success';
-                    gameState.resources.wood += 1;
-                    gameState.resources.food += 1;
-                } else {
-                    result = `😞 Poor exploration. Found very little.`;
+                // Different rewards based on location and roll
+                if (roll === 1) {
+                    result = `💀 Critical failure at ${location.name}! You lost 1 food and gained nothing.`;
                     type = 'failure';
+                    gameState.resources.food = Math.max(0, gameState.resources.food - 1);
+                } else if (roll >= 18) {
+                    result = `✨ Amazing success at ${location.name}! Double rewards!`;
+                    type = 'success';
+                    rewards = getLocationRewards(key, 2.0);
+                } else if (roll >= 12) {
+                    result = `⭐ Good results at ${location.name}!`;
+                    type = 'success';
+                    rewards = getLocationRewards(key, 1.5);
+                } else if (roll >= 6) {
+                    result = `📦 Decent exploration at ${location.name}.`;
+                    type = 'neutral';
+                    rewards = getLocationRewards(key, 1.0);
+                } else {
+                    result = `😞 Poor exploration at ${location.name}.`;
+                    type = 'failure';
+                    rewards = getLocationRewards(key, 0.5);
                 }
                 
-                addLogEntry(`🎲 Rolled ${roll}: ${result}`, type);
-                updateUI();
+                // Apply rewards
+                Object.keys(rewards).forEach(resource => {
+                    if (gameState.resources.hasOwnProperty(resource)) {
+                        gameState.resources[resource] += rewards[resource];
+                    }
+                });
                 
-                return [`You rolled ${roll}`, result, `Explorations remaining: ${gameState.explorationsLeft}`];
+                // Create reward text
+                const rewardText = Object.keys(rewards)
+                    .filter(r => rewards[r] > 0)
+                    .map(r => `+${rewards[r]} ${getResourceIcon(r)}`)
+                    .join(' ');
+                
+                const logMessage = `🎲 Rolled ${roll}: ${result}${rewardText ? ' Rewards: ' + rewardText : ''}`;
+                addLogEntry(logMessage, type);
+                updateUI();
+                initializeLocations(); // Refresh location buttons
+                
+                return [
+                    `You rolled ${roll}`,
+                    result,
+                    rewardText ? `Rewards: ${rewardText}` : 'No rewards gained',
+                    `Explorations remaining: ${gameState.explorationsLeft}`
+                ];
             });
         }
+        
+        function getLocationRewards(locationKey, multiplier) {
+            const baseRewards = {
+                forest: { wood: 2, food: 1 },
+                quarry: { stone: 2, metal: 1 },
+                plains: { food: 2, wood: 1 },
+                ruins: { wood: 1, stone: 1, metal: 1, gems: 0.5 },
+                swamp: { food: 1, wood: 1 },
+                mountains: { stone: 2, metal: 1, gems: 0.5 },
+                cavern: { gems: 1, metal: 1 },
+                lake: { food: 2, wood: 1 }
+            };
+            
+            const base = baseRewards[locationKey] || {};
+            const result = {};
+            
+            Object.keys(base).forEach(resource => {
+                const amount = Math.floor(base[resource] * multiplier);
+                if (amount > 0) {
+                    result[resource] = amount;
+                }
+            });
+            
+            return result;
+        }
+        
+        function getResourceIcon(resource) {
+            const icons = {
+                wood: '🪵',
+                stone: '🗿',
+                metal: '⚔️',
+                food: '🌾',
+                tools: '🔧',
+                gems: '💎'
+            };
+            return icons[resource] || resource;
+        }
 
-        function buildBuilding(name) {
-            addLogEntry(`🏗️ Started building ${name}`, 'success');
-            updateUI();
+        function buildBuilding(key, name) {
+            // Find the building in categories
+            let building = null;
+            Object.values(buildingCategories).forEach(category => {
+                const found = category.buildings.find(b => b.key === key);
+                if (found) building = found;
+            });
+            
+            if (!building) return;
+            
+            // Check if can build
+            if (gameState.level < building.level) {
+                addLogEntry(`❌ Need level ${building.level} to build ${name}`, 'failure');
+                return;
+            }
+            
+            if (building.count >= building.max) {
+                addLogEntry(`❌ Maximum ${name} buildings reached`, 'failure');
+                return;
+            }
+            
+            // For demo, just add the building
+            building.count++;
+            addLogEntry(`🏗️ Started building ${name}! It will be ready next month.`, 'success');
+            initializeBuildings(); // Refresh the display
         }
 
         function advanceMonth() {
@@ -1341,9 +1487,34 @@
             document.querySelectorAll('.nav-item').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const target = document.querySelector(link.getAttribute('href'));
+                    const href = link.getAttribute('href');
+                    
+                    // Handle different section targets
+                    let targetSelector = '';
+                    if (href === '#exploration') {
+                        targetSelector = '.section:nth-of-type(1)'; // First section
+                    } else if (href === '#settlement') {
+                        targetSelector = '.section:nth-of-type(2)'; // Second section
+                    } else if (href === '#event-log') {
+                        targetSelector = '.section:nth-of-type(3)'; // Third section
+                    }
+                    
+                    const target = document.querySelector(targetSelector);
                     if (target) {
-                        target.scrollIntoView({ behavior: 'smooth' });
+                        // Add visual feedback
+                        link.style.background = 'rgba(255, 255, 255, 0.3)';
+                        setTimeout(() => {
+                            link.style.background = '';
+                        }, 200);
+                        
+                        // Scroll to target with offset for header
+                        const headerHeight = document.querySelector('header').offsetHeight;
+                        const targetPosition = target.offsetTop - headerHeight - 10;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
                     }
                 });
             });
