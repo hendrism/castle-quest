@@ -1113,45 +1113,168 @@
         };
 
         const wallTypes = {
+
             none: { name: 'None', upgradeTo: 'earthen', cost: { wood: 5 } },
             earthen: { name: 'Earthen', upgradeTo: 'wood', cost: { wood: 10 } },
             wood: { name: 'Wood', upgradeTo: 'stone', cost: { stone: 20 } },
             stone: { name: 'Stone', upgradeTo: null, cost: null }
         };
 
+        const BUILDING_TYPES = {
+            farm: {
+                name: 'Farm',
+                icon: '🌾',
+                buildCost: { wood: 1, stone: 1 },
+                produces: 'food',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            quarry: {
+                name: 'Quarry',
+                icon: '⛏️',
+                buildCost: { wood: 1, stone: 2 },
+                produces: 'stone',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            mine: {
+                name: 'Mine',
+                icon: '⚒️',
+                buildCost: { wood: 2, stone: 2 },
+                produces: 'metal',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 3 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 2 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            workshop: {
+                name: 'Workshop',
+                icon: '🔧',
+                buildCost: { wood: 2, stone: 1 },
+                produces: 'tools',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 2 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 2 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            forester: {
+                name: 'Forester Hut',
+                icon: '🌳',
+                buildCost: { wood: 2, stone: 1 },
+                produces: 'wood',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { stone: 1 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 4, stone: 2 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 8, stone: 4, metal: 2 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            gemMine: {
+                name: 'Gem Mine',
+                icon: '💎',
+                buildCost: { wood: 2, stone: 2, metal: 1 },
+                produces: 'gems',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { metal: 1 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { stone: 3, metal: 2 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { stone: 6, metal: 4 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            sawmill: {
+                name: 'Sawmill',
+                icon: '🪚',
+                buildCost: { wood: 3, stone: 2 },
+                produces: 'wood',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            granary: {
+                name: 'Granary',
+                icon: '🍞',
+                buildCost: { wood: 2, stone: 2 },
+                produces: 'food',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 2 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 5, stone: 2 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 10, stone: 5, metal: 2 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            smelter: {
+                name: 'Smelter',
+                icon: '🔥',
+                buildCost: { wood: 2, stone: 3, metal: 1 },
+                produces: 'metal',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 3 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 4 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            },
+            barracks: {
+                name: 'Barracks',
+                icon: '🏹',
+                buildCost: { wood: 3, stone: 3, metal: 2 },
+                produces: 'tools',
+                levels: {
+                    basic: { name: 'Basic', upgradeTo: 'improved', cost: { wood: 3 }, production: 1 },
+                    improved: { name: 'Improved', upgradeTo: 'advanced', cost: { wood: 6, stone: 3 }, production: 2 },
+                    advanced: { name: 'Advanced', upgradeTo: 'master', cost: { wood: 12, stone: 6, metal: 4 }, production: 3 },
+                    master: { name: 'Master', upgradeTo: null, cost: null, production: 5 }
+                }
+            }
+        };
         const buildingCategories = {
             basic: {
                 name: 'Basic Production',
                 icon: '🏭',
                 buildings: [
-                    { key: 'farm', name: 'Farm', icon: '🌾', cost: '1 🪵 1 🗿', production: '+1 🌾', count: 0, max: 2, level: 1 },
-                    { key: 'forester', name: 'Forester Hut', icon: '🌳', cost: '2 🪵 1 🗿', production: '+1 🪵', count: 0, max: 2, level: 2 },
-                    { key: 'quarry', name: 'Quarry', icon: '⛏️', cost: '1 🪵 2 🗿', production: '+1 🗿', count: 0, max: 2, level: 1 }
+                    { key: 'farm', name: 'Farm', icon: '🌾', cost: '1 🪵 1 🗿', production: '+1 🌾', count: 0, max: 2, level: 1, tier: 'basic' },
+                    { key: 'forester', name: 'Forester Hut', icon: '🌳', cost: '2 🪵 1 🗿', production: '+1 🪵', count: 0, max: 2, level: 2, tier: 'basic' },
+                    { key: 'quarry', name: 'Quarry', icon: '⛏️', cost: '1 🪵 2 🗿', production: '+1 🗿', count: 0, max: 2, level: 1, tier: 'basic' }
                 ]
             },
             advanced: {
                 name: 'Advanced Production',
                 icon: '⚒️',
                 buildings: [
-                    { key: 'mine', name: 'Mine', icon: '⚒️', cost: '2 🪵 2 🗿', production: '+1 ⚔️', count: 0, max: 1, level: 2 },
-                    { key: 'gemMine', name: 'Gem Mine', icon: '💎', cost: '2 🪵 2 🗿 1 ⚔️', production: '+1 💎', count: 0, max: 2, level: 4 },
-                    { key: 'sawmill', name: 'Sawmill', icon: '🪚', cost: '3 🪵 2 🗿', production: '+1 🪵', count: 0, max: 2, level: 2 }
+                    { key: 'mine', name: 'Mine', icon: '⚒️', cost: '2 🪵 2 🗿', production: '+1 ⚔️', count: 0, max: 1, level: 2, tier: 'basic' },
+                    { key: 'gemMine', name: 'Gem Mine', icon: '💎', cost: '2 🪵 2 🗿 1 ⚔️', production: '+1 💎', count: 0, max: 2, level: 4, tier: 'basic' },
+                    { key: 'sawmill', name: 'Sawmill', icon: '🪚', cost: '3 🪵 2 🗿', production: '+1 🪵', count: 0, max: 2, level: 2, tier: 'basic' }
                 ]
             },
             utility: {
                 name: 'Utility Buildings',
                 icon: '🔧',
                 buildings: [
-                    { key: 'workshop', name: 'Workshop', icon: '🔧', cost: '2 🪵 1 🗿', production: '+1 🔧 (costs 🪵)', count: 0, max: 2, level: 3 },
-                    { key: 'granary', name: 'Granary', icon: '🍞', cost: '2 🪵 2 🗿', production: '+1 🌾', count: 0, max: 2, level: 2 },
-                    { key: 'smelter', name: 'Smelter', icon: '🔥', cost: '2 🪵 3 🗿 1 ⚔️', production: '+1 ⚔️', count: 0, max: 1, level: 3 }
+                    { key: 'workshop', name: 'Workshop', icon: '🔧', cost: '2 🪵 1 🗿', production: '+1 🔧 (costs 🪵)', count: 0, max: 2, level: 3, tier: 'basic' },
+                    { key: 'granary', name: 'Granary', icon: '🍞', cost: '2 🪵 2 🗿', production: '+1 🌾', count: 0, max: 2, level: 2, tier: 'basic' },
+                    { key: 'smelter', name: 'Smelter', icon: '🔥', cost: '2 🪵 3 🗿 1 ⚔️', production: '+1 ⚔️', count: 0, max: 1, level: 3, tier: 'basic' }
                 ]
             },
             military: {
                 name: 'Military Buildings',
                 icon: '🏹',
                 buildings: [
-                    { key: 'barracks', name: 'Barracks', icon: '🏹', cost: '3 🪵 3 🗿 2 ⚔️', production: '+1 🔧', count: 0, max: 1, level: 4 }
+                    { key: 'barracks', name: 'Barracks', icon: '🏹', cost: '3 🪵 3 🗿 2 ⚔️', production: '+1 🔧', count: 0, max: 1, level: 4, tier: 'basic' }
                 ]
             }
         };
@@ -1162,30 +1285,12 @@
             const counts = { wood: 0, stone: 0, metal: 0, food: 0, tools: 0, gems: 0 };
             Object.values(buildingCategories).forEach(cat => {
                 cat.buildings.forEach(b => {
-                    const c = b.count;
-                    switch (b.key) {
-                        case 'farm':
-                        case 'granary':
-                            counts.food += c;
-                            break;
-                        case 'forester':
-                        case 'sawmill':
-                            counts.wood += c;
-                            break;
-                        case 'quarry':
-                            counts.stone += c;
-                            break;
-                        case 'mine':
-                        case 'smelter':
-                            counts.metal += c;
-                            break;
-                        case 'workshop':
-                        case 'barracks':
-                            counts.tools += c;
-                            break;
-                        case 'gemMine':
-                            counts.gems += c;
-                            break;
+                    if (b.count === 0) return;
+                    const tier = b.tier || 'basic';
+                    const prod = BUILDING_TYPES[b.key].levels[tier].production * b.count;
+                    const resource = BUILDING_TYPES[b.key].produces;
+                    if (counts.hasOwnProperty(resource)) {
+                        counts[resource] += prod;
                     }
                 });
             });
@@ -1414,22 +1519,43 @@
                 category.buildings.forEach(building => {
                     const canBuild = gameState.level >= building.level && building.count < building.max;
                     if (canBuild) available = true;
+                    const bt = BUILDING_TYPES[building.key];
+                    const tierData = bt.levels[building.tier];
+                    const production = tierData.production * building.count;
                     const buildingDiv = document.createElement('div');
                     buildingDiv.className = 'building-item';
+
                     buildingDiv.innerHTML = `
                         <div class="building-info">
                             <div class="building-name">${building.icon} ${building.name} (${building.count}/${building.max})</div>
                             <div class="building-stats">
-                                <div><strong>Production:</strong> ${building.production}</div>
-                                <div><strong>Cost:</strong> ${building.cost}</div>
-                                <div><strong>Level:</strong> ${building.level}</div>
+                                <div><strong>Production:</strong> +${production} ${getResourceIcon(bt.produces)}</div>
+                                <div><strong>Tier:</strong> ${tierData.name}</div>
+                                <div><strong>Build Cost:</strong> ${formatCost(bt.buildCost)}</div>
                             </div>
                         </div>
-                        <button class="build-button" onclick="buildBuilding('${building.key}', '${building.name}')"
-                                ${!canBuild ? 'disabled' : ''}>
-                            ${building.count >= building.max ? 'Max' : gameState.level < building.level ? `Lv${building.level}` : 'Build'}
-                        </button>
                     `;
+
+                    const buildBtn = document.createElement('button');
+                    buildBtn.className = 'build-button';
+                    buildBtn.textContent = building.count >= building.max ? 'Max' : gameState.level < building.level ? `Lv${building.level}` : 'Build';
+                    buildBtn.disabled = !canBuild;
+                    buildBtn.addEventListener('click', () => buildBuilding(building.key, building.name));
+                    buildingDiv.appendChild(buildBtn);
+
+                    const upgradeBtn = document.createElement('button');
+                    upgradeBtn.className = 'upgrade-button';
+                    if (tierData.upgradeTo && building.count > 0) {
+                        const cost = {};
+                        Object.keys(tierData.cost).forEach(r => { cost[r] = tierData.cost[r] * building.count; });
+                        upgradeBtn.textContent = `Upgrade (${formatCost(cost)})`;
+                        upgradeBtn.disabled = !canAfford(cost);
+                        upgradeBtn.addEventListener('click', () => upgradeBuilding(building.key));
+                    } else {
+                        upgradeBtn.style.display = 'none';
+                    }
+                    buildingDiv.appendChild(upgradeBtn);
+
                     buildingsList.appendChild(buildingDiv);
                 });
                 const alertEl = document.getElementById(`alert-${categoryKey}`);
@@ -1597,25 +1723,63 @@
                 const found = category.buildings.find(b => b.key === key);
                 if (found) building = found;
             });
-            
+
             if (!building) return;
-            
+
             // Check if can build
             if (gameState.level < building.level) {
                 addLogEntry(`❌ Need level ${building.level} to build ${name}`, 'failure');
                 return;
             }
-            
+
             if (building.count >= building.max) {
                 addLogEntry(`❌ Maximum ${name} buildings reached`, 'failure');
                 return;
             }
-            
-            // For demo, just add the building
+
+            const cost = BUILDING_TYPES[key].buildCost;
+            if (!canAfford(cost)) {
+                addLogEntry('❌ Not enough resources', 'failure');
+                return;
+            }
+
+            Object.keys(cost).forEach(r => {
+                gameState.resources[r] -= cost[r];
+            });
+
             building.count++;
-            addLogEntry(`🏗️ Started building ${name}! It will be ready next month.`, 'success');
+            addLogEntry(`🏗️ Built ${name}!`, 'success');
             gainXP(5);
-            initializeBuildings(); // Refresh the display
+            initializeBuildings();
+            updateUI();
+        }
+
+        function upgradeBuilding(key) {
+            let building = null;
+            Object.values(buildingCategories).forEach(category => {
+                const found = category.buildings.find(b => b.key === key);
+                if (found) building = found;
+            });
+            if (!building || building.count === 0) return;
+
+            const current = BUILDING_TYPES[key].levels[building.tier];
+            if (!current.upgradeTo) return;
+            const cost = {};
+            Object.keys(current.cost).forEach(r => {
+                cost[r] = current.cost[r] * building.count;
+            });
+            if (!canAfford(cost)) {
+                addLogEntry('❌ Not enough resources', 'failure');
+                return;
+            }
+            Object.keys(cost).forEach(r => {
+                gameState.resources[r] -= cost[r];
+            });
+            building.tier = current.upgradeTo;
+            const newName = BUILDING_TYPES[key].levels[building.tier].name;
+            addLogEntry(`⬆️ Upgraded ${name} to ${newName}.`, 'success');
+            gainXP(10 * building.count);
+            initializeBuildings();
             updateUI();
         }
 
@@ -1624,8 +1788,13 @@
             gameState.explorationsLeft = gameState.explorationsMax;
             
             // Monthly production
-            gameState.resources.food += 2;
-            gameState.resources.wood += 1;
+            const prod = calculateProduction();
+            gameState.resources.food += prod.food;
+            gameState.resources.wood += prod.wood;
+            gameState.resources.stone += prod.stone;
+            gameState.resources.metal += prod.metal;
+            gameState.resources.tools += prod.tools;
+            gameState.resources.gems += prod.gems;
             
             showDiceRoll(() => {
                 const roll = Math.floor(Math.random() * 20) + 1;
