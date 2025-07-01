@@ -331,18 +331,44 @@ function setupEventListeners() {
         });
     }
 
-    // Auto hide header on scroll
+    // Enhanced header behavior
+    const header = document.querySelector('header');
+    const sentinel = document.querySelector('.sentinel');
     let lastScroll = window.scrollY;
-    window.addEventListener('scroll', () => {
-        const header = document.querySelector('header');
-        if (!header) return;
-        if (window.scrollY > lastScroll && window.scrollY > 50) {
-            header.classList.add('hide-header');
-        } else {
-            header.classList.remove('hide-header');
+    let inactivity;
+
+    if (header && sentinel) {
+        new IntersectionObserver(entries => {
+            for (const e of entries) {
+                header.classList.toggle('header--collapsed', !e.isIntersecting);
+            }
+        }).observe(sentinel);
+
+        function hideAfterDelay() {
+            clearTimeout(inactivity);
+            inactivity = setTimeout(() => header.classList.add('header--hidden'), 2000);
         }
-        lastScroll = window.scrollY;
-    });
+
+        window.addEventListener('scroll', () => {
+            const y = window.scrollY;
+            if (y > lastScroll && y > 50) {
+                header.classList.add('header--hidden');
+            } else {
+                header.classList.remove('header--hidden');
+            }
+            lastScroll = y;
+            hideAfterDelay();
+        });
+
+        ['touchstart', 'mousemove'].forEach(evt =>
+            window.addEventListener(evt, () => {
+                clearTimeout(inactivity);
+                header.classList.remove('header--hidden');
+            })
+        );
+
+        hideAfterDelay();
+    }
 
     // Save and load buttons
     const saveBtn = document.getElementById('save-btn');
