@@ -263,6 +263,7 @@ function initGame() {
         debouncedRefreshGameInterface();
         setupEventListeners();
         setupCollapsibleHeader();
+        setupNavigationDrawer();
         initScrollIndicators();
         console.log('Game initialized successfully!');
 
@@ -2200,6 +2201,29 @@ function updateHeaderSummary() {
     if (summaryWood) summaryWood.textContent = gameState.resources.wood;
     if (summaryFood) summaryFood.textContent = gameState.resources.food;
     if (summaryStone) summaryStone.textContent = gameState.resources.stone;
+}
+
+function setupNavigationDrawer() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const drawer = document.getElementById('nav-drawer');
+    const overlay = document.getElementById('drawer-overlay');
+    if (!menuToggle || !drawer || !overlay) return;
+
+    function closeDrawer() {
+        drawer.classList.remove('open');
+        overlay.classList.remove('show');
+    }
+
+    menuToggle.addEventListener('click', () => {
+        drawer.classList.toggle('open');
+        overlay.classList.toggle('show');
+    });
+
+    overlay.addEventListener('click', closeDrawer);
+
+    drawer.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', closeDrawer);
+    });
 }
 
 
