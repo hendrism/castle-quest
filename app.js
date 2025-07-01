@@ -262,6 +262,7 @@ function initGame() {
         updateResearchUI();
         debouncedRefreshGameInterface();
         setupEventListeners();
+        setupCollapsibleHeader();
         initScrollIndicators();
         console.log('Game initialized successfully!');
 
@@ -1320,6 +1321,9 @@ function refreshGameInterface() {
     uiManager.updateXP(gameState.xp, gameState.xpToNext);
     uiManager.updateMorale(gameState.morale);
     uiManager.updateSeason(`${seasons[gameState.season].icon} ${seasons[gameState.season].name}`);
+
+    updateHeaderSummary();
+    
     if (gameState.ruler) {
         const el = uiManager.elements;
         if (el.rulerName) el.rulerName.textContent = gameState.ruler.name;
@@ -2122,6 +2126,82 @@ function updateScrollIndicators(containers = document.querySelectorAll('.scroll-
         }
     });
 }
+
+function setupCollapsibleHeader() {
+    const headerToggle = document.getElementById('header-toggle');
+    const headerDetails = document.getElementById('header-details');
+    const headerSummary = document.getElementById('header-summary');
+    
+    // Load saved state
+    const isExpanded = localStorage.getItem('headerExpanded') === 'true';
+    if (isExpanded) {
+        expandHeader();
+    }
+    
+    // Toggle on button click
+    if (headerToggle) {
+        headerToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleHeader();
+        });
+    }
+    
+    // Toggle on summary click (optional)
+    if (headerSummary) {
+        headerSummary.addEventListener('click', () => {
+            toggleHeader();
+        });
+    }
+    
+    function toggleHeader() {
+        const isCurrentlyExpanded = headerDetails.classList.contains('expanded');
+        
+        if (isCurrentlyExpanded) {
+            collapseHeader();
+        } else {
+            expandHeader();
+        }
+        
+        // Save state
+        localStorage.setItem('headerExpanded', !isCurrentlyExpanded);
+    }
+    
+    function expandHeader() {
+        headerDetails.classList.add('expanded');
+        headerToggle.classList.add('expanded');
+        headerToggle.setAttribute('aria-expanded', 'true');
+    }
+    
+    function collapseHeader() {
+        headerDetails.classList.remove('expanded');
+        headerToggle.classList.remove('expanded');
+        headerToggle.setAttribute('aria-expanded', 'false');
+    }
+}
+
+function updateHeaderSummary() {
+    // Update summary month
+    const summaryMonth = document.getElementById('summary-month');
+    if (summaryMonth) summaryMonth.textContent = gameState.month;
+    
+    // Update summary level
+    const summaryLevel = document.getElementById('summary-level');
+    if (summaryLevel) summaryLevel.textContent = gameState.level;
+    
+    // Update summary season
+    const summarySeason = document.getElementById('summary-season');
+    if (summarySeason) summarySeason.textContent = seasons[gameState.season].icon;
+    
+    // Update summary resources (top 3 most important)
+    const summaryWood = document.getElementById('summary-wood');
+    const summaryFood = document.getElementById('summary-food');
+    const summaryStone = document.getElementById('summary-stone');
+    
+    if (summaryWood) summaryWood.textContent = gameState.resources.wood;
+    if (summaryFood) summaryFood.textContent = gameState.resources.food;
+    if (summaryStone) summaryStone.textContent = gameState.resources.stone;
+}
+
 
 // Initialize when page loads. Only run initGame once
 if (document.readyState === 'loading') {
