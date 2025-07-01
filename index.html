@@ -1555,9 +1555,8 @@
             }
             
             gameState.explorationsLeft--;
-            updateUI();
-            initializeLocations();
-            showDiceRoll((roll) => {
+            showDiceRoll(() => {
+                const roll = Math.floor(Math.random() * 20) + 1;
                 let result = '';
                 let type = 'neutral';
                 let rewards = {};
@@ -1798,7 +1797,8 @@
             gameState.resources.tools += prod.tools;
             gameState.resources.gems += prod.gems;
             
-            showDiceRoll((roll) => {
+            showDiceRoll(() => {
+                const roll = Math.floor(Math.random() * 20) + 1;
                 let event = '';
                 let type = 'neutral';
                 
@@ -1845,7 +1845,7 @@
                 const roll = Math.floor(Math.random() * 20) + 1;
                 diceFace.textContent = roll;
 
-                const details = callback ? callback(roll) : [`You rolled ${roll}`];
+                const details = callback ? callback() : [`You rolled ${roll}`];
                 result.innerHTML = details.join('<br>');
             }, 1000);
         }
