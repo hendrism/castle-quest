@@ -504,8 +504,9 @@
             margin-bottom: var(--spacing-sm);
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary-blue);
         }
 
         .building-item:last-child {
@@ -522,8 +523,17 @@
         }
 
         .building-stats {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.2;
+        }
+
+        .building-stats div {
+            margin-bottom: 2px;
+        }
+
+        .building-stats div:last-child {
+            margin-bottom: 0;
         }
 
         .build-button {
@@ -1105,6 +1115,8 @@
             }
         };
 
+        const expandedCategories = {};
+
         // UI Management Functions
         function updateUI() {
             // Update header stats
@@ -1244,6 +1256,10 @@
                     </div>
                 `;
                 
+                if (expandedCategories[categoryKey]) {
+                    categoryDiv.classList.add('expanded');
+                }
+
                 buildingsGrid.appendChild(categoryDiv);
                 
                 // Add buildings to category
@@ -1255,9 +1271,13 @@
                     buildingDiv.innerHTML = `
                         <div class="building-info">
                             <div class="building-name">${building.icon} ${building.name} (${building.count}/${building.max})</div>
-                            <div class="building-stats">${building.production} • Cost: ${building.cost} • Level ${building.level}</div>
+                            <div class="building-stats">
+                                <div><strong>Production:</strong> ${building.production}</div>
+                                <div><strong>Cost:</strong> ${building.cost}</div>
+                                <div><strong>Level:</strong> ${building.level}</div>
+                            </div>
                         </div>
-                        <button class="build-button" onclick="buildBuilding('${building.key}', '${building.name}')" 
+                        <button class="build-button" onclick="buildBuilding('${building.key}', '${building.name}')"
                                 ${!canBuild ? 'disabled' : ''}>
                             ${building.count >= building.max ? 'Max' : gameState.level < building.level ? `Lv${building.level}` : 'Build'}
                         </button>
@@ -1267,10 +1287,11 @@
             });
         }
 
-        function toggleCategory(categoryKey) {
-            const category = document.querySelector(`#category-${categoryKey}`).parentElement;
+       function toggleCategory(categoryKey) {
+           const category = document.querySelector(`#category-${categoryKey}`).parentElement;
             category.classList.toggle('expanded');
-        }
+            expandedCategories[categoryKey] = category.classList.contains('expanded');
+       }
 
         function exploreLocation(key, location) {
             if (gameState.explorationsLeft <= 0) {
@@ -1525,7 +1546,12 @@
             updateUI();
             
             // Expand first building category by default
-            document.querySelector('.building-category').classList.add('expanded');
+            const firstCategory = document.querySelector('.building-category');
+            if (firstCategory) {
+                firstCategory.classList.add('expanded');
+                const key = Object.keys(buildingCategories)[0];
+                expandedCategories[key] = true;
+            }
         });
 
         // Touch feedback for better mobile experience
