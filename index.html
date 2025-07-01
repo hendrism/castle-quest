@@ -1328,7 +1328,10 @@
             
             // Update next month button
             document.getElementById('next-month-btn').disabled = gameState.explorationsLeft > 0;
-            
+
+            // Refresh building buttons in case resource availability changed
+            initializeBuildings();
+
             updateEventLog();
         }
 
