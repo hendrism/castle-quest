@@ -263,7 +263,6 @@ function initGame() {
         debouncedRefreshGameInterface();
         setupEventListeners();
         setupCollapsibleHeader();
-        setupNavigationDrawer();
         initScrollIndicators();
         console.log('Game initialized successfully!');
 
@@ -2209,30 +2208,6 @@ function updateHeaderSummary() {
     if (toolsEl) toolsEl.textContent = gameState.resources.tools;
     if (gemsEl) gemsEl.textContent = gameState.resources.gems;
 }
-
-function setupNavigationDrawer() {
-    const menuToggle = document.getElementById('menu-toggle');
-    const drawer = document.getElementById('nav-drawer');
-    const overlay = document.getElementById('drawer-overlay');
-    if (!menuToggle || !drawer || !overlay) return;
-
-    function closeDrawer() {
-        drawer.classList.remove('open');
-        overlay.classList.remove('show');
-    }
-
-    menuToggle.addEventListener('click', () => {
-        drawer.classList.toggle('open');
-        overlay.classList.toggle('show');
-    });
-
-    overlay.addEventListener('click', closeDrawer);
-
-    drawer.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', closeDrawer);
-    });
-}
-
 
 // Initialize when page loads. Only run initGame once
 if (document.readyState === 'loading') {
