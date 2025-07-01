@@ -1672,8 +1672,9 @@ function renderBuildingList(type, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
     container.innerHTML = '';
-    gameState.settlement[key].forEach(b => {
-        container.appendChild(createBuildingElement(type, b));
+    gameState.settlement[key].forEach((b, idx) => {
+        const index = type === 'farm' ? idx + 1 : undefined;
+        container.appendChild(createBuildingElement(type, b, index));
     });
     gameState.settlement.constructionQueue
         .filter(q => q.type === type)
@@ -1682,7 +1683,7 @@ function renderBuildingList(type, containerId) {
         });
 }
 
-function createBuildingElement(type, building) {
+function createBuildingElement(type, building, index) {
     const buildingType = BUILDING_TYPES[type];
     const currentLevel = buildingType.levels[building.level];
     const upgrading = !!building.pendingLevel;
@@ -1694,9 +1695,10 @@ function createBuildingElement(type, building) {
         ? `Upgrading to ${buildingType.levels[building.pendingLevel].name}...`
         : `${currentLevel.name} (${getProductionDescription(type, currentLevel)})`;
 
+    const nameText = index ? `${buildingType.name} #${index}` : buildingType.name;
     div.innerHTML = `
         <div class="building-info">
-            <div class="building-name">${buildingType.icon} ${buildingType.name}</div>
+            <div class="building-name">${buildingType.icon} ${nameText}</div>
             <div class="building-level">${levelText}</div>
         </div>
     `;
