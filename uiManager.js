@@ -23,6 +23,11 @@ export class UIManager {
     setTimeout(() => target.classList.remove('pulse'), 500);
   }
 
+  updateRulerYears(years) {
+  const el = document.getElementById('ruler-years');
+  if (el) el.textContent = years;
+}
+
   updateMonth(month) {
     if (this.elements.month) {
       this.elements.month.textContent = month;

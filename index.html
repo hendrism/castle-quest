@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,357 +12,401 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <body>
     <div id="app">
         <header>
             <h1>🛡️ Dice & Castle</h1>
-            <div class="header-cards">
+
+            <!-- Main Information Grid -->
+            <div class="header-main">
+                <!-- Month & Season -->
                 <div class="stat-card month-card">
                     <span class="stat-label">Month</span>
-                    <span id="month">1</span>
-                    <span id="season" class="season">🌸 Spring</span>
+                    <div class="stat-value" id="month">1</div>
+                    <div class="season" id="season">🌸 Spring</div>
                 </div>
+
+                <!-- XP & Level -->
                 <div class="stat-card xp-card">
-                    <div class="level-line">
+                    <div class="level-section">
                         <span class="stat-label">Level</span>
-                        <span id="level">1</span>
+                        <span class="level-number" id="level">1</span>
                     </div>
-                    <progress id="xp-progress" value="0" max="100" class="xp-progress" aria-label="Experience progress"></progress>
-                    <div class="xp-amount"><span id="xp">0</span>/<span id="xp-next">100</span></div>
+                    <progress id="xp-progress" value="0" max="100" class="xp-progress"
+                        aria-label="Experience progress"></progress>
+                    <div class="xp-amount"><span id="xp">0</span>/<span id="xp-next">100</span> XP</div>
                 </div>
+
+                <!-- Morale -->
                 <div class="stat-card morale-card">
                     <span class="stat-label">Morale</span>
-                    <span id="morale">100</span>
+                    <div class="morale-value" id="morale">😀 100</div>
                 </div>
-                <div class="stat-card ruler-card" id="ruler-stat">
-                    <span class="stat-label">Ruler</span>
-                    <span id="ruler-name">-</span> (<span id="ruler-age">0</span>)
-                    <div id="ruler-traits" class="ruler-traits"></div>
+
+                <!-- Ruler Information -->
+                <div class="stat-card ruler-card">
+                    <div class="ruler-info">
+                        <div class="ruler-name">
+                            👑 <span id="ruler-name">-</span>
+                        </div>
+                        <div class="ruler-details">
+                            Age <span id="ruler-age">0</span> • Reign <span id="ruler-years">20</span> years left
+                        </div>
+                        <div class="ruler-traits" id="ruler-traits">
+                            <!-- Traits will be populated by JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div id="resource-bar" class="resource-bar resource-cards"></div>
+
+            <!-- Resource Cards -->
+            <div id="resource-bar" class="resource-bar"></div>
+
+            <!-- Quick Navigation -->
             <nav class="quick-nav">
                 <a href="#exploration" aria-label="Jump to exploration">
-                    <span class="icon">🗺️</span><span class="label">Explore</span>
-                </a>
-                <a href="#event-log" aria-label="Jump to event log">
-                    <span class="icon">📜</span><span class="label">Events</span>
+                    <span class="icon">🗺️</span>
+                    <span class="label">Explore</span>
                 </a>
                 <a href="#settlement" aria-label="Jump to settlement">
-                    <span class="icon">🏠</span><span class="label">Settlement</span>
+                    <span class="icon">🏠</span>
+                    <span class="label">Settlement</span>
                 </a>
-                <a href="#month-section" class="top-next-month" aria-label="Jump to next month controls">
-                    <span class="icon">⏭️</span><span class="label">Next Month</span>
+                <a href="#event-log" aria-label="Jump to event log">
+                    <span class="icon">📜</span>
+                    <span class="label">Events</span>
+                </a>
+                <a href="#month-section" aria-label="Jump to next month controls">
+                    <span class="icon">⏭️</span>
+                    <span class="label">Next Month</span>
                 </a>
             </nav>
-            <!-- Save/Load temporarily disabled -->
         </header>
 
-    <main>
-        <!-- Exploration -->
-        <section class="exploration" id="exploration">
-            <h2>Exploration</h2>
-            <div class="exploration-info">
-                <p>Explorations remaining this month: <span id="explorations-left">5</span>/<span id="exploration-max">5</span></p>
-                <p>Monthly Challenge: <span id="daily-challenge-text">Explore all locations</span> (<span id="daily-challenge-progress">0/0</span>)</p>
-            </div>
+        <main>
+            <!-- Exploration -->
+            <section class="exploration" id="exploration">
+                <h2>Exploration</h2>
+                <div class="exploration-info">
+                    <p>Explorations remaining this month: <span id="explorations-left">5</span>/<span
+                            id="exploration-max">5</span></p>
+                    <p>Monthly Challenge: <span id="daily-challenge-text">Explore all locations</span> (<span
+                            id="daily-challenge-progress">0/0</span>)</p>
+                </div>
 
-            <div class="locations scroll-container">
-                <button class="location-btn location-forest" data-location="forest" aria-label="Explore Deep Forest">
-                    <span class="location-icon">🌲</span>
-                    <span class="location-info">
-                        <span class="location-name">Deep Forest</span>
-                        <span class="location-desc">Rich in wood and wildlife</span>
-                        <span class="location-rewards animated-rewards">🪵1-4 🌾0-2</span>
-                        <span class="location-level">Unlocks at level 1</span>
-                        <span class="location-difficulty" id="forest-difficulty"></span>
-                        <span class="success-chance" id="forest-chance"></span>
-                    </span>
-                </button>
-                <button class="location-btn location-quarry" data-location="quarry" aria-label="Explore Stone Quarry">
-                    <span class="location-icon">⛰️</span>
-                    <span class="location-info">
-                        <span class="location-name">Stone Quarry</span>
-                        <span class="location-desc">Source of stone and metal</span>
-                        <span class="location-rewards animated-rewards">🗿1-3 ⚔️0-1</span>
-                        <span class="location-level">Unlocks at level 1</span>
-                        <span class="location-difficulty" id="quarry-difficulty"></span>
-                        <span class="success-chance" id="quarry-chance"></span>
-                    </span>
-                </button>
-                <button class="location-btn location-plains" data-location="plains" aria-label="Explore Fertile Plains">
-                    <span class="location-icon">🌾</span>
-                    <span class="location-info">
-                        <span class="location-name">Fertile Plains</span>
-                        <span class="location-desc">Food and farming supplies</span>
-                        <span class="location-rewards animated-rewards">🌾1-3 🪵0-1</span>
-                        <span class="location-level">Unlocks at level 1</span>
-                        <span class="location-difficulty" id="plains-difficulty"></span>
-                        <span class="success-chance" id="plains-chance"></span>
-                    </span>
-                </button>
-                <button class="location-btn location-ruins" data-location="ruins" aria-label="Explore Ancient Ruins">
-                    <span class="location-icon">🏛️</span>
-                    <span class="location-info">
-                        <span class="location-name">Ancient Ruins</span>
-                        <span class="location-desc">Mysterious treasures await</span>
-                        <span class="location-rewards animated-rewards">🪵0-2 🗿0-2 ⚔️0-2 🌾0-1 💎0-1</span>
-                        <span class="location-level">Unlocks at level 2</span>
-                        <span class="location-difficulty" id="ruins-difficulty"></span>
-                        <span class="success-chance" id="ruins-chance"></span>
-                    </span>
-                </button>
-                <button class="location-btn location-swamp" data-location="swamp" aria-label="Explore Misty Swamp">
-                    <span class="location-icon">🐸</span>
-                    <span class="location-info">
-                        <span class="location-name">Misty Swamp</span>
-                        <span class="location-desc">Treacherous wetlands rich in herbs</span>
-                        <span class="location-rewards animated-rewards">🌾0-2 🪵0-1 🗿0-1</span>
-                        <span class="location-level">Unlocks at level 2</span>
-                        <span class="location-difficulty" id="swamp-difficulty"></span>
-                        <span class="success-chance" id="swamp-chance"></span>
-                    </span>
-                </button>
-                <button class="location-btn location-mountains" data-location="mountains" aria-label="Explore High Mountains">
-                    <span class="location-icon">🏔️</span>
-                    <span class="location-info">
-                        <span class="location-name">High Mountains</span>
-                        <span class="location-desc">Metal and gems hidden in the peaks</span>
-                        <span class="location-rewards animated-rewards">🗿1-3 ⚔️1-2 💎0-1</span>
-                        <span class="location-level">Unlocks at level 3</span>
-                        <span class="location-difficulty" id="mountains-difficulty"></span>
-                        <span class="success-chance" id="mountains-chance"></span>
-                    </span>
-                </button>
-                <button class="location-btn location-cavern" data-location="cavern" aria-label="Explore Crystal Cavern">
-                    <span class="location-icon">🕳️</span>
-                    <span class="location-info">
-                        <span class="location-name">Crystal Cavern</span>
-                        <span class="location-desc">Shimmering crystals line the walls</span>
-                        <span class="location-rewards animated-rewards">💎0-2 ⚔️0-1</span>
-                        <span class="location-level">Unlocks at level 4</span>
-                        <span class="location-difficulty" id="cavern-difficulty"></span>
-                        <span class="success-chance" id="cavern-chance"></span>
-                    </span>
-                </button>
-                <button class="location-btn location-lake" data-location="lake" aria-label="Explore Serene Lake">
-                    <span class="location-icon">🌊</span>
-                    <span class="location-info">
-                        <span class="location-name">Serene Lake</span>
-                        <span class="location-desc">Plentiful fish and clean water</span>
-                        <span class="location-rewards animated-rewards">🌾1-3 🪵0-1</span>
-                        <span class="location-level">Unlocks at level 2</span>
-                        <span class="location-difficulty" id="lake-difficulty"></span>
-                        <span class="success-chance" id="lake-chance"></span>
-                    </span>
-                </button>
-            </div>
+                <div class="locations scroll-container">
+                    <button class="location-btn location-forest" data-location="forest"
+                        aria-label="Explore Deep Forest">
+                        <span class="location-icon">🌲</span>
+                        <span class="location-info">
+                            <span class="location-name">Deep Forest</span>
+                            <span class="location-desc">Rich in wood and wildlife</span>
+                            <span class="location-rewards animated-rewards">🪵1-4 🌾0-2</span>
+                            <span class="location-level">Unlocks at level 1</span>
+                            <span class="location-difficulty" id="forest-difficulty"></span>
+                            <span class="success-chance" id="forest-chance"></span>
+                        </span>
+                    </button>
+                    <button class="location-btn location-quarry" data-location="quarry"
+                        aria-label="Explore Stone Quarry">
+                        <span class="location-icon">⛰️</span>
+                        <span class="location-info">
+                            <span class="location-name">Stone Quarry</span>
+                            <span class="location-desc">Source of stone and metal</span>
+                            <span class="location-rewards animated-rewards">🗿1-3 ⚔️0-1</span>
+                            <span class="location-level">Unlocks at level 1</span>
+                            <span class="location-difficulty" id="quarry-difficulty"></span>
+                            <span class="success-chance" id="quarry-chance"></span>
+                        </span>
+                    </button>
+                    <button class="location-btn location-plains" data-location="plains"
+                        aria-label="Explore Fertile Plains">
+                        <span class="location-icon">🌾</span>
+                        <span class="location-info">
+                            <span class="location-name">Fertile Plains</span>
+                            <span class="location-desc">Food and farming supplies</span>
+                            <span class="location-rewards animated-rewards">🌾1-3 🪵0-1</span>
+                            <span class="location-level">Unlocks at level 1</span>
+                            <span class="location-difficulty" id="plains-difficulty"></span>
+                            <span class="success-chance" id="plains-chance"></span>
+                        </span>
+                    </button>
+                    <button class="location-btn location-ruins" data-location="ruins"
+                        aria-label="Explore Ancient Ruins">
+                        <span class="location-icon">🏛️</span>
+                        <span class="location-info">
+                            <span class="location-name">Ancient Ruins</span>
+                            <span class="location-desc">Mysterious treasures await</span>
+                            <span class="location-rewards animated-rewards">🪵0-2 🗿0-2 ⚔️0-2 🌾0-1 💎0-1</span>
+                            <span class="location-level">Unlocks at level 2</span>
+                            <span class="location-difficulty" id="ruins-difficulty"></span>
+                            <span class="success-chance" id="ruins-chance"></span>
+                        </span>
+                    </button>
+                    <button class="location-btn location-swamp" data-location="swamp" aria-label="Explore Misty Swamp">
+                        <span class="location-icon">🐸</span>
+                        <span class="location-info">
+                            <span class="location-name">Misty Swamp</span>
+                            <span class="location-desc">Treacherous wetlands rich in herbs</span>
+                            <span class="location-rewards animated-rewards">🌾0-2 🪵0-1 🗿0-1</span>
+                            <span class="location-level">Unlocks at level 2</span>
+                            <span class="location-difficulty" id="swamp-difficulty"></span>
+                            <span class="success-chance" id="swamp-chance"></span>
+                        </span>
+                    </button>
+                    <button class="location-btn location-mountains" data-location="mountains"
+                        aria-label="Explore High Mountains">
+                        <span class="location-icon">🏔️</span>
+                        <span class="location-info">
+                            <span class="location-name">High Mountains</span>
+                            <span class="location-desc">Metal and gems hidden in the peaks</span>
+                            <span class="location-rewards animated-rewards">🗿1-3 ⚔️1-2 💎0-1</span>
+                            <span class="location-level">Unlocks at level 3</span>
+                            <span class="location-difficulty" id="mountains-difficulty"></span>
+                            <span class="success-chance" id="mountains-chance"></span>
+                        </span>
+                    </button>
+                    <button class="location-btn location-cavern" data-location="cavern"
+                        aria-label="Explore Crystal Cavern">
+                        <span class="location-icon">🕳️</span>
+                        <span class="location-info">
+                            <span class="location-name">Crystal Cavern</span>
+                            <span class="location-desc">Shimmering crystals line the walls</span>
+                            <span class="location-rewards animated-rewards">💎0-2 ⚔️0-1</span>
+                            <span class="location-level">Unlocks at level 4</span>
+                            <span class="location-difficulty" id="cavern-difficulty"></span>
+                            <span class="success-chance" id="cavern-chance"></span>
+                        </span>
+                    </button>
+                    <button class="location-btn location-lake" data-location="lake" aria-label="Explore Serene Lake">
+                        <span class="location-icon">🌊</span>
+                        <span class="location-info">
+                            <span class="location-name">Serene Lake</span>
+                            <span class="location-desc">Plentiful fish and clean water</span>
+                            <span class="location-rewards animated-rewards">🌾1-3 🪵0-1</span>
+                            <span class="location-level">Unlocks at level 2</span>
+                            <span class="location-difficulty" id="lake-difficulty"></span>
+                            <span class="success-chance" id="lake-chance"></span>
+                        </span>
+                    </button>
+                </div>
 
-        </section>
+            </section>
 
-        <!-- Event Log -->
-        <section class="event-log" id="event-log">
-            <h2>Event Log</h2>
-            <div class="log-controls">
-                <button id="clear-log-btn" aria-label="Clear event log">Clear Log</button>
-                <input type="text" id="log-search" placeholder="Search log..." aria-label="Search event log">
-                <select id="text-size-select">
-                    <option value="small">Small Text</option>
-                    <option value="medium" selected>Medium Text</option>
-                    <option value="large">Large Text</option>
-                </select>
-            </div>
-            <div id="event-log-content" class="log-content"></div>
-        </section>
+            <!-- Event Log -->
+            <section class="event-log" id="event-log">
+                <h2>Event Log</h2>
+                <div class="log-controls">
+                    <button id="clear-log-btn" aria-label="Clear event log">Clear Log</button>
+                    <input type="text" id="log-search" placeholder="Search log..." aria-label="Search event log">
+                    <select id="text-size-select">
+                        <option value="small">Small Text</option>
+                        <option value="medium" selected>Medium Text</option>
+                        <option value="large">Large Text</option>
+                    </select>
+                </div>
+                <div id="event-log-content" class="log-content"></div>
+            </section>
 
 
-        <!-- Settlement -->
-        <section class="settlement" id="settlement">
-            <h2>Your Settlement</h2>
+            <!-- Settlement -->
+            <section class="settlement" id="settlement">
+                <h2>Your Settlement</h2>
 
-            <div class="settlement-dashboard">
-                <div id="building-overview" class="dashboard-section"></div>
-                <div id="happiness-meter" class="dashboard-section"></div>
-                <div id="construction-progress" class="dashboard-section"></div>
-                <div id="settlement-stats" class="dashboard-section"></div>
-            </div>
-            
-            <div class="settlement-overview">
-                <div class="settlement-item">
-                    <span class="settlement-icon">🏠</span>
-                    <div class="settlement-info">
-                        <div class="settlement-name">Home: <span id="home-level">Camp</span></div>
-                        <button class="upgrade-btn" id="home-upgrade-btn" aria-label="Upgrade home">
-                            <span class="upgrade-text">Upgrade to House</span>
-                            <span class="upgrade-cost">5 🪵</span>
+                <div class="settlement-dashboard">
+                    <div id="building-overview" class="dashboard-section"></div>
+                    <div id="happiness-meter" class="dashboard-section"></div>
+                    <div id="construction-progress" class="dashboard-section"></div>
+                    <div id="settlement-stats" class="dashboard-section"></div>
+                </div>
+
+                <div class="settlement-overview">
+                    <div class="settlement-item">
+                        <span class="settlement-icon">🏠</span>
+                        <div class="settlement-info">
+                            <div class="settlement-name">Home: <span id="home-level">Camp</span></div>
+                            <button class="upgrade-btn" id="home-upgrade-btn" aria-label="Upgrade home">
+                                <span class="upgrade-text">Upgrade to House</span>
+                                <span class="upgrade-cost">5 🪵</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settlement-item">
+                        <span class="settlement-icon">🛡️</span>
+                        <div class="settlement-info">
+                            <div class="settlement-name">Walls: <span id="walls-level">None</span></div>
+                            <button class="upgrade-btn" id="walls-upgrade-btn" aria-label="Upgrade walls">
+                                <span class="upgrade-text">Build Earthen Walls</span>
+                                <span class="upgrade-cost">5 🪵</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="settlement-item">
+                        <span class="settlement-icon">👥</span>
+                        <div class="settlement-info">
+                            <div class="settlement-name">Population: <span id="population-count">5</span> (Food: <span
+                                    id="population-food">5</span>)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buildings scroll-container">
+                    <details class="building-section" open>
+                        <summary>Farms (Camp) (<span id="farm-count">0</span>/<span id="farm-max">2</span>)</summary>
+                        <div id="farms-container"></div>
+                        <button class="build-btn" id="build-farm-btn" aria-label="Build Farm">
+                            <span class="build-text">Build Farm</span>
+                            <span class="build-cost">1 🪵 1 🗿</span>
                         </button>
-                    </div>
-                </div>
+                    </details>
 
-                <div class="settlement-item">
-                    <span class="settlement-icon">🛡️</span>
-                    <div class="settlement-info">
-                        <div class="settlement-name">Walls: <span id="walls-level">None</span></div>
-                        <button class="upgrade-btn" id="walls-upgrade-btn" aria-label="Upgrade walls">
-                            <span class="upgrade-text">Build Earthen Walls</span>
-                            <span class="upgrade-cost">5 🪵</span>
+                    <details class="building-section" open>
+                        <summary>Forester Huts (Camp) (<span id="forester-count">0</span>/<span
+                                id="forester-max">2</span>)</summary>
+                        <div id="foresters-container"></div>
+                        <button class="build-btn" id="build-forester-btn" aria-label="Build Forester Hut">
+                            <span class="build-text">Build Forester Hut</span>
+                            <span class="build-cost">2 🪵 1 🗿</span>
                         </button>
-                    </div>
-                </div>
-                <div class="settlement-item">
-                    <span class="settlement-icon">👥</span>
-                    <div class="settlement-info">
-                        <div class="settlement-name">Population: <span id="population-count">5</span> (Food: <span id="population-food">5</span>)</div>
-                    </div>
-                </div>
-            </div>
+                    </details>
 
-            <div class="buildings scroll-container">
-                <details class="building-section" open>
-                    <summary>Farms (Camp) (<span id="farm-count">0</span>/<span id="farm-max">2</span>)</summary>
-                    <div id="farms-container"></div>
-                    <button class="build-btn" id="build-farm-btn" aria-label="Build Farm">
-                        <span class="build-text">Build Farm</span>
-                        <span class="build-cost">1 🪵 1 🗿</span>
-                    </button>
-                </details>
-
-                <details class="building-section" open>
-                    <summary>Forester Huts (Camp) (<span id="forester-count">0</span>/<span id="forester-max">2</span>)</summary>
-                    <div id="foresters-container"></div>
-                    <button class="build-btn" id="build-forester-btn" aria-label="Build Forester Hut">
-                        <span class="build-text">Build Forester Hut</span>
-                        <span class="build-cost">2 🪵 1 🗿</span>
-                    </button>
-                </details>
-
-                <details class="building-section" open>
-                    <summary>Quarries (Camp) (<span id="quarry-count">0</span>/<span id="quarry-max">2</span>)</summary>
-                    <div id="quarries-container"></div>
-                    <button class="build-btn" id="build-quarry-btn" aria-label="Build Quarry">
-                        <span class="build-text">Build Quarry</span>
-                        <span class="build-cost">1 🪵 2 🗿</span>
-                    </button>
-                </details>
-                <details class="building-section" open>
-                    <summary>Mines (House) (<span id="mine-count">0</span>/<span id="mine-max">2</span>)</summary>
-                    <div id="mines-container"></div>
-                    <button class="build-btn" id="build-mine-btn" aria-label="Build Mine">
-                        <span class="build-text">Build Mine</span>
-                        <span class="build-cost">2 🪵 2 🗿</span>
-                    </button>
-                </details>
-
-                <details class="building-section" open>
-                    <summary>Gem Mines (Fortress) (<span id="gemMine-count">0</span>/<span id="gemMine-max">2</span>)</summary>
-                    <div id="gemMines-container"></div>
-                    <button class="build-btn" id="build-gemMine-btn" aria-label="Build Gem Mine">
-                        <span class="build-text">Build Gem Mine</span>
-                        <span class="build-cost">2 🪵 2 🗿 1 ⚔️</span>
-                    </button>
-                </details>
-                <details class="building-section" open>
-                    <summary>Workshops (Hall) (<span id="workshop-count">0</span>/<span id="workshop-max">2</span>)</summary>
-                    <div id="workshops-container"></div>
-                    <button class="build-btn" id="build-workshop-btn" aria-label="Build Workshop">
-                        <span class="build-text">Build Workshop</span>
-                        <span class="build-cost">2 🪵 1 🗿</span>
-                    </button>
-                </details>
-                <details class="building-section" open>
-                    <summary>Sawmills (House) (<span id="sawmill-count">0</span>/<span id="sawmill-max">1</span>)</summary>
-                    <div id="sawmills-container"></div>
-                    <button class="build-btn" id="build-sawmill-btn" aria-label="Build Sawmill">
-                        <span class="build-text">Build Sawmill</span>
-                        <span class="build-cost">3 🪵 2 🗿</span>
-                    </button>
-                </details>
-                <details class="building-section" open>
-                    <summary>Granaries (House) (<span id="granary-count">0</span>/<span id="granary-max">1</span>)</summary>
-                    <div id="granaries-container"></div>
-                    <button class="build-btn" id="build-granary-btn" aria-label="Build Granary">
-                        <span class="build-text">Build Granary</span>
-                        <span class="build-cost">2 🪵 2 🗿</span>
-                    </button>
-                </details>
-                <details class="building-section" open>
-                    <summary>Smelters (Hall) (<span id="smelter-count">0</span>/<span id="smelter-max">1</span>)</summary>
-                    <div id="smelters-container"></div>
-                    <button class="build-btn" id="build-smelter-btn" aria-label="Build Smelter">
-                        <span class="build-text">Build Smelter</span>
-                        <span class="build-cost">2 🪵 3 🗿 1 ⚔️</span>
-                    </button>
-                </details>
-                <details class="building-section" open>
-                    <summary>Barracks (Fortress) (<span id="barracks-count">0</span>/<span id="barracks-max">1</span>)</summary>
-                    <div id="barracks-container"></div>
-                    <button class="build-btn" id="build-barracks-btn" aria-label="Build Barracks">
-                        <span class="build-text">Build Barracks</span>
-                        <span class="build-cost">3 🪵 3 🗿 2 ⚔️</span>
-                    </button>
-                </details>
-            </div>
-
-            <div class="crafting">
-                <h3>Crafting</h3>
-                <div class="craft-items scroll-container">
-                    <div class="craft-item">
-                        <span class="craft-icon">🍀</span>
-                        <span class="craft-name">Lucky Charm</span>
-                        <span class="craft-owned" id="lucky-charm-count">0</span>
-                        <div class="craft-desc">Adds +2 to your next 3 rolls.</div>
-                        <button class="craft-btn" id="craft-lucky-charm" aria-label="Craft Lucky Charm">
-                            <span class="craft-cost">3 🪵 2 🗿</span>
+                    <details class="building-section" open>
+                        <summary>Quarries (Camp) (<span id="quarry-count">0</span>/<span id="quarry-max">2</span>)
+                        </summary>
+                        <div id="quarries-container"></div>
+                        <button class="build-btn" id="build-quarry-btn" aria-label="Build Quarry">
+                            <span class="build-text">Build Quarry</span>
+                            <span class="build-cost">1 🪵 2 🗿</span>
                         </button>
-                        <!-- Repair option removed -->
-                    </div>
-                    <div class="craft-item">
-                        <span class="craft-icon">📜</span>
-                        <span class="craft-name">Magic Scroll</span>
-                        <span class="craft-owned" id="magic-scroll-count">0</span>
-                        <div class="craft-desc">Craft to gain 20 XP instantly.</div>
-                        <button class="craft-btn" id="craft-magic-scroll" aria-label="Craft Magic Scroll">
-                            <span class="craft-cost">2 🪵 1 💎</span>
+                    </details>
+                    <details class="building-section" open>
+                        <summary>Mines (House) (<span id="mine-count">0</span>/<span id="mine-max">2</span>)</summary>
+                        <div id="mines-container"></div>
+                        <button class="build-btn" id="build-mine-btn" aria-label="Build Mine">
+                            <span class="build-text">Build Mine</span>
+                            <span class="build-cost">2 🪵 2 🗿</span>
                         </button>
+                    </details>
+
+                    <details class="building-section" open>
+                        <summary>Gem Mines (Fortress) (<span id="gemMine-count">0</span>/<span
+                                id="gemMine-max">2</span>)</summary>
+                        <div id="gemMines-container"></div>
+                        <button class="build-btn" id="build-gemMine-btn" aria-label="Build Gem Mine">
+                            <span class="build-text">Build Gem Mine</span>
+                            <span class="build-cost">2 🪵 2 🗿 1 ⚔️</span>
+                        </button>
+                    </details>
+                    <details class="building-section" open>
+                        <summary>Workshops (Hall) (<span id="workshop-count">0</span>/<span id="workshop-max">2</span>)
+                        </summary>
+                        <div id="workshops-container"></div>
+                        <button class="build-btn" id="build-workshop-btn" aria-label="Build Workshop">
+                            <span class="build-text">Build Workshop</span>
+                            <span class="build-cost">2 🪵 1 🗿</span>
+                        </button>
+                    </details>
+                    <details class="building-section" open>
+                        <summary>Sawmills (House) (<span id="sawmill-count">0</span>/<span id="sawmill-max">1</span>)
+                        </summary>
+                        <div id="sawmills-container"></div>
+                        <button class="build-btn" id="build-sawmill-btn" aria-label="Build Sawmill">
+                            <span class="build-text">Build Sawmill</span>
+                            <span class="build-cost">3 🪵 2 🗿</span>
+                        </button>
+                    </details>
+                    <details class="building-section" open>
+                        <summary>Granaries (House) (<span id="granary-count">0</span>/<span id="granary-max">1</span>)
+                        </summary>
+                        <div id="granaries-container"></div>
+                        <button class="build-btn" id="build-granary-btn" aria-label="Build Granary">
+                            <span class="build-text">Build Granary</span>
+                            <span class="build-cost">2 🪵 2 🗿</span>
+                        </button>
+                    </details>
+                    <details class="building-section" open>
+                        <summary>Smelters (Hall) (<span id="smelter-count">0</span>/<span id="smelter-max">1</span>)
+                        </summary>
+                        <div id="smelters-container"></div>
+                        <button class="build-btn" id="build-smelter-btn" aria-label="Build Smelter">
+                            <span class="build-text">Build Smelter</span>
+                            <span class="build-cost">2 🪵 3 🗿 1 ⚔️</span>
+                        </button>
+                    </details>
+                    <details class="building-section" open>
+                        <summary>Barracks (Fortress) (<span id="barracks-count">0</span>/<span
+                                id="barracks-max">1</span>)</summary>
+                        <div id="barracks-container"></div>
+                        <button class="build-btn" id="build-barracks-btn" aria-label="Build Barracks">
+                            <span class="build-text">Build Barracks</span>
+                            <span class="build-cost">3 🪵 3 🗿 2 ⚔️</span>
+                        </button>
+                    </details>
+                </div>
+
+                <div class="crafting">
+                    <h3>Crafting</h3>
+                    <div class="craft-items scroll-container">
+                        <div class="craft-item">
+                            <span class="craft-icon">🍀</span>
+                            <span class="craft-name">Lucky Charm</span>
+                            <span class="craft-owned" id="lucky-charm-count">0</span>
+                            <div class="craft-desc">Adds +2 to your next 3 rolls.</div>
+                            <button class="craft-btn" id="craft-lucky-charm" aria-label="Craft Lucky Charm">
+                                <span class="craft-cost">3 🪵 2 🗿</span>
+                            </button>
+                            <!-- Repair option removed -->
+                        </div>
+                        <div class="craft-item">
+                            <span class="craft-icon">📜</span>
+                            <span class="craft-name">Magic Scroll</span>
+                            <span class="craft-owned" id="magic-scroll-count">0</span>
+                            <div class="craft-desc">Craft to gain 20 XP instantly.</div>
+                            <button class="craft-btn" id="craft-magic-scroll" aria-label="Craft Magic Scroll">
+                                <span class="craft-cost">2 🪵 1 💎</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="research">
-                <h3>Research</h3>
-                <div>Current: <span id="current-research">None</span> <span id="research-progress"></span></div>
-                <select id="research-select"></select>
-                <button id="start-research-btn">Start Research</button>
-            </div>
-        </section>
-
-        <section class="sleep-section" id="month-section">
-            <button id="next-month-btn" class="sleep-btn" disabled aria-label="Advance to next month">
-                <span class="sleep-icon">😴</span>
-                Go To Next Month
-            </button>
-        </section>
-
-    </main>
-
-    <!-- Dice Roll Modal -->
-    <div id="dice-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close-btn" aria-label="Close">&times;</button>
-            <div class="dice-container">
-                <div class="dice" id="dice">
-                    <div class="dice-face">?</div>
+                <div class="research">
+                    <h3>Research</h3>
+                    <div>Current: <span id="current-research">None</span> <span id="research-progress"></span></div>
+                    <select id="research-select"></select>
+                    <button id="start-research-btn">Start Research</button>
                 </div>
+            </section>
+
+            <section class="sleep-section" id="month-section">
+                <button id="next-month-btn" class="sleep-btn" disabled aria-label="Advance to next month">
+                    <span class="sleep-icon">😴</span>
+                    Go To Next Month
+                </button>
+            </section>
+
+        </main>
+
+        <!-- Dice Roll Modal -->
+        <div id="dice-modal" class="modal">
+            <div class="modal-content">
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+                <div class="dice-container">
+                    <div class="dice" id="dice">
+                        <div class="dice-face">?</div>
+                    </div>
+                </div>
+                <div class="roll-result" id="roll-result"></div>
+                <button id="close-modal-btn" class="modal-btn">Continue</button>
             </div>
-            <div class="roll-result" id="roll-result"></div>
-            <button id="close-modal-btn" class="modal-btn">Continue</button>
         </div>
+        <button id="fab-next-month" class="fab" aria-label="Advance to next month">⏭️</button>
     </div>
-    <button id="fab-next-month" class="fab" aria-label="Advance to next month">⏭️</button>
-</div>
 
-<!-- Load the main script as an ES module -->
-<script type="module" src="./app.js"></script>
+    <!-- Load the main script as an ES module -->
+    <script type="module" src="./app.js"></script>
 
 </body>
+
 </html>
