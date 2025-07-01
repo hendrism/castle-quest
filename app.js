@@ -247,102 +247,102 @@ const game = new Game();
 
 // Initialize game
 function initGame() {
-console.log('Initializing Dice & Castle...');
-try {
-    loadGame();
-    validateGameState(gameState);
-    if (!gameState.population) {
-        gameState.population = homeTypes[gameState.settlement.home].population;
-    }
-    if (!gameState.ruler || !gameState.ruler.name) {
-        createNewRuler();
-    }
-    setupResourceBar();
-    generateMonthlyChallenge();
-    updateResearchUI();
-    debouncedRefreshGameInterface();
-setupEventListeners();
-    initScrollIndicators();
-console.log('Game initialized successfully!');
+    console.log('Initializing Dice & Castle...');
+    try {
+        loadGame();
+        validateGameState(gameState);
+        if (!gameState.population) {
+            gameState.population = homeTypes[gameState.settlement.home].population;
+        }
+        if (!gameState.ruler || !gameState.ruler.name) {
+            createNewRuler();
+        }
+        setupResourceBar();
+        generateMonthlyChallenge();
+        updateResearchUI();
+        debouncedRefreshGameInterface();
+        setupEventListeners();
+        initScrollIndicators();
+        console.log('Game initialized successfully!');
 
-    // Test that buttons exist
-    const testBtn = document.querySelector('.location-btn');
-    if (testBtn) {
-        console.log('Location buttons found');
-    } else {
-        console.error('Location buttons not found!');
+        // Test that buttons exist
+        const testBtn = document.querySelector('.location-btn');
+        if (testBtn) {
+            console.log('Location buttons found');
+        } else {
+            console.error('Location buttons not found!');
+        }
+    } catch (error) {
+        console.error('Error initializing game:', error);
     }
-} catch (error) {
-    console.error('Error initializing game:', error);
-}
 
-// Register service worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-        .then(registration => console.log('SW registered'))
-        .catch(error => console.log('SW registration failed:', error));
-}
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => console.log('SW registered'))
+            .catch(error => console.log('SW registration failed:', error));
+    }
 
 }
 
 // Event listeners
 function setupEventListeners() {
-console.log('Setting up event listeners...');
+    console.log('Setting up event listeners...');
 
-// Location exploration
-const locationBtns = document.querySelectorAll('.location-btn');
-console.log('Found', locationBtns.length, 'location buttons');
+    // Location exploration
+    const locationBtns = document.querySelectorAll('.location-btn');
+    console.log('Found', locationBtns.length, 'location buttons');
 
-locationBtns.forEach((btn, index) => {
-    console.log('Setting up button', index, 'for location:', btn.dataset.location);
-    btn.addEventListener('click', (e) => {
-        console.log('Location button clicked:', btn.dataset.location);
-        
-        // Visual feedback for phone users
-        btn.style.background = '#e74c3c';
-        btn.style.color = 'white';
-        setTimeout(() => {
-            btn.style.background = '';
-            btn.style.color = '';
-        }, 200);
-        
-        const location = btn.dataset.location;
-        exploreLocation(location);
+    locationBtns.forEach((btn, index) => {
+        console.log('Setting up button', index, 'for location:', btn.dataset.location);
+        btn.addEventListener('click', (e) => {
+            console.log('Location button clicked:', btn.dataset.location);
+
+            // Visual feedback for phone users
+            btn.style.background = '#e74c3c';
+            btn.style.color = 'white';
+            setTimeout(() => {
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 200);
+
+            const location = btn.dataset.location;
+            exploreLocation(location);
+        });
     });
-});
 
-// Next month button
-const nextMonthBtn = document.getElementById('next-month-btn');
-if (nextMonthBtn) {
-    nextMonthBtn.addEventListener('click', () => {
-        console.log('Next month button clicked');
-        advanceMonth();
-    });
-} else {
-    console.error('Next month button not found!');
-}
-
-// Floating next month button
-const fabNext = document.getElementById('fab-next-month');
-if (fabNext) {
-    fabNext.addEventListener('click', () => {
-        console.log('FAB next month clicked');
-        advanceMonth();
-    });
-}
-
-// Auto hide header on scroll
-let lastScroll = window.scrollY;
-window.addEventListener('scroll', () => {
-    const header = document.querySelector('header');
-    if (!header) return;
-    if (window.scrollY > lastScroll && window.scrollY > 50) {
-        header.classList.add('hide-header');
+    // Next month button
+    const nextMonthBtn = document.getElementById('next-month-btn');
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener('click', () => {
+            console.log('Next month button clicked');
+            advanceMonth();
+        });
     } else {
-        header.classList.remove('hide-header');
+        console.error('Next month button not found!');
     }
-    lastScroll = window.scrollY;
-});
+
+    // Floating next month button
+    const fabNext = document.getElementById('fab-next-month');
+    if (fabNext) {
+        fabNext.addEventListener('click', () => {
+            console.log('FAB next month clicked');
+            advanceMonth();
+        });
+    }
+
+    // Auto hide header on scroll
+    let lastScroll = window.scrollY;
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (!header) return;
+        if (window.scrollY > lastScroll && window.scrollY > 50) {
+            header.classList.add('hide-header');
+        } else {
+            header.classList.remove('hide-header');
+        }
+        lastScroll = window.scrollY;
+    });
 
     // Save and load buttons
     const saveBtn = document.getElementById('save-btn');
@@ -362,172 +362,172 @@ window.addEventListener('scroll', () => {
         });
     }
 
-// Settlement upgrades
-const homeUpgradeBtn = document.getElementById('home-upgrade-btn');
-const wallsUpgradeBtn = document.getElementById('walls-upgrade-btn');
+    // Settlement upgrades
+    const homeUpgradeBtn = document.getElementById('home-upgrade-btn');
+    const wallsUpgradeBtn = document.getElementById('walls-upgrade-btn');
 
-if (homeUpgradeBtn) {
-    homeUpgradeBtn.addEventListener('click', (e) => {
-        console.log('Home upgrade clicked');
-        upgradeHome();
-    });
-}
-
-if (wallsUpgradeBtn) {
-    wallsUpgradeBtn.addEventListener('click', (e) => {
-        console.log('Walls upgrade clicked');
-        upgradeWalls();
-    });
-}
-
-// Building construction
-const buildFarmBtn = document.getElementById('build-farm-btn');
-const buildQuarryBtn = document.getElementById('build-quarry-btn');
-const buildMineBtn = document.getElementById('build-mine-btn');
-const buildWorkshopBtn = document.getElementById('build-workshop-btn');
-const buildForesterBtn = document.getElementById('build-forester-btn');
-const buildGemMineBtn = document.getElementById('build-gemMine-btn');
-const buildSawmillBtn = document.getElementById('build-sawmill-btn');
-const buildGranaryBtn = document.getElementById('build-granary-btn');
-const buildSmelterBtn = document.getElementById('build-smelter-btn');
-const buildBarracksBtn = document.getElementById('build-barracks-btn');
-const researchSelect = document.getElementById('research-select');
-const startResearchBtn = document.getElementById('start-research-btn');
-
-if (buildFarmBtn) {
-    buildFarmBtn.addEventListener('click', () => {
-        console.log('Build farm clicked');
-        buildBuilding('farm');
-    });
-}
-
-if (buildQuarryBtn) {
-    buildQuarryBtn.addEventListener('click', () => {
-        console.log('Build quarry clicked');
-        buildBuilding('quarry');
-    });
-}
-
-if (buildMineBtn) {
-    buildMineBtn.addEventListener('click', () => {
-        console.log('Build mine clicked');
-        buildBuilding('mine');
-    });
-}
-
-if (buildForesterBtn) {
-    buildForesterBtn.addEventListener('click', () => {
-        console.log('Build forester clicked');
-        buildBuilding('forester');
-    });
-}
-
-if (buildGemMineBtn) {
-    buildGemMineBtn.addEventListener('click', () => {
-        console.log('Build gem mine clicked');
-        buildBuilding('gemMine');
-    });
-}
-
-if (buildSawmillBtn) {
-    buildSawmillBtn.addEventListener('click', () => {
-        buildBuilding('sawmill');
-    });
-}
-
-if (buildGranaryBtn) {
-    buildGranaryBtn.addEventListener('click', () => {
-        buildBuilding('granary');
-    });
-}
-
-if (buildSmelterBtn) {
-    buildSmelterBtn.addEventListener('click', () => {
-        buildBuilding('smelter');
-    });
-}
-
-if (buildBarracksBtn) {
-    buildBarracksBtn.addEventListener('click', () => {
-        buildBuilding('barracks');
-    });
-}
-
-if (buildWorkshopBtn) {
-    buildWorkshopBtn.addEventListener('click', () => {
-        console.log('Build workshop clicked');
-        buildBuilding('workshop');
-    });
-}
-
-if (startResearchBtn) {
-    startResearchBtn.addEventListener('click', () => {
-        const key = researchSelect.value;
-        if (startResearch(key)) {
-            updateResearchUI();
-        }
-    });
-}
-
-// Crafting
-const craftBtn = document.getElementById('craft-lucky-charm');
-const craftScrollBtn = document.getElementById('craft-magic-scroll');
-if (craftBtn) {
-    craftBtn.addEventListener('click', () => {
-        console.log('Craft lucky charm clicked');
-        craftLuckyCharm();
-    });
-}
-if (craftScrollBtn) {
-    craftScrollBtn.addEventListener('click', () => {
-        console.log('Craft magic scroll clicked');
-        craftMagicScroll();
-    });
-}
-
-// Event log controls
-const clearLogBtn = document.getElementById('clear-log-btn');
-const textSizeSelect = document.getElementById('text-size-select');
-const logSearch = document.getElementById('log-search');
-
-if (clearLogBtn) {
-    clearLogBtn.addEventListener('click', () => {
-        console.log('Clear log clicked');
-        clearEventLog();
-    });
-}
-
-if (textSizeSelect) {
-    textSizeSelect.addEventListener('change', changeTextSize);
-}
-
-if (logSearch) {
-    logSearch.addEventListener('input', updateEventLogUI);
-}
-
-// Modal controls
-const closeModalBtn = document.getElementById('close-modal-btn');
-const modalCloseX = document.querySelector('.modal-close-btn');
-if (closeModalBtn) {
-    closeModalBtn.addEventListener('click', () => {
-        console.log('Close modal clicked');
-        closeModal();
-    });
-}
-if (modalCloseX) {
-    modalCloseX.addEventListener('click', () => closeModal());
-}
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('dice-modal');
-        if (modal && modal.classList.contains('show')) {
-            closeModal();
-        }
+    if (homeUpgradeBtn) {
+        homeUpgradeBtn.addEventListener('click', (e) => {
+            console.log('Home upgrade clicked');
+            upgradeHome();
+        });
     }
-});
 
-console.log('Event listeners setup complete');
+    if (wallsUpgradeBtn) {
+        wallsUpgradeBtn.addEventListener('click', (e) => {
+            console.log('Walls upgrade clicked');
+            upgradeWalls();
+        });
+    }
+
+    // Building construction
+    const buildFarmBtn = document.getElementById('build-farm-btn');
+    const buildQuarryBtn = document.getElementById('build-quarry-btn');
+    const buildMineBtn = document.getElementById('build-mine-btn');
+    const buildWorkshopBtn = document.getElementById('build-workshop-btn');
+    const buildForesterBtn = document.getElementById('build-forester-btn');
+    const buildGemMineBtn = document.getElementById('build-gemMine-btn');
+    const buildSawmillBtn = document.getElementById('build-sawmill-btn');
+    const buildGranaryBtn = document.getElementById('build-granary-btn');
+    const buildSmelterBtn = document.getElementById('build-smelter-btn');
+    const buildBarracksBtn = document.getElementById('build-barracks-btn');
+    const researchSelect = document.getElementById('research-select');
+    const startResearchBtn = document.getElementById('start-research-btn');
+
+    if (buildFarmBtn) {
+        buildFarmBtn.addEventListener('click', () => {
+            console.log('Build farm clicked');
+            buildBuilding('farm');
+        });
+    }
+
+    if (buildQuarryBtn) {
+        buildQuarryBtn.addEventListener('click', () => {
+            console.log('Build quarry clicked');
+            buildBuilding('quarry');
+        });
+    }
+
+    if (buildMineBtn) {
+        buildMineBtn.addEventListener('click', () => {
+            console.log('Build mine clicked');
+            buildBuilding('mine');
+        });
+    }
+
+    if (buildForesterBtn) {
+        buildForesterBtn.addEventListener('click', () => {
+            console.log('Build forester clicked');
+            buildBuilding('forester');
+        });
+    }
+
+    if (buildGemMineBtn) {
+        buildGemMineBtn.addEventListener('click', () => {
+            console.log('Build gem mine clicked');
+            buildBuilding('gemMine');
+        });
+    }
+
+    if (buildSawmillBtn) {
+        buildSawmillBtn.addEventListener('click', () => {
+            buildBuilding('sawmill');
+        });
+    }
+
+    if (buildGranaryBtn) {
+        buildGranaryBtn.addEventListener('click', () => {
+            buildBuilding('granary');
+        });
+    }
+
+    if (buildSmelterBtn) {
+        buildSmelterBtn.addEventListener('click', () => {
+            buildBuilding('smelter');
+        });
+    }
+
+    if (buildBarracksBtn) {
+        buildBarracksBtn.addEventListener('click', () => {
+            buildBuilding('barracks');
+        });
+    }
+
+    if (buildWorkshopBtn) {
+        buildWorkshopBtn.addEventListener('click', () => {
+            console.log('Build workshop clicked');
+            buildBuilding('workshop');
+        });
+    }
+
+    if (startResearchBtn) {
+        startResearchBtn.addEventListener('click', () => {
+            const key = researchSelect.value;
+            if (startResearch(key)) {
+                updateResearchUI();
+            }
+        });
+    }
+
+    // Crafting
+    const craftBtn = document.getElementById('craft-lucky-charm');
+    const craftScrollBtn = document.getElementById('craft-magic-scroll');
+    if (craftBtn) {
+        craftBtn.addEventListener('click', () => {
+            console.log('Craft lucky charm clicked');
+            craftLuckyCharm();
+        });
+    }
+    if (craftScrollBtn) {
+        craftScrollBtn.addEventListener('click', () => {
+            console.log('Craft magic scroll clicked');
+            craftMagicScroll();
+        });
+    }
+
+    // Event log controls
+    const clearLogBtn = document.getElementById('clear-log-btn');
+    const textSizeSelect = document.getElementById('text-size-select');
+    const logSearch = document.getElementById('log-search');
+
+    if (clearLogBtn) {
+        clearLogBtn.addEventListener('click', () => {
+            console.log('Clear log clicked');
+            clearEventLog();
+        });
+    }
+
+    if (textSizeSelect) {
+        textSizeSelect.addEventListener('change', changeTextSize);
+    }
+
+    if (logSearch) {
+        logSearch.addEventListener('input', updateEventLogUI);
+    }
+
+    // Modal controls
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalCloseX = document.querySelector('.modal-close-btn');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            console.log('Close modal clicked');
+            closeModal();
+        });
+    }
+    if (modalCloseX) {
+        modalCloseX.addEventListener('click', () => closeModal());
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('dice-modal');
+            if (modal && modal.classList.contains('show')) {
+                closeModal();
+            }
+        }
+    });
+
+    console.log('Event listeners setup complete');
 
 }
 
@@ -551,57 +551,57 @@ function exploreLocation(locationKey) {
 
         gameState.explorationsLeft--;
 
-    if (gameState.monthlyChallenge.type === 'explore' && gameState.monthlyChallenge.exploreTargets && gameState.monthlyChallenge.exploreTargets.has(locationKey)) {
-        gameState.monthlyChallenge.explored.add(locationKey);
-        gameState.monthlyChallenge.progress = gameState.monthlyChallenge.explored.size;
-    }
-    checkMonthlyChallengeCompletion();
-
-// Roll dice and show modal
-showDiceRoll((roll) => {
-    const result = calculateExplorationResult(locationKey, roll);
-    
-    // Apply rewards
-    Object.keys(result.rewards).forEach(resource => {
-        gameState.resources[resource] += result.rewards[resource];
-    });
-
-    // Gain XP
-    gainXP(result.xp);
-
-    // Log event with roll and rewards
-    const rewardsText = Object.keys(result.rewards)
-        .map(r => {
-            const amt = result.rewards[r];
-            if (amt === 0) return null;
-            const icon = getResourceIcon(r);
-            return `${amt > 0 ? '+' : ''}${amt} ${icon}`;
-        })
-        .filter(Boolean)
-        .join(' ');
-
-    let logMsg = `🎲 Rolled ${result.roll}: ${result.message}`;
-    if (rewardsText) {
-        logMsg += ` Rewards: ${rewardsText}`;
-    }
-    addEventLog(logMsg, result.type);
-
-    debouncedRefreshGameInterface();
-    saveGame();
-
-    // Build detail lines for the modal
-    const details = [];
-    details.push(result.message);
-    Object.keys(result.rewards).forEach(r => {
-        const amt = result.rewards[r];
-        if (amt !== 0) {
-            details.push(`${amt > 0 ? '+' : ''}${amt} ${getResourceIcon(r)} ${r}`);
+        if (gameState.monthlyChallenge.type === 'explore' && gameState.monthlyChallenge.exploreTargets && gameState.monthlyChallenge.exploreTargets.has(locationKey)) {
+            gameState.monthlyChallenge.explored.add(locationKey);
+            gameState.monthlyChallenge.progress = gameState.monthlyChallenge.explored.size;
         }
-    });
-    if (result.xp) details.push(`+${result.xp} XP`);
+        checkMonthlyChallengeCompletion();
 
-    return details;
-    });
+        // Roll dice and show modal
+        showDiceRoll((roll) => {
+            const result = calculateExplorationResult(locationKey, roll);
+
+            // Apply rewards
+            Object.keys(result.rewards).forEach(resource => {
+                gameState.resources[resource] += result.rewards[resource];
+            });
+
+            // Gain XP
+            gainXP(result.xp);
+
+            // Log event with roll and rewards
+            const rewardsText = Object.keys(result.rewards)
+                .map(r => {
+                    const amt = result.rewards[r];
+                    if (amt === 0) return null;
+                    const icon = getResourceIcon(r);
+                    return `${amt > 0 ? '+' : ''}${amt} ${icon}`;
+                })
+                .filter(Boolean)
+                .join(' ');
+
+            let logMsg = `🎲 Rolled ${result.roll}: ${result.message}`;
+            if (rewardsText) {
+                logMsg += ` Rewards: ${rewardsText}`;
+            }
+            addEventLog(logMsg, result.type);
+
+            debouncedRefreshGameInterface();
+            saveGame();
+
+            // Build detail lines for the modal
+            const details = [];
+            details.push(result.message);
+            Object.keys(result.rewards).forEach(r => {
+                const amt = result.rewards[r];
+                if (amt !== 0) {
+                    details.push(`${amt > 0 ? '+' : ''}${amt} ${getResourceIcon(r)} ${r}`);
+                }
+            });
+            if (result.xp) details.push(`+${result.xp} XP`);
+
+            return details;
+        });
 
     } catch (error) {
         console.error('Exploration failed:', error);
@@ -617,51 +617,51 @@ showDiceRoll((roll) => {
  * @returns {Object} The exploration result with rewards and messages
  */
 function calculateExplorationResult(locationKey, roll) {
-const location = LOCATIONS[locationKey];
-const effectiveRoll = Math.min(20, roll);
+    const location = LOCATIONS[locationKey];
+    const effectiveRoll = Math.min(20, roll);
 
-let multiplier = 1;
-let type = 'neutral';
-let message = '';
+    let multiplier = 1;
+    let type = 'neutral';
+    let message = '';
 
-if (effectiveRoll === 1) {
-    multiplier = 0;
-    type = 'failure';
-    message = `💀 Critical failure at ${location.name}! You gained nothing and lost 1 food.`;
-    return {
-        rewards: { food: -1 },
-        xp: 5,
-        message,
-        type
-    };
-} else if (effectiveRoll >= 18) {
-    multiplier = 2;
-    type = 'success';
-    message = `✨ Amazing success at ${location.name}! Double rewards!`;
-} else if (effectiveRoll >= 12) {
-    multiplier = 1.5;
-    type = 'success';
-    message = `⭐ Good results at ${location.name}!`;
-} else if (effectiveRoll >= 6) {
-    multiplier = 1;
-    type = 'neutral';
-    message = `📦 Decent exploration at ${location.name}.`;
-} else {
-    multiplier = 0.5;
-    type = 'failure';
-    message = `😞 Poor exploration at ${location.name}.`;
-}
+    if (effectiveRoll === 1) {
+        multiplier = 0;
+        type = 'failure';
+        message = `💀 Critical failure at ${location.name}! You gained nothing and lost 1 food.`;
+        return {
+            rewards: { food: -1 },
+            xp: 5,
+            message,
+            type
+        };
+    } else if (effectiveRoll >= 18) {
+        multiplier = 2;
+        type = 'success';
+        message = `✨ Amazing success at ${location.name}! Double rewards!`;
+    } else if (effectiveRoll >= 12) {
+        multiplier = 1.5;
+        type = 'success';
+        message = `⭐ Good results at ${location.name}!`;
+    } else if (effectiveRoll >= 6) {
+        multiplier = 1;
+        type = 'neutral';
+        message = `📦 Decent exploration at ${location.name}.`;
+    } else {
+        multiplier = 0.5;
+        type = 'failure';
+        message = `😞 Poor exploration at ${location.name}.`;
+    }
 
-const rewards = {};
-Object.keys(location.rewards).forEach(resource => {
-    const [min, max] = location.rewards[resource];
-    const base = min + Math.floor(Math.random() * (max - min + 1));
-    rewards[resource] = Math.floor(base * multiplier);
-});
+    const rewards = {};
+    Object.keys(location.rewards).forEach(resource => {
+        const [min, max] = location.rewards[resource];
+        const base = min + Math.floor(Math.random() * (max - min + 1));
+        rewards[resource] = Math.floor(base * multiplier);
+    });
 
-const xp = 10 + (effectiveRoll >= 15 ? 10 : 0);
+    const xp = 10 + (effectiveRoll >= 15 ? 10 : 0);
 
-return { rewards, xp, message, type, roll: effectiveRoll };
+    return { rewards, xp, message, type, roll: effectiveRoll };
 
 }
 
@@ -821,37 +821,37 @@ function advanceMonth() {
 
 // Settlement management
 function upgradeHome() {
-const currentHome = homeTypes[gameState.settlement.home];
-if (!currentHome.upgradeTo) return;
+    const currentHome = homeTypes[gameState.settlement.home];
+    if (!currentHome.upgradeTo) return;
 
-const upgradeCost = adjustCostForTraits(currentHome.cost);
-if (!canAfford(upgradeCost)) return;
+    const upgradeCost = adjustCostForTraits(currentHome.cost);
+    if (!canAfford(upgradeCost)) return;
 
-spendResources(upgradeCost);
-gameState.settlement.pendingHome = currentHome.upgradeTo;
-addEventLog(`🏠 Started upgrading home to ${homeTypes[currentHome.upgradeTo].name}. It will be ready tomorrow.`, 'success');
+    spendResources(upgradeCost);
+    gameState.settlement.pendingHome = currentHome.upgradeTo;
+    addEventLog(`🏠 Started upgrading home to ${homeTypes[currentHome.upgradeTo].name}. It will be ready tomorrow.`, 'success');
 
-debouncedRefreshGameInterface();
-saveGame();
+    debouncedRefreshGameInterface();
+    saveGame();
 
 }
 
 function upgradeWalls() {
-const currentWalls = wallTypes[gameState.settlement.walls];
-if (!currentWalls.upgradeTo) return;
+    const currentWalls = wallTypes[gameState.settlement.walls];
+    if (!currentWalls.upgradeTo) return;
 
-const upgradeCost = adjustCostForTraits(currentWalls.cost);
-if (!canAfford(upgradeCost)) return;
+    const upgradeCost = adjustCostForTraits(currentWalls.cost);
+    if (!canAfford(upgradeCost)) return;
 
-spendResources(upgradeCost);
-gameState.settlement.walls = currentWalls.upgradeTo;
+    spendResources(upgradeCost);
+    gameState.settlement.walls = currentWalls.upgradeTo;
 
-const newWalls = wallTypes[gameState.settlement.walls];
-addEventLog(`🛡️ Built ${newWalls.name} walls!`, 'success');
-gainXP(75);
+    const newWalls = wallTypes[gameState.settlement.walls];
+    addEventLog(`🛡️ Built ${newWalls.name} walls!`, 'success');
+    gainXP(75);
 
-debouncedRefreshGameInterface();
-saveGame();
+    debouncedRefreshGameInterface();
+    saveGame();
 
 }
 
@@ -880,36 +880,36 @@ function buildBuilding(type) {
     }
     checkMonthlyChallengeCompletion();
 
-debouncedRefreshGameInterface();
-saveGame();
+    debouncedRefreshGameInterface();
+    saveGame();
 
 }
 
 function upgradeBuilding(type, buildingId) {
-const key = getBuildingKey(type);
-const buildings = gameState.settlement[key];
-const building = buildings.find(b => b.id === buildingId);
-if (!building) return;
+    const key = getBuildingKey(type);
+    const buildings = gameState.settlement[key];
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) return;
 
-const currentLevel = BUILDING_TYPES[type].levels[building.level];
-if (!currentLevel.upgradeTo) return;
-const upgradeCost = adjustCostForTraits(currentLevel.cost);
-if (!canAfford(upgradeCost)) return;
+    const currentLevel = BUILDING_TYPES[type].levels[building.level];
+    if (!currentLevel.upgradeTo) return;
+    const upgradeCost = adjustCostForTraits(currentLevel.cost);
+    if (!canAfford(upgradeCost)) return;
 
-spendResources(upgradeCost);
-building.pendingLevel = currentLevel.upgradeTo;
+    spendResources(upgradeCost);
+    building.pendingLevel = currentLevel.upgradeTo;
 
-const newLevel = BUILDING_TYPES[type].levels[currentLevel.upgradeTo];
-addEventLog(`${BUILDING_TYPES[type].icon} Upgrading ${BUILDING_TYPES[type].name} to ${newLevel.name}. It will be ready tomorrow.`, 'success');
-gainXP(10);
+    const newLevel = BUILDING_TYPES[type].levels[currentLevel.upgradeTo];
+    addEventLog(`${BUILDING_TYPES[type].icon} Upgrading ${BUILDING_TYPES[type].name} to ${newLevel.name}. It will be ready tomorrow.`, 'success');
+    gainXP(10);
 
     if (gameState.monthlyChallenge.type === 'upgrade') {
         gameState.monthlyChallenge.progress++;
     }
     checkMonthlyChallengeCompletion();
 
-debouncedRefreshGameInterface();
-saveGame();
+    debouncedRefreshGameInterface();
+    saveGame();
 
 }
 
@@ -932,16 +932,16 @@ function finalizeBuildingUpgrades() {
 
 // Crafting
 function craftLuckyCharm() {
-const cost = { wood: 3, stone: 2 };
-if (!canAfford(cost)) return;
+    const cost = { wood: 3, stone: 2 };
+    if (!canAfford(cost)) return;
 
-spendResources(cost);
-gameState.items.luckyCharm += CONSTANTS.LUCKY_CHARM_MAX_USES;
-addEventLog(`🍀 Crafted a Lucky Charm! (${CONSTANTS.LUCKY_CHARM_MAX_USES} uses)`, 'success');
-gainXP(30);
+    spendResources(cost);
+    gameState.items.luckyCharm += CONSTANTS.LUCKY_CHARM_MAX_USES;
+    addEventLog(`🍀 Crafted a Lucky Charm! (${CONSTANTS.LUCKY_CHARM_MAX_USES} uses)`, 'success');
+    gainXP(30);
 
-debouncedRefreshGameInterface();
-saveGame();
+    debouncedRefreshGameInterface();
+    saveGame();
 
 }
 
@@ -965,15 +965,15 @@ function rollDice(sides = 20) {
 }
 
 function canAfford(cost) {
-return Object.keys(cost).every(resource =>
-gameState.resources[resource] >= cost[resource]
-);
+    return Object.keys(cost).every(resource =>
+        gameState.resources[resource] >= cost[resource]
+    );
 }
 
 function spendResources(cost) {
-Object.keys(cost).forEach(resource => {
-gameState.resources[resource] -= cost[resource];
-});
+    Object.keys(cost).forEach(resource => {
+        gameState.resources[resource] -= cost[resource];
+    });
 }
 
 function getBuildingKey(type) {
@@ -1160,30 +1160,30 @@ function getRequirementTooltip(type) {
 }
 
 function gainXP(amount) {
-gameState.xp += amount;
+    gameState.xp += amount;
 
-while (gameState.xp >= gameState.xpToNext) {
-    gameState.xp -= gameState.xpToNext;
-    gameState.level++;
-    gameState.xpToNext = Math.floor(gameState.xpToNext * CONSTANTS.LEVEL_XP_MULTIPLIER);
-    addEventLog(`🎉 Level up! You are now level ${gameState.level}!`, 'success');
-}
+    while (gameState.xp >= gameState.xpToNext) {
+        gameState.xp -= gameState.xpToNext;
+        gameState.level++;
+        gameState.xpToNext = Math.floor(gameState.xpToNext * CONSTANTS.LEVEL_XP_MULTIPLIER);
+        addEventLog(`🎉 Level up! You are now level ${gameState.level}!`, 'success');
+    }
 
 }
 
 function addEventLog(message, type = 'neutral') {
-const timestamp = new Date().toLocaleTimeString();
-gameState.eventLog.unshift({
-message,
-type,
-timestamp,
-month: gameState.month
-});
+    const timestamp = new Date().toLocaleTimeString();
+    gameState.eventLog.unshift({
+        message,
+        type,
+        timestamp,
+        month: gameState.month
+    });
 
-// Keep only last 50 entries
-if (gameState.eventLog.length > 50) {
-    gameState.eventLog = gameState.eventLog.slice(0, 50);
-}
+    // Keep only last 50 entries
+    if (gameState.eventLog.length > 50) {
+        gameState.eventLog = gameState.eventLog.slice(0, 50);
+    }
 
 }
 
@@ -1216,15 +1216,15 @@ function checkRulerStability() {
 }
 
 function clearEventLog() {
-gameState.eventLog = [];
-debouncedRefreshGameInterface();
-saveGame();
+    gameState.eventLog = [];
+    debouncedRefreshGameInterface();
+    saveGame();
 }
 
 function changeTextSize() {
-const size = document.getElementById('text-size-select').value;
-const logContent = document.getElementById('event-log-content');
-logContent.className = `log-content ${size}`;
+    const size = document.getElementById('text-size-select').value;
+    const logContent = document.getElementById('event-log-content');
+    logContent.className = `log-content ${size}`;
 }
 
 // Modal functions
@@ -1283,7 +1283,7 @@ function showDiceRoll(callback) {
 }
 
 function closeModal() {
-document.getElementById('dice-modal').classList.remove('show');
+    document.getElementById('dice-modal').classList.remove('show');
 }
 
 // UI Updates
@@ -1299,6 +1299,7 @@ function refreshGameInterface() {
         if (el.rulerName) el.rulerName.textContent = gameState.ruler.name;
         if (el.rulerAge) el.rulerAge.textContent = gameState.ruler.age;
         if (el.rulerTraits) el.rulerTraits.textContent = gameState.ruler.traits.join(', ');
+        uiManager.updateRulerYears(gameState.ruler.yearsRemaining);
     }
 
     // Update resources bar
@@ -1310,48 +1311,48 @@ function refreshGameInterface() {
     }
 
 
-// Update exploration
-const uiEl = uiManager.elements;
-if (uiEl.explorationsLeft) uiEl.explorationsLeft.textContent = gameState.explorationsLeft;
-const explorationMax = getExplorationMax() ?? 5;
-if (uiEl.explorationMax) uiEl.explorationMax.textContent = explorationMax;
+    // Update exploration
+    const uiEl = uiManager.elements;
+    if (uiEl.explorationsLeft) uiEl.explorationsLeft.textContent = gameState.explorationsLeft;
+    const explorationMax = getExplorationMax() ?? 5;
+    if (uiEl.explorationMax) uiEl.explorationMax.textContent = explorationMax;
 
-// Enable/disable location buttons
-document.querySelectorAll('.location-btn').forEach(btn => {
-    const loc = LOCATIONS[btn.dataset.location];
-    const locked = gameState.level < (loc.requiredLevel || 1);
-    btn.disabled = gameState.explorationsLeft <= 0 || locked;
-    if (locked) {
-        btn.title = `Requires level ${loc.requiredLevel}`;
-    } else {
-        btn.removeAttribute('title');
-    }
+    // Enable/disable location buttons
+    document.querySelectorAll('.location-btn').forEach(btn => {
+        const loc = LOCATIONS[btn.dataset.location];
+        const locked = gameState.level < (loc.requiredLevel || 1);
+        btn.disabled = gameState.explorationsLeft <= 0 || locked;
+        if (locked) {
+            btn.title = `Requires level ${loc.requiredLevel}`;
+        } else {
+            btn.removeAttribute('title');
+        }
 
-    // Update difficulty stars
-    const diffEl = document.getElementById(`${btn.dataset.location}-difficulty`);
-    if (diffEl) {
-        const diff = loc.requiredLevel || 1;
-        const stars = '★★★★★'.slice(0, diff).padEnd(5, '☆');
-        diffEl.textContent = `Difficulty: ${stars}`;
-    }
+        // Update difficulty stars
+        const diffEl = document.getElementById(`${btn.dataset.location}-difficulty`);
+        if (diffEl) {
+            const diff = loc.requiredLevel || 1;
+            const stars = '★★★★★'.slice(0, diff).padEnd(5, '☆');
+            diffEl.textContent = `Difficulty: ${stars}`;
+        }
 
-    // Update success chance hint
-    const chanceEl = document.getElementById(`${btn.dataset.location}-chance`);
-    if (chanceEl) {
-        const levelDiff = gameState.level - (loc.requiredLevel || 1);
-        let chance = 0.5 + levelDiff * 0.1;
-        chance = Math.min(0.95, Math.max(0.1, chance));
-        chanceEl.textContent = `Success: ${Math.round(chance * 100)}%`;
-    }
-});
+        // Update success chance hint
+        const chanceEl = document.getElementById(`${btn.dataset.location}-chance`);
+        if (chanceEl) {
+            const levelDiff = gameState.level - (loc.requiredLevel || 1);
+            let chance = 0.5 + levelDiff * 0.1;
+            chance = Math.min(0.95, Math.max(0.1, chance));
+            chanceEl.textContent = `Success: ${Math.round(chance * 100)}%`;
+        }
+    });
 
-// Enable/disable next month button
-if (uiEl.nextMonthBtn) uiEl.nextMonthBtn.disabled = gameState.explorationsLeft > 0;
+    // Enable/disable next month button
+    if (uiEl.nextMonthBtn) uiEl.nextMonthBtn.disabled = gameState.explorationsLeft > 0;
 
-// Update settlement
-updateSettlementUI();
+    // Update settlement
+    updateSettlementUI();
 
-// Update event log
+    // Update event log
     updateEventLogUI();
     updateMonthlyChallengeUI();
     checkMonthlyChallengeCompletion();
@@ -1374,355 +1375,355 @@ function debounce(func, wait) {
 const debouncedRefreshGameInterface = debounce(refreshGameInterface, 16);
 
 function updateSettlementUI() {
-// Home upgrade
-const currentHome = homeTypes[gameState.settlement.home];
-const homeUpgradeBtn = document.getElementById('home-upgrade-btn');
-document.getElementById('home-level').textContent = currentHome.name;
+    // Home upgrade
+    const currentHome = homeTypes[gameState.settlement.home];
+    const homeUpgradeBtn = document.getElementById('home-upgrade-btn');
+    document.getElementById('home-level').textContent = currentHome.name;
 
-if (currentHome.upgradeTo) {
-    const nextHome = homeTypes[currentHome.upgradeTo];
-    const homeCost = adjustCostForTraits(currentHome.cost);
-    const costText = formatCost(homeCost);
+    if (currentHome.upgradeTo) {
+        const nextHome = homeTypes[currentHome.upgradeTo];
+        const homeCost = adjustCostForTraits(currentHome.cost);
+        const costText = formatCost(homeCost);
 
-    if (gameState.settlement.pendingHome) {
-        homeUpgradeBtn.querySelector('.upgrade-text').textContent = `Upgrading to ${nextHome.name}...`;
-        homeUpgradeBtn.querySelector('.upgrade-cost').textContent = '';
-        homeUpgradeBtn.disabled = true;
+        if (gameState.settlement.pendingHome) {
+            homeUpgradeBtn.querySelector('.upgrade-text').textContent = `Upgrading to ${nextHome.name}...`;
+            homeUpgradeBtn.querySelector('.upgrade-cost').textContent = '';
+            homeUpgradeBtn.disabled = true;
+        } else {
+            homeUpgradeBtn.querySelector('.upgrade-text').textContent = `Upgrade to ${nextHome.name}`;
+            homeUpgradeBtn.querySelector('.upgrade-cost').textContent = costText;
+            homeUpgradeBtn.disabled = !canAfford(homeCost);
+        }
+        homeUpgradeBtn.style.display = 'flex';
     } else {
-        homeUpgradeBtn.querySelector('.upgrade-text').textContent = `Upgrade to ${nextHome.name}`;
-        homeUpgradeBtn.querySelector('.upgrade-cost').textContent = costText;
-        homeUpgradeBtn.disabled = !canAfford(homeCost);
+        homeUpgradeBtn.style.display = 'none';
     }
-    homeUpgradeBtn.style.display = 'flex';
-} else {
-    homeUpgradeBtn.style.display = 'none';
-}
 
-// Walls upgrade
-const currentWalls = wallTypes[gameState.settlement.walls];
-const wallsUpgradeBtn = document.getElementById('walls-upgrade-btn');
-document.getElementById('walls-level').textContent = currentWalls.name;
+    // Walls upgrade
+    const currentWalls = wallTypes[gameState.settlement.walls];
+    const wallsUpgradeBtn = document.getElementById('walls-upgrade-btn');
+    document.getElementById('walls-level').textContent = currentWalls.name;
 
-if (currentWalls.upgradeTo) {
-    const nextWalls = wallTypes[currentWalls.upgradeTo];
-    const wallCost = adjustCostForTraits(currentWalls.cost);
-    const costText = formatCost(wallCost);
-    
-    wallsUpgradeBtn.querySelector('.upgrade-text').textContent = `Build ${nextWalls.name} Walls`;
-    wallsUpgradeBtn.querySelector('.upgrade-cost').textContent = costText;
-    wallsUpgradeBtn.disabled = !canAfford(wallCost);
-    wallsUpgradeBtn.style.display = 'flex';
-} else {
-    wallsUpgradeBtn.style.display = 'none';
-}
+    if (currentWalls.upgradeTo) {
+        const nextWalls = wallTypes[currentWalls.upgradeTo];
+        const wallCost = adjustCostForTraits(currentWalls.cost);
+        const costText = formatCost(wallCost);
 
-// Population info
-const popEl = document.getElementById('population-count');
-const foodEl = document.getElementById('population-food');
-if (popEl) popEl.textContent = gameState.population;
-if (foodEl) foodEl.textContent = gameState.population;
+        wallsUpgradeBtn.querySelector('.upgrade-text').textContent = `Build ${nextWalls.name} Walls`;
+        wallsUpgradeBtn.querySelector('.upgrade-cost').textContent = costText;
+        wallsUpgradeBtn.disabled = !canAfford(wallCost);
+        wallsUpgradeBtn.style.display = 'flex';
+    } else {
+        wallsUpgradeBtn.style.display = 'none';
+    }
 
-// Buildings
-updateBuildingsUI();
+    // Population info
+    const popEl = document.getElementById('population-count');
+    const foodEl = document.getElementById('population-food');
+    if (popEl) popEl.textContent = gameState.population;
+    if (foodEl) foodEl.textContent = gameState.population;
 
-// Items
-document.getElementById('lucky-charm-count').textContent = gameState.items.luckyCharm;
-document.getElementById('craft-lucky-charm').disabled = !canAfford({ wood: 3, stone: 2 });
+    // Buildings
+    updateBuildingsUI();
+
+    // Items
+    document.getElementById('lucky-charm-count').textContent = gameState.items.luckyCharm;
+    document.getElementById('craft-lucky-charm').disabled = !canAfford({ wood: 3, stone: 2 });
 
 
-document.getElementById('magic-scroll-count').textContent = gameState.items.magicScroll;
-document.getElementById('craft-magic-scroll').disabled = !canAfford({ wood: 2, gems: 1 });
+    document.getElementById('magic-scroll-count').textContent = gameState.items.magicScroll;
+    document.getElementById('craft-magic-scroll').disabled = !canAfford({ wood: 2, gems: 1 });
 
     updateSettlementDashboard();
 
 }
 
 function updateBuildingsUI() {
-const farmLimit = getBuildingLimit('farm');
-document.getElementById('farm-count').textContent = gameState.settlement.farms.length;
-document.getElementById('farm-max').textContent = farmLimit;
-document.getElementById('build-farm-btn').disabled =
-    gameState.level < BUILDING_TYPES.farm.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.farm.requiredHome || 'camp') ||
-    gameState.settlement.farms.length + gameState.settlement.constructionQueue.filter(b=>b.type==='farm').length >= farmLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.farm.buildCost));
-document.getElementById('build-farm-btn').title = getRequirementTooltip('farm');
-const farmCost = adjustCostForTraits(BUILDING_TYPES.farm.buildCost);
-const farmCostText = formatCost(farmCost);
-const farmBtn = document.getElementById('build-farm-btn');
-const farmInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'farm').length;
-farmBtn.querySelector('.build-text').textContent =
-    farmInProgress > 0 ? `Build Farm (${farmInProgress} in progress)` : 'Build Farm';
-farmBtn.querySelector('.build-cost').textContent = farmCostText;
+    const farmLimit = getBuildingLimit('farm');
+    document.getElementById('farm-count').textContent = gameState.settlement.farms.length;
+    document.getElementById('farm-max').textContent = farmLimit;
+    document.getElementById('build-farm-btn').disabled =
+        gameState.level < BUILDING_TYPES.farm.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.farm.requiredHome || 'camp') ||
+        gameState.settlement.farms.length + gameState.settlement.constructionQueue.filter(b => b.type === 'farm').length >= farmLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.farm.buildCost));
+    document.getElementById('build-farm-btn').title = getRequirementTooltip('farm');
+    const farmCost = adjustCostForTraits(BUILDING_TYPES.farm.buildCost);
+    const farmCostText = formatCost(farmCost);
+    const farmBtn = document.getElementById('build-farm-btn');
+    const farmInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'farm').length;
+    farmBtn.querySelector('.build-text').textContent =
+        farmInProgress > 0 ? `Build Farm (${farmInProgress} in progress)` : 'Build Farm';
+    farmBtn.querySelector('.build-cost').textContent = farmCostText;
 
-const farmsContainer = document.getElementById('farms-container');
-farmsContainer.innerHTML = '';
-gameState.settlement.farms.forEach(farm => {
-    const farmElement = createBuildingElement('farm', farm);
-    farmsContainer.appendChild(farmElement);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='farm').forEach(b=>{
-    const el = createConstructionElement('farm');
-    farmsContainer.appendChild(el);
-});
+    const farmsContainer = document.getElementById('farms-container');
+    farmsContainer.innerHTML = '';
+    gameState.settlement.farms.forEach(farm => {
+        const farmElement = createBuildingElement('farm', farm);
+        farmsContainer.appendChild(farmElement);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'farm').forEach(b => {
+        const el = createConstructionElement('farm');
+        farmsContainer.appendChild(el);
+    });
 
-// Foresters
-const foresterLimit = getBuildingLimit('forester');
-document.getElementById('forester-count').textContent = gameState.settlement.foresters.length;
-document.getElementById('forester-max').textContent = foresterLimit;
-document.getElementById('build-forester-btn').disabled =
-    gameState.level < BUILDING_TYPES.forester.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.forester.requiredHome || 'camp') ||
-    gameState.settlement.foresters.length + gameState.settlement.constructionQueue.filter(b=>b.type==='forester').length >= foresterLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.forester.buildCost));
-document.getElementById('build-forester-btn').title = getRequirementTooltip('forester');
-const foresterCost = adjustCostForTraits(BUILDING_TYPES.forester.buildCost);
-const foresterCostText = formatCost(foresterCost);
-const foresterBtn = document.getElementById('build-forester-btn');
-const foresterInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'forester').length;
-foresterBtn.querySelector('.build-text').textContent =
-    foresterInProgress > 0 ? `Build Forester Hut (${foresterInProgress} in progress)` : 'Build Forester Hut';
-foresterBtn.querySelector('.build-cost').textContent = foresterCostText;
+    // Foresters
+    const foresterLimit = getBuildingLimit('forester');
+    document.getElementById('forester-count').textContent = gameState.settlement.foresters.length;
+    document.getElementById('forester-max').textContent = foresterLimit;
+    document.getElementById('build-forester-btn').disabled =
+        gameState.level < BUILDING_TYPES.forester.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.forester.requiredHome || 'camp') ||
+        gameState.settlement.foresters.length + gameState.settlement.constructionQueue.filter(b => b.type === 'forester').length >= foresterLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.forester.buildCost));
+    document.getElementById('build-forester-btn').title = getRequirementTooltip('forester');
+    const foresterCost = adjustCostForTraits(BUILDING_TYPES.forester.buildCost);
+    const foresterCostText = formatCost(foresterCost);
+    const foresterBtn = document.getElementById('build-forester-btn');
+    const foresterInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'forester').length;
+    foresterBtn.querySelector('.build-text').textContent =
+        foresterInProgress > 0 ? `Build Forester Hut (${foresterInProgress} in progress)` : 'Build Forester Hut';
+    foresterBtn.querySelector('.build-cost').textContent = foresterCostText;
 
-const forestersContainer = document.getElementById('foresters-container');
-forestersContainer.innerHTML = '';
-gameState.settlement.foresters.forEach(f => {
-    const el = createBuildingElement('forester', f);
-    forestersContainer.appendChild(el);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='forester').forEach(b=>{
-    const el = createConstructionElement('forester');
-    forestersContainer.appendChild(el);
-});
+    const forestersContainer = document.getElementById('foresters-container');
+    forestersContainer.innerHTML = '';
+    gameState.settlement.foresters.forEach(f => {
+        const el = createBuildingElement('forester', f);
+        forestersContainer.appendChild(el);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'forester').forEach(b => {
+        const el = createConstructionElement('forester');
+        forestersContainer.appendChild(el);
+    });
 
-// Quarries
-const quarryLimit = getBuildingLimit('quarry');
-document.getElementById('quarry-count').textContent = gameState.settlement.quarries.length;
-document.getElementById('quarry-max').textContent = quarryLimit;
-document.getElementById('build-quarry-btn').disabled =
-    gameState.level < BUILDING_TYPES.quarry.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.quarry.requiredHome || 'camp') ||
-    gameState.settlement.quarries.length + gameState.settlement.constructionQueue.filter(b=>b.type==='quarry').length >= quarryLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.quarry.buildCost));
-document.getElementById('build-quarry-btn').title = getRequirementTooltip('quarry');
-const quarryCost = adjustCostForTraits(BUILDING_TYPES.quarry.buildCost);
-const quarryCostText = formatCost(quarryCost);
-const quarryBtn = document.getElementById('build-quarry-btn');
-const quarryInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'quarry').length;
-quarryBtn.querySelector('.build-text').textContent =
-    quarryInProgress > 0 ? `Build Quarry (${quarryInProgress} in progress)` : 'Build Quarry';
-quarryBtn.querySelector('.build-cost').textContent = quarryCostText;
+    // Quarries
+    const quarryLimit = getBuildingLimit('quarry');
+    document.getElementById('quarry-count').textContent = gameState.settlement.quarries.length;
+    document.getElementById('quarry-max').textContent = quarryLimit;
+    document.getElementById('build-quarry-btn').disabled =
+        gameState.level < BUILDING_TYPES.quarry.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.quarry.requiredHome || 'camp') ||
+        gameState.settlement.quarries.length + gameState.settlement.constructionQueue.filter(b => b.type === 'quarry').length >= quarryLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.quarry.buildCost));
+    document.getElementById('build-quarry-btn').title = getRequirementTooltip('quarry');
+    const quarryCost = adjustCostForTraits(BUILDING_TYPES.quarry.buildCost);
+    const quarryCostText = formatCost(quarryCost);
+    const quarryBtn = document.getElementById('build-quarry-btn');
+    const quarryInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'quarry').length;
+    quarryBtn.querySelector('.build-text').textContent =
+        quarryInProgress > 0 ? `Build Quarry (${quarryInProgress} in progress)` : 'Build Quarry';
+    quarryBtn.querySelector('.build-cost').textContent = quarryCostText;
 
-const quarriesContainer = document.getElementById('quarries-container');
-quarriesContainer.innerHTML = '';
-gameState.settlement.quarries.forEach(quarry => {
-    const quarryElement = createBuildingElement('quarry', quarry);
-    quarriesContainer.appendChild(quarryElement);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='quarry').forEach(b=>{
-    const el = createConstructionElement('quarry');
-    quarriesContainer.appendChild(el);
-});
+    const quarriesContainer = document.getElementById('quarries-container');
+    quarriesContainer.innerHTML = '';
+    gameState.settlement.quarries.forEach(quarry => {
+        const quarryElement = createBuildingElement('quarry', quarry);
+        quarriesContainer.appendChild(quarryElement);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'quarry').forEach(b => {
+        const el = createConstructionElement('quarry');
+        quarriesContainer.appendChild(el);
+    });
 
-// Mines
-const mineLimit = getBuildingLimit('mine');
-document.getElementById('mine-count').textContent = gameState.settlement.mines.length;
-document.getElementById('mine-max').textContent = mineLimit;
-document.getElementById('build-mine-btn').disabled =
-    gameState.level < BUILDING_TYPES.mine.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.mine.requiredHome || 'camp') ||
-    gameState.settlement.mines.length + gameState.settlement.constructionQueue.filter(b=>b.type==='mine').length >= mineLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.mine.buildCost));
-document.getElementById('build-mine-btn').title = getRequirementTooltip('mine');
-const mineCost = adjustCostForTraits(BUILDING_TYPES.mine.buildCost);
-const mineCostText = formatCost(mineCost);
-const mineBtn = document.getElementById('build-mine-btn');
-const mineInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'mine').length;
-mineBtn.querySelector('.build-text').textContent =
-    mineInProgress > 0 ? `Build Mine (${mineInProgress} in progress)` : 'Build Mine';
-mineBtn.querySelector('.build-cost').textContent = mineCostText;
+    // Mines
+    const mineLimit = getBuildingLimit('mine');
+    document.getElementById('mine-count').textContent = gameState.settlement.mines.length;
+    document.getElementById('mine-max').textContent = mineLimit;
+    document.getElementById('build-mine-btn').disabled =
+        gameState.level < BUILDING_TYPES.mine.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.mine.requiredHome || 'camp') ||
+        gameState.settlement.mines.length + gameState.settlement.constructionQueue.filter(b => b.type === 'mine').length >= mineLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.mine.buildCost));
+    document.getElementById('build-mine-btn').title = getRequirementTooltip('mine');
+    const mineCost = adjustCostForTraits(BUILDING_TYPES.mine.buildCost);
+    const mineCostText = formatCost(mineCost);
+    const mineBtn = document.getElementById('build-mine-btn');
+    const mineInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'mine').length;
+    mineBtn.querySelector('.build-text').textContent =
+        mineInProgress > 0 ? `Build Mine (${mineInProgress} in progress)` : 'Build Mine';
+    mineBtn.querySelector('.build-cost').textContent = mineCostText;
 
-const minesContainer = document.getElementById('mines-container');
-minesContainer.innerHTML = '';
-gameState.settlement.mines.forEach(mine => {
-    const mineElement = createBuildingElement('mine', mine);
-    minesContainer.appendChild(mineElement);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='mine').forEach(b=>{
-    const el = createConstructionElement('mine');
-    minesContainer.appendChild(el);
-});
+    const minesContainer = document.getElementById('mines-container');
+    minesContainer.innerHTML = '';
+    gameState.settlement.mines.forEach(mine => {
+        const mineElement = createBuildingElement('mine', mine);
+        minesContainer.appendChild(mineElement);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'mine').forEach(b => {
+        const el = createConstructionElement('mine');
+        minesContainer.appendChild(el);
+    });
 
-// Gem Mines
-const gemMineLimit = getBuildingLimit('gemMine');
-document.getElementById('gemMine-count').textContent = gameState.settlement.gemMines.length;
-document.getElementById('gemMine-max').textContent = gemMineLimit;
-document.getElementById('build-gemMine-btn').disabled =
-    gameState.level < BUILDING_TYPES.gemMine.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.gemMine.requiredHome || 'camp') ||
-    gameState.settlement.gemMines.length + gameState.settlement.constructionQueue.filter(b=>b.type==='gemMine').length >= gemMineLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.gemMine.buildCost));
-document.getElementById('build-gemMine-btn').title = getRequirementTooltip('gemMine');
-const gemMineCost = adjustCostForTraits(BUILDING_TYPES.gemMine.buildCost);
-const gemMineCostText = formatCost(gemMineCost);
-const gemMineBtn = document.getElementById('build-gemMine-btn');
-const gemMineInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'gemMine').length;
-gemMineBtn.querySelector('.build-text').textContent =
-    gemMineInProgress > 0 ? `Build Gem Mine (${gemMineInProgress} in progress)` : 'Build Gem Mine';
-gemMineBtn.querySelector('.build-cost').textContent = gemMineCostText;
+    // Gem Mines
+    const gemMineLimit = getBuildingLimit('gemMine');
+    document.getElementById('gemMine-count').textContent = gameState.settlement.gemMines.length;
+    document.getElementById('gemMine-max').textContent = gemMineLimit;
+    document.getElementById('build-gemMine-btn').disabled =
+        gameState.level < BUILDING_TYPES.gemMine.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.gemMine.requiredHome || 'camp') ||
+        gameState.settlement.gemMines.length + gameState.settlement.constructionQueue.filter(b => b.type === 'gemMine').length >= gemMineLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.gemMine.buildCost));
+    document.getElementById('build-gemMine-btn').title = getRequirementTooltip('gemMine');
+    const gemMineCost = adjustCostForTraits(BUILDING_TYPES.gemMine.buildCost);
+    const gemMineCostText = formatCost(gemMineCost);
+    const gemMineBtn = document.getElementById('build-gemMine-btn');
+    const gemMineInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'gemMine').length;
+    gemMineBtn.querySelector('.build-text').textContent =
+        gemMineInProgress > 0 ? `Build Gem Mine (${gemMineInProgress} in progress)` : 'Build Gem Mine';
+    gemMineBtn.querySelector('.build-cost').textContent = gemMineCostText;
 
-const gemMinesContainer = document.getElementById('gemMines-container');
-gemMinesContainer.innerHTML = '';
-gameState.settlement.gemMines.forEach(gm => {
-    const el = createBuildingElement('gemMine', gm);
-    gemMinesContainer.appendChild(el);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='gemMine').forEach(b=>{
-    const el = createConstructionElement('gemMine');
-    gemMinesContainer.appendChild(el);
-});
+    const gemMinesContainer = document.getElementById('gemMines-container');
+    gemMinesContainer.innerHTML = '';
+    gameState.settlement.gemMines.forEach(gm => {
+        const el = createBuildingElement('gemMine', gm);
+        gemMinesContainer.appendChild(el);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'gemMine').forEach(b => {
+        const el = createConstructionElement('gemMine');
+        gemMinesContainer.appendChild(el);
+    });
 
-// Workshops
-const workshopLimit = getBuildingLimit('workshop');
-document.getElementById('workshop-count').textContent = gameState.settlement.workshops.length;
-document.getElementById('workshop-max').textContent = workshopLimit;
-document.getElementById('build-workshop-btn').disabled =
-    gameState.level < BUILDING_TYPES.workshop.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.workshop.requiredHome || 'camp') ||
-    gameState.settlement.workshops.length + gameState.settlement.constructionQueue.filter(b=>b.type==='workshop').length >= workshopLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.workshop.buildCost));
-document.getElementById('build-workshop-btn').title = getRequirementTooltip('workshop');
-const workshopCost = adjustCostForTraits(BUILDING_TYPES.workshop.buildCost);
-const workshopCostText = formatCost(workshopCost);
-const workshopBtn = document.getElementById('build-workshop-btn');
-const workshopInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'workshop').length;
-workshopBtn.querySelector('.build-text').textContent =
-    workshopInProgress > 0 ? `Build Workshop (${workshopInProgress} in progress)` : 'Build Workshop';
-workshopBtn.querySelector('.build-cost').textContent = workshopCostText;
+    // Workshops
+    const workshopLimit = getBuildingLimit('workshop');
+    document.getElementById('workshop-count').textContent = gameState.settlement.workshops.length;
+    document.getElementById('workshop-max').textContent = workshopLimit;
+    document.getElementById('build-workshop-btn').disabled =
+        gameState.level < BUILDING_TYPES.workshop.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.workshop.requiredHome || 'camp') ||
+        gameState.settlement.workshops.length + gameState.settlement.constructionQueue.filter(b => b.type === 'workshop').length >= workshopLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.workshop.buildCost));
+    document.getElementById('build-workshop-btn').title = getRequirementTooltip('workshop');
+    const workshopCost = adjustCostForTraits(BUILDING_TYPES.workshop.buildCost);
+    const workshopCostText = formatCost(workshopCost);
+    const workshopBtn = document.getElementById('build-workshop-btn');
+    const workshopInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'workshop').length;
+    workshopBtn.querySelector('.build-text').textContent =
+        workshopInProgress > 0 ? `Build Workshop (${workshopInProgress} in progress)` : 'Build Workshop';
+    workshopBtn.querySelector('.build-cost').textContent = workshopCostText;
 
-const workshopsContainer = document.getElementById('workshops-container');
-workshopsContainer.innerHTML = '';
-gameState.settlement.workshops.forEach(ws => {
-    const wsElement = createBuildingElement('workshop', ws);
-    workshopsContainer.appendChild(wsElement);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='workshop').forEach(b=>{
-    const el = createConstructionElement('workshop');
-    workshopsContainer.appendChild(el);
-});
+    const workshopsContainer = document.getElementById('workshops-container');
+    workshopsContainer.innerHTML = '';
+    gameState.settlement.workshops.forEach(ws => {
+        const wsElement = createBuildingElement('workshop', ws);
+        workshopsContainer.appendChild(wsElement);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'workshop').forEach(b => {
+        const el = createConstructionElement('workshop');
+        workshopsContainer.appendChild(el);
+    });
 
-// Sawmills
-const sawmillLimit = getBuildingLimit('sawmill');
-document.getElementById('sawmill-count').textContent = gameState.settlement.sawmills.length;
-document.getElementById('sawmill-max').textContent = sawmillLimit;
-document.getElementById('build-sawmill-btn').disabled =
-    gameState.level < BUILDING_TYPES.sawmill.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.sawmill.requiredHome || 'camp') ||
-    gameState.settlement.sawmills.length + gameState.settlement.constructionQueue.filter(b=>b.type==='sawmill').length >= sawmillLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.sawmill.buildCost));
-document.getElementById('build-sawmill-btn').title = getRequirementTooltip('sawmill');
-const sawmillCost = adjustCostForTraits(BUILDING_TYPES.sawmill.buildCost);
-const sawmillBtn = document.getElementById('build-sawmill-btn');
-const sawmillInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'sawmill').length;
-sawmillBtn.querySelector('.build-text').textContent =
-    sawmillInProgress > 0 ? `Build Sawmill (${sawmillInProgress} in progress)` : 'Build Sawmill';
-sawmillBtn.querySelector('.build-cost').textContent = formatCost(sawmillCost);
+    // Sawmills
+    const sawmillLimit = getBuildingLimit('sawmill');
+    document.getElementById('sawmill-count').textContent = gameState.settlement.sawmills.length;
+    document.getElementById('sawmill-max').textContent = sawmillLimit;
+    document.getElementById('build-sawmill-btn').disabled =
+        gameState.level < BUILDING_TYPES.sawmill.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.sawmill.requiredHome || 'camp') ||
+        gameState.settlement.sawmills.length + gameState.settlement.constructionQueue.filter(b => b.type === 'sawmill').length >= sawmillLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.sawmill.buildCost));
+    document.getElementById('build-sawmill-btn').title = getRequirementTooltip('sawmill');
+    const sawmillCost = adjustCostForTraits(BUILDING_TYPES.sawmill.buildCost);
+    const sawmillBtn = document.getElementById('build-sawmill-btn');
+    const sawmillInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'sawmill').length;
+    sawmillBtn.querySelector('.build-text').textContent =
+        sawmillInProgress > 0 ? `Build Sawmill (${sawmillInProgress} in progress)` : 'Build Sawmill';
+    sawmillBtn.querySelector('.build-cost').textContent = formatCost(sawmillCost);
 
-const sawmillsContainer = document.getElementById('sawmills-container');
-sawmillsContainer.innerHTML = '';
-gameState.settlement.sawmills.forEach(sm => {
-    const el = createBuildingElement('sawmill', sm);
-    sawmillsContainer.appendChild(el);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='sawmill').forEach(b=>{
-    const el = createConstructionElement('sawmill');
-    sawmillsContainer.appendChild(el);
-});
+    const sawmillsContainer = document.getElementById('sawmills-container');
+    sawmillsContainer.innerHTML = '';
+    gameState.settlement.sawmills.forEach(sm => {
+        const el = createBuildingElement('sawmill', sm);
+        sawmillsContainer.appendChild(el);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'sawmill').forEach(b => {
+        const el = createConstructionElement('sawmill');
+        sawmillsContainer.appendChild(el);
+    });
 
-// Granaries
-const granaryLimit = getBuildingLimit('granary');
-document.getElementById('granary-count').textContent = gameState.settlement.granaries.length;
-document.getElementById('granary-max').textContent = granaryLimit;
-document.getElementById('build-granary-btn').disabled =
-    gameState.level < BUILDING_TYPES.granary.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.granary.requiredHome || 'camp') ||
-    gameState.settlement.granaries.length + gameState.settlement.constructionQueue.filter(b=>b.type==='granary').length >= granaryLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.granary.buildCost));
-document.getElementById('build-granary-btn').title = getRequirementTooltip('granary');
-const granaryCost = adjustCostForTraits(BUILDING_TYPES.granary.buildCost);
-const granaryBtn = document.getElementById('build-granary-btn');
-const granaryInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'granary').length;
-granaryBtn.querySelector('.build-text').textContent =
-    granaryInProgress > 0 ? `Build Granary (${granaryInProgress} in progress)` : 'Build Granary';
-granaryBtn.querySelector('.build-cost').textContent = formatCost(granaryCost);
+    // Granaries
+    const granaryLimit = getBuildingLimit('granary');
+    document.getElementById('granary-count').textContent = gameState.settlement.granaries.length;
+    document.getElementById('granary-max').textContent = granaryLimit;
+    document.getElementById('build-granary-btn').disabled =
+        gameState.level < BUILDING_TYPES.granary.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.granary.requiredHome || 'camp') ||
+        gameState.settlement.granaries.length + gameState.settlement.constructionQueue.filter(b => b.type === 'granary').length >= granaryLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.granary.buildCost));
+    document.getElementById('build-granary-btn').title = getRequirementTooltip('granary');
+    const granaryCost = adjustCostForTraits(BUILDING_TYPES.granary.buildCost);
+    const granaryBtn = document.getElementById('build-granary-btn');
+    const granaryInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'granary').length;
+    granaryBtn.querySelector('.build-text').textContent =
+        granaryInProgress > 0 ? `Build Granary (${granaryInProgress} in progress)` : 'Build Granary';
+    granaryBtn.querySelector('.build-cost').textContent = formatCost(granaryCost);
 
-const granariesContainer = document.getElementById('granaries-container');
-granariesContainer.innerHTML = '';
-gameState.settlement.granaries.forEach(g => {
-    const el = createBuildingElement('granary', g);
-    granariesContainer.appendChild(el);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='granary').forEach(b=>{
-    const el = createConstructionElement('granary');
-    granariesContainer.appendChild(el);
-});
+    const granariesContainer = document.getElementById('granaries-container');
+    granariesContainer.innerHTML = '';
+    gameState.settlement.granaries.forEach(g => {
+        const el = createBuildingElement('granary', g);
+        granariesContainer.appendChild(el);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'granary').forEach(b => {
+        const el = createConstructionElement('granary');
+        granariesContainer.appendChild(el);
+    });
 
-// Smelters
-const smelterLimit = getBuildingLimit('smelter');
-document.getElementById('smelter-count').textContent = gameState.settlement.smelters.length;
-document.getElementById('smelter-max').textContent = smelterLimit;
-document.getElementById('build-smelter-btn').disabled =
-    gameState.level < BUILDING_TYPES.smelter.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.smelter.requiredHome || 'camp') ||
-    gameState.settlement.smelters.length + gameState.settlement.constructionQueue.filter(b=>b.type==='smelter').length >= smelterLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.smelter.buildCost));
-document.getElementById('build-smelter-btn').title = getRequirementTooltip('smelter');
-const smelterCost = adjustCostForTraits(BUILDING_TYPES.smelter.buildCost);
-const smelterBtn = document.getElementById('build-smelter-btn');
-const smelterInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'smelter').length;
-smelterBtn.querySelector('.build-text').textContent =
-    smelterInProgress > 0 ? `Build Smelter (${smelterInProgress} in progress)` : 'Build Smelter';
-smelterBtn.querySelector('.build-cost').textContent = formatCost(smelterCost);
+    // Smelters
+    const smelterLimit = getBuildingLimit('smelter');
+    document.getElementById('smelter-count').textContent = gameState.settlement.smelters.length;
+    document.getElementById('smelter-max').textContent = smelterLimit;
+    document.getElementById('build-smelter-btn').disabled =
+        gameState.level < BUILDING_TYPES.smelter.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.smelter.requiredHome || 'camp') ||
+        gameState.settlement.smelters.length + gameState.settlement.constructionQueue.filter(b => b.type === 'smelter').length >= smelterLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.smelter.buildCost));
+    document.getElementById('build-smelter-btn').title = getRequirementTooltip('smelter');
+    const smelterCost = adjustCostForTraits(BUILDING_TYPES.smelter.buildCost);
+    const smelterBtn = document.getElementById('build-smelter-btn');
+    const smelterInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'smelter').length;
+    smelterBtn.querySelector('.build-text').textContent =
+        smelterInProgress > 0 ? `Build Smelter (${smelterInProgress} in progress)` : 'Build Smelter';
+    smelterBtn.querySelector('.build-cost').textContent = formatCost(smelterCost);
 
-const smeltersContainer = document.getElementById('smelters-container');
-smeltersContainer.innerHTML = '';
-gameState.settlement.smelters.forEach(s => {
-    const el = createBuildingElement('smelter', s);
-    smeltersContainer.appendChild(el);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='smelter').forEach(b=>{
-    const el = createConstructionElement('smelter');
-    smeltersContainer.appendChild(el);
-});
+    const smeltersContainer = document.getElementById('smelters-container');
+    smeltersContainer.innerHTML = '';
+    gameState.settlement.smelters.forEach(s => {
+        const el = createBuildingElement('smelter', s);
+        smeltersContainer.appendChild(el);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'smelter').forEach(b => {
+        const el = createConstructionElement('smelter');
+        smeltersContainer.appendChild(el);
+    });
 
-// Barracks
-const barracksLimit = getBuildingLimit('barracks');
-document.getElementById('barracks-count').textContent = gameState.settlement.barracks.length;
-document.getElementById('barracks-max').textContent = barracksLimit;
-document.getElementById('build-barracks-btn').disabled =
-    gameState.level < BUILDING_TYPES.barracks.requiredLevel ||
-    !homeAtLeast(BUILDING_TYPES.barracks.requiredHome || 'camp') ||
-    gameState.settlement.barracks.length + gameState.settlement.constructionQueue.filter(b=>b.type==='barracks').length >= barracksLimit ||
-    !canAfford(adjustCostForTraits(BUILDING_TYPES.barracks.buildCost));
-document.getElementById('build-barracks-btn').title = getRequirementTooltip('barracks');
-const barracksCost = adjustCostForTraits(BUILDING_TYPES.barracks.buildCost);
-const barracksBtn = document.getElementById('build-barracks-btn');
-const barracksInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'barracks').length;
-barracksBtn.querySelector('.build-text').textContent =
-    barracksInProgress > 0 ? `Build Barracks (${barracksInProgress} in progress)` : 'Build Barracks';
-barracksBtn.querySelector('.build-cost').textContent = formatCost(barracksCost);
+    // Barracks
+    const barracksLimit = getBuildingLimit('barracks');
+    document.getElementById('barracks-count').textContent = gameState.settlement.barracks.length;
+    document.getElementById('barracks-max').textContent = barracksLimit;
+    document.getElementById('build-barracks-btn').disabled =
+        gameState.level < BUILDING_TYPES.barracks.requiredLevel ||
+        !homeAtLeast(BUILDING_TYPES.barracks.requiredHome || 'camp') ||
+        gameState.settlement.barracks.length + gameState.settlement.constructionQueue.filter(b => b.type === 'barracks').length >= barracksLimit ||
+        !canAfford(adjustCostForTraits(BUILDING_TYPES.barracks.buildCost));
+    document.getElementById('build-barracks-btn').title = getRequirementTooltip('barracks');
+    const barracksCost = adjustCostForTraits(BUILDING_TYPES.barracks.buildCost);
+    const barracksBtn = document.getElementById('build-barracks-btn');
+    const barracksInProgress = gameState.settlement.constructionQueue.filter(b => b.type === 'barracks').length;
+    barracksBtn.querySelector('.build-text').textContent =
+        barracksInProgress > 0 ? `Build Barracks (${barracksInProgress} in progress)` : 'Build Barracks';
+    barracksBtn.querySelector('.build-cost').textContent = formatCost(barracksCost);
 
-const barracksContainer = document.getElementById('barracks-container');
-barracksContainer.innerHTML = '';
-gameState.settlement.barracks.forEach(b => {
-    const el = createBuildingElement('barracks', b);
-    barracksContainer.appendChild(el);
-});
-gameState.settlement.constructionQueue.filter(b=>b.type==='barracks').forEach(b=>{
-    const el = createConstructionElement('barracks');
-    barracksContainer.appendChild(el);
-});
-updateResearchUI();
+    const barracksContainer = document.getElementById('barracks-container');
+    barracksContainer.innerHTML = '';
+    gameState.settlement.barracks.forEach(b => {
+        const el = createBuildingElement('barracks', b);
+        barracksContainer.appendChild(el);
+    });
+    gameState.settlement.constructionQueue.filter(b => b.type === 'barracks').forEach(b => {
+        const el = createConstructionElement('barracks');
+        barracksContainer.appendChild(el);
+    });
+    updateResearchUI();
 
 }
 
@@ -1826,22 +1827,22 @@ function updateSettlementDashboard() {
 }
 
 function updateEventLogUI() {
-const logContent = document.getElementById('event-log-content');
-const search = document.getElementById('log-search');
-const term = search ? search.value.toLowerCase() : '';
-logContent.innerHTML = '';
+    const logContent = document.getElementById('event-log-content');
+    const search = document.getElementById('log-search');
+    const term = search ? search.value.toLowerCase() : '';
+    logContent.innerHTML = '';
 
-gameState.eventLog.forEach(entry => {
-    const div = document.createElement('div');
-    div.className = `log-entry ${entry.type}`;
-    div.innerHTML = `
+    gameState.eventLog.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = `log-entry ${entry.type}`;
+        div.innerHTML = `
         <div><strong>Month ${entry.month}</strong> - ${entry.timestamp}</div>
         <div>${entry.message}</div>
     `;
-    if (!term || div.textContent.toLowerCase().includes(term)) {
-        logContent.appendChild(div);
-    }
-});
+        if (!term || div.textContent.toLowerCase().includes(term)) {
+            logContent.appendChild(div);
+        }
+    });
 
 }
 
@@ -1901,15 +1902,15 @@ function updateResourceBar() {
 }
 
 function getResourceIcon(resource) {
-const icons = {
-wood: '🪵',
-stone: '🗿',
-metal: '⚔️',
-food: '🌾',
-tools: '🔧',
-gems: '💎'
-};
-return icons[resource] || resource;
+    const icons = {
+        wood: '🪵',
+        stone: '🗿',
+        metal: '⚔️',
+        food: '🌾',
+        tools: '🔧',
+        gems: '💎'
+    };
+    return icons[resource] || resource;
 }
 
 function getResourceColor(resource) {
