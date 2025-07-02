@@ -265,6 +265,7 @@ function initGame() {
         updateResearchUI();
         debouncedRefreshGameInterface();
         setupEventListeners();
+        setupDeveloperPanel();
         setupCollapsibleHeader();
         initScrollIndicators();
         setupErrorHandlers();
@@ -2187,6 +2188,46 @@ function updateHeaderSummary() {
     if (foodEl) foodEl.textContent = gameState.resources.food;
     if (toolsEl) toolsEl.textContent = gameState.resources.tools;
     if (gemsEl) gemsEl.textContent = gameState.resources.gems;
+}
+
+function adjustResource(resource, amount) {
+    if (!RESOURCE_TYPES.includes(resource) || !Number.isFinite(amount)) return;
+    const current = gameState.resources[resource] || 0;
+    gameState.resources[resource] = Math.max(0, current + amount);
+    debouncedRefreshGameInterface();
+}
+
+function setupDeveloperPanel() {
+    const panel = document.getElementById('dev-panel');
+    const toggle = document.getElementById('dev-toggle-btn');
+    const closeBtn = document.getElementById('dev-close-btn');
+    const addBtn = document.getElementById('dev-add-btn');
+    const subBtn = document.getElementById('dev-sub-btn');
+    const amountInput = document.getElementById('dev-amount');
+    const resourceSelect = document.getElementById('dev-resource');
+
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            panel.classList.toggle('show');
+        });
+    }
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => panel.classList.remove('show'));
+    }
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            const res = resourceSelect.value;
+            const amt = parseInt(amountInput.value, 10) || 0;
+            adjustResource(res, amt);
+        });
+    }
+    if (subBtn) {
+        subBtn.addEventListener('click', () => {
+            const res = resourceSelect.value;
+            const amt = parseInt(amountInput.value, 10) || 0;
+            adjustResource(res, -amt);
+        });
+    }
 }
 
 // Initialize when page loads. Only run initGame once

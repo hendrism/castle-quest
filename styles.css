@@ -1237,3 +1237,42 @@ padding-bottom: env(safe-area-inset-bottom);
   from { transform: translateX(-100%); }
   to { transform: translateX(100%); }
 }
+
+/* Developer Panel */
+.dev-toggle {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #555;
+  color: #fff;
+  border: none;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.dev-panel {
+  position: fixed;
+  bottom: 4.5rem;
+  right: 1rem;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.5rem;
+  z-index: 1001;
+  display: none;
+}
+
+.dev-panel.show {
+  display: block;
+}
+
+.dev-panel select,
+.dev-panel input {
+  margin-right: 0.25rem;
+}
