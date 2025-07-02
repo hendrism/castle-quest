@@ -159,6 +159,18 @@
             color: var(--white);
         }
 
+        .resource-prod.positive {
+            color: var(--success-green);
+        }
+
+        .resource-prod.negative {
+            color: var(--danger-red);
+        }
+
+        .resource-prod.zero {
+            color: var(--light-gray);
+        }
+
         /* Expandable Details */
         .header-details {
             max-height: none;
@@ -866,10 +878,10 @@
                         <div class="settlement-card">
                             <div class="settlement-icon">🏠</div>
                             <div class="settlement-details">
-                                <div class="settlement-name">Home: <span id="home-type">Camp</span></div>
-                                <div class="settlement-status">Population: <span id="population">5</span></div>
+                                <div class="settlement-name">Home: <span id="home-level">Camp</span></div>
+                                <div class="settlement-status">Population: <span id="population-count">5</span></div>
                             </div>
-                            <button class="upgrade-button" id="upgrade-home">
+                            <button class="upgrade-button" id="home-upgrade-btn">
                                 Upgrade
                             </button>
                         </div>
@@ -877,10 +889,10 @@
                         <div class="settlement-card">
                             <div class="settlement-icon">🛡️</div>
                             <div class="settlement-details">
-                                <div class="settlement-name">Walls: <span id="walls-type">None</span></div>
+                                <div class="settlement-name">Walls: <span id="walls-level">None</span></div>
                                 <div class="settlement-status">Defense bonus: <span id="wall-bonus">0</span></div>
                             </div>
-                            <button class="upgrade-button" id="upgrade-walls">
+                            <button class="upgrade-button" id="walls-upgrade-btn">
                                 Build
                             </button>
                         </div>
