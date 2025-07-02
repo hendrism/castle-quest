@@ -1922,6 +1922,7 @@ function updateExplorationUI() {
     grid.innerHTML = '';
 
     const sorted = Object.entries(LOCATIONS)
+        .filter(([key, loc]) => gameState.level >= (loc.requiredLevel || 1))
         .sort((a, b) => (a[1].requiredLevel || 1) - (b[1].requiredLevel || 1));
 
     let currentLevel = null;
@@ -1958,14 +1959,9 @@ function updateExplorationUI() {
     // After rendering, apply state for difficulty and chance
     document.querySelectorAll('.location-btn').forEach(btn => {
         const loc = LOCATIONS[btn.dataset.location];
-        const locked = gameState.level < (loc.requiredLevel || 1);
-        btn.disabled = gameState.explorationsLeft <= 0 || locked;
-        btn.classList.toggle('locked', locked);
-        if (locked) {
-            btn.title = `Requires level ${loc.requiredLevel}`;
-        } else {
-            btn.removeAttribute('title');
-        }
+        btn.disabled = gameState.explorationsLeft <= 0;
+        btn.classList.remove('locked');
+        btn.removeAttribute('title');
 
         const diffEl = document.getElementById(`${btn.dataset.location}-difficulty`);
         if (diffEl) {
