@@ -44,7 +44,12 @@ export function showDiceRoll(callback) {
 
     let detail = '';
     if (callback) {
-      detail = callback(roll) || '';
+      try {
+        detail = callback(roll) || '';
+      } catch (err) {
+        console.error('Dice roll callback error:', err);
+        detail = 'An error occurred';
+      }
     }
 
     if (Array.isArray(detail)) {
