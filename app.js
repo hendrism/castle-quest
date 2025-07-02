@@ -3,10 +3,10 @@ import { gameState } from './gameState.js';
 import { LOCATIONS } from './data/locations.js';
 import { BUILDING_TYPES } from './data/buildings.js';
 import { TECHNOLOGIES } from './data/technologies.js';
-import { CONSTANTS, RESOURCE_COLORS } from './constants.js';
+import { CONSTANTS, RESOURCE_COLORS, RESOURCE_ICONS, RESOURCE_TYPES } from './constants.js';
 import { uiManager } from './uiManager.js';
 import { rollDice, showDiceRoll, closeModal } from "./dice.js";
-import { canAfford, spendResources } from "./utils.js";
+import { canAfford, spendResources, ensureResourceKeys } from "./utils.js";
 import { startResearch, progressResearch, getAvailableTechnologies, getResearchProgress } from './research.js';
 
 // Game data
@@ -233,6 +233,7 @@ class Game {
 
     load() {
         loadGame();
+        ensureResourceKeys();
         debouncedRefreshGameInterface();
     }
 
@@ -1742,7 +1743,7 @@ function updateEventLogUI() {
 function setupResourceBar() {
     const bar = document.getElementById('resource-bar');
     if (!bar) return;
-    bar.innerHTML = Object.keys(gameState.resources).map(r => {
+    bar.innerHTML = RESOURCE_TYPES.map(r => {
         const icon = getResourceIcon(r);
         const name = r.charAt(0).toUpperCase() + r.slice(1);
         const amount = gameState.resources[r];
@@ -1757,7 +1758,7 @@ function setupResourceBar() {
 
 function updateResourceBar() {
     const prod = calculateMonthlyProduction();
-    Object.keys(gameState.resources).forEach(r => {
+    RESOURCE_TYPES.forEach(r => {
         const amount = gameState.resources[r];
         const el = document.getElementById(`bar-${r}`);
         if (el) {
@@ -1795,20 +1796,13 @@ function updateResourceBar() {
 }
 
 function getResourceIcon(resource) {
-    const icons = {
-        wood: '🪵',
-        stone: '🗿',
-        metal: '⚔️',
-        food: '🌾',
-        tools: '🔧',
-        gems: '💎'
-    };
-    return icons[resource] || resource;
+    return RESOURCE_ICONS[resource] || resource;
 }
 
 function applyRewards(rewards) {
+    ensureResourceKeys();
     Object.entries(rewards).forEach(([resource, amount]) => {
-        if (gameState.resources.hasOwnProperty(resource)) {
+        if (RESOURCE_TYPES.includes(resource)) {
             const current = gameState.resources[resource] || 0;
             gameState.resources[resource] = Math.max(0, current + amount);
         }
@@ -1920,8 +1914,7 @@ function generateMonthlyChallenge() {
         challenge.target = 1 + Math.floor(Math.random() * 3);
         challenge.description = `Upgrade buildings ${challenge.target} time${challenge.target > 1 ? 's' : ''}`;
     } else if (type === 'gather') {
-        const resources = Object.keys(gameState.resources);
-        const res = resources[Math.floor(Math.random() * resources.length)];
+        const res = RESOURCE_TYPES[Math.floor(Math.random() * RESOURCE_TYPES.length)];
         challenge.resource = res;
         challenge.target = 5 + Math.floor(Math.random() * 6);
         challenge.description = `Collect ${challenge.target} ${res}`;
@@ -1999,6 +1992,10 @@ function loadGame(slot = 'default') {
         };
         const loaded = JSON.parse(data, reviver);
         Object.assign(gameState, loaded);
+        if (loaded.resources) {
+            Object.assign(gameState.resources, loaded.resources);
+        }
+        ensureResourceKeys();
         console.log('Game loaded');
     } catch (error) {
         console.error('Failed to load game:', error);
@@ -2092,14 +2089,12 @@ function updateHeaderSummary() {
     // Bottom row resources
     const woodEl = document.getElementById('res-wood');
     const stoneEl = document.getElementById('res-stone');
-    const militaryEl = document.getElementById('res-military');
     const foodEl = document.getElementById('res-food');
     const toolsEl = document.getElementById('res-tools');
     const gemsEl = document.getElementById('res-gems');
 
     if (woodEl) woodEl.textContent = gameState.resources.wood;
     if (stoneEl) stoneEl.textContent = gameState.resources.stone;
-    if (militaryEl) militaryEl.textContent = gameState.resources.military ?? 0;
     if (foodEl) foodEl.textContent = gameState.resources.food;
     if (toolsEl) toolsEl.textContent = gameState.resources.tools;
     if (gemsEl) gemsEl.textContent = gameState.resources.gems;

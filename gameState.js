@@ -16,7 +16,6 @@ export const gameState = {
         metal: 0,
         food: 10,
         tools: 0,
-        military: 0,
         gems: 0
     },
     settlement: {
