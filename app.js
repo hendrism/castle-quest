@@ -535,7 +535,7 @@ function setupEventListeners() {
     }
 
     // Modal controls
-    const closeModalBtn = document.getElementById('close-modal-btn');
+    const closeModalBtn = document.getElementById('modal-continue');
     const modalCloseX = document.querySelector('.modal-close-btn');
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', () => {

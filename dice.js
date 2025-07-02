@@ -7,7 +7,7 @@ export function rollDice(sides = 20) {
 export function showDiceRoll(callback) {
   const modal = document.getElementById('dice-modal');
   const dice = document.getElementById('dice');
-  const diceFace = dice.querySelector('.dice-face');
+   document.getElementById('dice-face');
   const result = document.getElementById('roll-result');
 
   modal.classList.add('show');
