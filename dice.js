@@ -52,6 +52,9 @@ export function showDiceRoll(callback) {
     } else if (detail) {
       lines.push(detail);
     }
+    if (lines.length === 1) {
+      lines.push('No effect');
+    }
 
     result.innerHTML = lines.join('<br>');
   }, 1000);
