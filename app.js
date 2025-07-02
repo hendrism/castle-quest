@@ -1832,14 +1832,16 @@ function updateResourceBar() {
                 val -= prod.foodDemand || 0;
             }
             if (val > 0) {
-                prodEl.textContent = `↗️ ${val}`;
+                prodEl.textContent = `+${val}`;
+                prodEl.classList.add('positive');
                 prodEl.classList.remove('negative');
             } else if (val < 0) {
-                prodEl.textContent = `↘️ ${Math.abs(val)}`;
+                prodEl.textContent = `${val}`;
+                prodEl.classList.remove('positive');
                 prodEl.classList.add('negative');
             } else {
-                prodEl.textContent = '';
-                prodEl.classList.remove('negative');
+                prodEl.textContent = '0';
+                prodEl.classList.remove('positive', 'negative');
             }
         }
     });
