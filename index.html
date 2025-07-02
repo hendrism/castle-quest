@@ -882,7 +882,8 @@
                                 <div class="settlement-status">Population: <span id="population-count">5</span></div>
                             </div>
                             <button class="upgrade-button" id="home-upgrade-btn">
-                                Upgrade
+                                <span class="upgrade-text">Upgrade</span>
+                                <span class="upgrade-cost"></span>
                             </button>
                         </div>
                         
@@ -893,14 +894,165 @@
                                 <div class="settlement-status">Defense bonus: <span id="wall-bonus">0</span></div>
                             </div>
                             <button class="upgrade-button" id="walls-upgrade-btn">
-                                Build
+                                <span class="upgrade-text">Build</span>
+                                <span class="upgrade-cost"></span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Buildings -->
                     <div class="buildings-grid" id="buildings-grid">
-                        <!-- Buildings will be populated by JavaScript -->
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>🌾 Farms (<span id="farm-count">0</span>/<span id="farm-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="farms-container"></div>
+                                <button class="build-button" id="build-farm-btn">
+                                    <span class="build-text">Build Farm</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>🌳 Forester Huts (<span id="forester-count">0</span>/<span id="forester-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="foresters-container"></div>
+                                <button class="build-button" id="build-forester-btn">
+                                    <span class="build-text">Build Forester Hut</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>⛏️ Quarries (<span id="quarry-count">0</span>/<span id="quarry-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="quarries-container"></div>
+                                <button class="build-button" id="build-quarry-btn">
+                                    <span class="build-text">Build Quarry</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>⚒️ Mines (<span id="mine-count">0</span>/<span id="mine-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="mines-container"></div>
+                                <button class="build-button" id="build-mine-btn">
+                                    <span class="build-text">Build Mine</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>💎 Gem Mines (<span id="gemMine-count">0</span>/<span id="gemMine-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="gemMines-container"></div>
+                                <button class="build-button" id="build-gemMine-btn">
+                                    <span class="build-text">Build Gem Mine</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>🔧 Workshops (<span id="workshop-count">0</span>/<span id="workshop-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="workshops-container"></div>
+                                <button class="build-button" id="build-workshop-btn">
+                                    <span class="build-text">Build Workshop</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>🪚 Sawmills (<span id="sawmill-count">0</span>/<span id="sawmill-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="sawmills-container"></div>
+                                <button class="build-button" id="build-sawmill-btn">
+                                    <span class="build-text">Build Sawmill</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>🍞 Granaries (<span id="granary-count">0</span>/<span id="granary-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="granaries-container"></div>
+                                <button class="build-button" id="build-granary-btn">
+                                    <span class="build-text">Build Granary</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>🔥 Smelters (<span id="smelter-count">0</span>/<span id="smelter-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="smelters-container"></div>
+                                <button class="build-button" id="build-smelter-btn">
+                                    <span class="build-text">Build Smelter</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="building-category expanded">
+                            <div class="building-category-header">
+                                <span>🏹 Barracks (<span id="barracks-count">0</span>/<span id="barracks-max">0</span>)</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="building-category-content">
+                                <div class="building-list" id="barracks-container"></div>
+                                <button class="build-button" id="build-barracks-btn">
+                                    <span class="build-text">Build Barracks</span>
+                                    <span class="build-cost"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="crafting">
+                        <h3>Crafting</h3>
+                        <div class="craft-items">
+                            <div class="craft-item">
+                                <span class="craft-icon">🍀</span>
+                                <span class="craft-name">Lucky Charm</span>
+                                <span class="craft-owned" id="lucky-charm-count">0</span>
+                                <button class="craft-btn" id="craft-lucky-charm">
+                                    <span class="craft-cost"></span>
+                                </button>
+                            </div>
+                            <div class="craft-item">
+                                <span class="craft-icon">📜</span>
+                                <span class="craft-name">Magic Scroll</span>
+                                <span class="craft-owned" id="magic-scroll-count">0</span>
+                                <button class="craft-btn" id="craft-magic-scroll">
+                                    <span class="craft-cost"></span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
