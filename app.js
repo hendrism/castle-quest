@@ -563,7 +563,7 @@ function setupEventListeners() {
 // Exploration
 // Fixed exploreLocation function for app.js
 
-function exploreLocation(locationKey) {
+async function exploreLocation(locationKey) {
     try {
         if (gameState.explorationsLeft <= 0) {
             throw new Error('No explorations remaining');
@@ -590,7 +590,7 @@ function exploreLocation(locationKey) {
         checkMonthlyChallengeCompletion();
 
         // Roll dice and show modal
-        showDiceRoll((roll) => {
+        await showDiceRoll((roll) => {
             // Calculate the exploration result
             const result = calculateExplorationResult(locationKey, roll);
             
@@ -621,10 +621,6 @@ function exploreLocation(locationKey) {
             }
             addEventLog(logMsg, result.type);
 
-            // Refresh UI immediately after applying changes
-            debouncedRefreshGameInterface();
-            saveGame();
-
             // Return details for the modal display
             const details = [result.message];
             
@@ -643,6 +639,10 @@ function exploreLocation(locationKey) {
 
             return details;
         });
+
+        // Update UI after dice roll resolves
+        debouncedRefreshGameInterface();
+        saveGame();
 
     } catch (error) {
         console.error('Exploration failed:', error);
@@ -708,8 +708,8 @@ function calculateExplorationResult(locationKey, roll) {
 }
 
 // Month progression and random event
-function advanceMonth() {
-    showDiceRoll((roll) => {
+async function advanceMonth() {
+    await showDiceRoll((roll) => {
         // Overnight event using 2d6 for event and provided d20 roll for severity
         const d1 = rollDice(6);
         const d2 = rollDice(6);
@@ -836,10 +836,6 @@ function advanceMonth() {
 
         checkRulerStability();
 
-        debouncedRefreshGameInterface();
-        saveGame();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
         // Build detail text for modal
         const details = [];
         details.push(eventMessage);
@@ -859,6 +855,11 @@ function advanceMonth() {
 
         return details;
     });
+
+    // Update UI after dice roll resolves
+    debouncedRefreshGameInterface();
+    saveGame();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Settlement management
