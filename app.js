@@ -661,7 +661,8 @@ function calculateExplorationResult(locationKey, roll) {
             rewards: { food: -1 },
             xp: 5,
             message,
-            type
+            type,
+            roll: effectiveRoll
         };
     } else if (effectiveRoll >= 18) {
         multiplier = 2;
