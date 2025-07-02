@@ -1317,34 +1317,7 @@ function refreshGameInterface() {
     const explorationMax = getExplorationMax() ?? 5;
     if (uiEl.explorationMax) uiEl.explorationMax.textContent = explorationMax;
 
-    // Enable/disable location buttons
-    document.querySelectorAll('.location-btn').forEach(btn => {
-        const loc = LOCATIONS[btn.dataset.location];
-        const locked = gameState.level < (loc.requiredLevel || 1);
-        btn.disabled = gameState.explorationsLeft <= 0 || locked;
-        if (locked) {
-            btn.title = `Requires level ${loc.requiredLevel}`;
-        } else {
-            btn.removeAttribute('title');
-        }
-
-        // Update difficulty stars
-        const diffEl = document.getElementById(`${btn.dataset.location}-difficulty`);
-        if (diffEl) {
-            const diff = loc.requiredLevel || 1;
-            const stars = '★★★★★'.slice(0, diff).padEnd(5, '☆');
-            diffEl.textContent = `Difficulty: ${stars}`;
-        }
-
-        // Update success chance hint
-        const chanceEl = document.getElementById(`${btn.dataset.location}-chance`);
-        if (chanceEl) {
-            const levelDiff = gameState.level - (loc.requiredLevel || 1);
-            let chance = 0.5 + levelDiff * 0.1;
-            chance = Math.min(0.95, Math.max(0.1, chance));
-            chanceEl.textContent = `Success: ${Math.round(chance * 100)}%`;
-        }
-    });
+    updateExplorationUI();
 
     // Enable/disable next month button
     if (uiEl.nextMonthBtn) uiEl.nextMonthBtn.disabled = gameState.explorationsLeft > 0;
@@ -1940,6 +1913,74 @@ function getAccessibleLocations() {
     return Object.keys(LOCATIONS).filter(key => {
         const loc = LOCATIONS[key];
         return gameState.level >= (loc.requiredLevel || 1);
+    });
+}
+
+function updateExplorationUI() {
+    const grid = document.getElementById('locations-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const sorted = Object.entries(LOCATIONS)
+        .sort((a, b) => (a[1].requiredLevel || 1) - (b[1].requiredLevel || 1));
+
+    let currentLevel = null;
+    sorted.forEach(([key, loc]) => {
+        const level = loc.requiredLevel || 1;
+        if (level !== currentLevel) {
+            currentLevel = level;
+            const heading = document.createElement('div');
+            heading.className = 'location-level-heading';
+            heading.textContent = `Level ${level}`;
+            grid.appendChild(heading);
+        }
+
+        const btn = document.createElement('button');
+        btn.className = 'location-card location-btn';
+        btn.dataset.location = key;
+        btn.innerHTML = `
+            <div class="location-header">
+                <div class="location-icon">${loc.icon}</div>
+                <div class="location-info">
+                    <div class="location-name">${loc.name}</div>
+                    <div class="location-desc">${loc.description}</div>
+                </div>
+            </div>
+            <div class="location-meta">
+                <span id="${key}-difficulty"></span>
+                <span id="${key}-chance"></span>
+            </div>
+        `;
+        btn.addEventListener('click', () => exploreLocation(key));
+        grid.appendChild(btn);
+    });
+
+    // After rendering, apply state for difficulty and chance
+    document.querySelectorAll('.location-btn').forEach(btn => {
+        const loc = LOCATIONS[btn.dataset.location];
+        const locked = gameState.level < (loc.requiredLevel || 1);
+        btn.disabled = gameState.explorationsLeft <= 0 || locked;
+        btn.classList.toggle('locked', locked);
+        if (locked) {
+            btn.title = `Requires level ${loc.requiredLevel}`;
+        } else {
+            btn.removeAttribute('title');
+        }
+
+        const diffEl = document.getElementById(`${btn.dataset.location}-difficulty`);
+        if (diffEl) {
+            const diff = loc.requiredLevel || 1;
+            const stars = '★★★★★'.slice(0, diff).padEnd(5, '☆');
+            diffEl.textContent = `Difficulty: ${stars}`;
+        }
+
+        const chanceEl = document.getElementById(`${btn.dataset.location}-chance`);
+        if (chanceEl) {
+            const levelDiff = gameState.level - (loc.requiredLevel || 1);
+            let chance = 0.5 + levelDiff * 0.1;
+            chance = Math.min(0.95, Math.max(0.1, chance));
+            chanceEl.textContent = `Success: ${Math.round(chance * 100)}%`;
+        }
     });
 }
 
