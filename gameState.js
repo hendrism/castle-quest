@@ -62,5 +62,6 @@ export const gameState = {
         reward: 50,
         completed: false
     },
-    eventLog: []
+    eventLog: [],
+    errorLog: []
 };

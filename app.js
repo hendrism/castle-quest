@@ -267,6 +267,7 @@ function initGame() {
         setupEventListeners();
         setupCollapsibleHeader();
         initScrollIndicators();
+        setupErrorHandlers();
         console.log('Game initialized successfully!');
 
         // Test that buttons exist
@@ -517,6 +518,7 @@ function setupEventListeners() {
 
     // Event log controls
     const clearLogBtn = document.getElementById('clear-log-btn');
+    const clearErrorBtn = document.getElementById('clear-error-log');
     const textSizeSelect = document.getElementById('text-size-select');
     const logSearch = document.getElementById('log-search');
 
@@ -524,6 +526,13 @@ function setupEventListeners() {
         clearLogBtn.addEventListener('click', () => {
             console.log('Clear log clicked');
             clearEventLog();
+        });
+    }
+
+    if (clearErrorBtn) {
+        clearErrorBtn.addEventListener('click', () => {
+            console.log('Clear error log clicked');
+            clearErrorLog();
         });
     }
 
@@ -1243,6 +1252,30 @@ function clearEventLog() {
     saveGame();
 }
 
+function clearErrorLog() {
+    gameState.errorLog = [];
+    debouncedRefreshGameInterface();
+}
+
+function logError(err) {
+    const message = err && err.message ? err.message : String(err);
+    const timestamp = new Date().toLocaleTimeString();
+    gameState.errorLog.unshift({ message, timestamp });
+    if (gameState.errorLog.length > 50) {
+        gameState.errorLog = gameState.errorLog.slice(0, 50);
+    }
+    updateErrorLogUI();
+}
+
+function setupErrorHandlers() {
+    window.addEventListener('error', (e) => {
+        logError(e.error || e.message);
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+        logError(e.reason);
+    });
+}
+
 function changeTextSize() {
     const size = document.getElementById('text-size-select').value;
     const logContent = document.getElementById('event-log-content');
@@ -1321,6 +1354,7 @@ function refreshGameInterface() {
 
     // Update event log
     updateEventLogUI();
+    updateErrorLogUI();
     updateMonthlyChallengeUI();
     checkMonthlyChallengeCompletion();
     updateScrollIndicators();
@@ -1738,6 +1772,21 @@ function updateEventLogUI() {
         }
     });
 
+}
+
+function updateErrorLogUI() {
+    const container = document.getElementById('error-log-content');
+    if (!container) return;
+    container.innerHTML = '';
+    gameState.errorLog.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'log-entry failure';
+        div.innerHTML = `
+            <div>${entry.timestamp}</div>
+            <div>${entry.message}</div>
+        `;
+        container.appendChild(div);
+    });
 }
 
 function setupResourceBar() {
