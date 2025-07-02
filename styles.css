@@ -798,7 +798,7 @@ font-weight: 500;
 
 /* Buttons */
 .upgrade-btn, .build-btn, .craft-btn {
-background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
 color: white;
 border: none;
 border-radius: 6px;
@@ -815,7 +815,7 @@ min-width: 100px;
 .upgrade-btn:hover:not(:disabled),
 .build-btn:hover:not(:disabled),
 .craft-btn:hover:not(:disabled) {
-background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-blue) 100%);
 transform: translateY(-1px);
 }
 
