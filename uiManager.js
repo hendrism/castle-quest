@@ -12,7 +12,10 @@ export class UIManager {
       explorationMax: document.getElementById('exploration-max'),
       rulerName: document.getElementById('ruler-name'),
       rulerAge: document.getElementById('ruler-age'),
-      rulerTraits: document.getElementById('ruler-traits')
+      rulerTraits: document.getElementById('ruler-traits'),
+      xpCurrent: document.getElementById('xp-current'),
+      xpRequired: document.getElementById('xp-required'),
+      levelDetailed: document.getElementById('level-detailed')
     };
   }
 
@@ -40,11 +43,17 @@ export class UIManager {
       this.elements.level.textContent = level;
       this.pulse(this.elements.level);
     }
+    if (this.elements.levelDetailed) {
+      this.elements.levelDetailed.textContent = level;
+      this.pulse(this.elements.levelDetailed);
+    }
   }
 
   updateXP(xp, next) {
     if (this.elements.xp) this.elements.xp.textContent = xp;
     if (this.elements.xpNext) this.elements.xpNext.textContent = next;
+    if (this.elements.xpCurrent) this.elements.xpCurrent.textContent = xp;
+    if (this.elements.xpRequired) this.elements.xpRequired.textContent = next;
     const prog = document.getElementById('xp-progress');
     if (prog) {
       prog.max = next;
