@@ -622,15 +622,8 @@ async function exploreLocation(locationKey) {
             addEventLog(logMsg, result.type);
 
             // Return details for the modal display
-            const details = [result.message];
-            
-            // Add reward details for the modal
-            if (rewardsText) {
-                details.push(`Rewards: ${rewardsText}`);
-            } else {
-                details.push('No rewards gained');
-            }
-            
+            const details = [logMsg];
+
             if (result.xp) {
                 details.push(`+${result.xp} XP`);
             }
