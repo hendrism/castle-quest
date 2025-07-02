@@ -5,6 +5,8 @@ import { BUILDING_TYPES } from './data/buildings.js';
 import { TECHNOLOGIES } from './data/technologies.js';
 import { CONSTANTS, RESOURCE_COLORS } from './constants.js';
 import { uiManager } from './uiManager.js';
+import { rollDice, showDiceRoll, closeModal } from "./dice.js";
+import { canAfford, spendResources } from "./utils.js";
 import { startResearch, progressResearch, getAvailableTechnologies, getResearchProgress } from './research.js';
 
 // Game data
@@ -986,23 +988,6 @@ function craftMagicScroll() {
     saveGame();
 }
 
-// Helper functions
-function rollDice(sides = 20) {
-    return Math.floor(Math.random() * sides) + 1;
-}
-
-function canAfford(cost) {
-    return Object.keys(cost).every(resource =>
-        gameState.resources[resource] >= cost[resource]
-    );
-}
-
-function spendResources(cost) {
-    Object.keys(cost).forEach(resource => {
-        gameState.resources[resource] -= cost[resource];
-    });
-}
-
 function getBuildingKey(type) {
     switch (type) {
         case 'quarry':
@@ -1254,64 +1239,6 @@ function changeTextSize() {
     logContent.className = `log-content ${size}`;
 }
 
-// Modal functions
-function showDiceRoll(callback) {
-    const modal = document.getElementById('dice-modal');
-    const dice = document.getElementById('dice');
-    const diceFace = dice.querySelector('.dice-face');
-    const result = document.getElementById('roll-result');
-
-    modal.classList.add('show');
-    dice.classList.add('rolling');
-    diceFace.textContent = '?';
-    result.textContent = 'Rolling...';
-
-    setTimeout(() => {
-        dice.classList.remove('rolling');
-        const baseRoll = rollDice();
-        let roll = baseRoll;
-        const notes = [];
-
-        if (gameState.rollPenalty) {
-            roll = Math.max(1, roll - gameState.rollPenalty);
-            notes.push(`Food penalty: -${gameState.rollPenalty} = ${roll}`);
-        }
-
-        if (gameState.items.luckyCharm > 0) {
-            gameState.items.luckyCharm--;
-            const boosted = Math.min(20, roll + 2);
-            notes.push(`Lucky Charm: +2 = ${boosted}`);
-            roll = boosted;
-        }
-
-        diceFace.textContent = roll;
-
-        const lines = [];
-        let rollLine = `You rolled a ${roll}.`;
-        if (notes.length) {
-            rollLine += ` (${notes.join(', ')})`;
-        }
-        lines.push(rollLine);
-
-        // Allow callback to provide additional detail text
-        let detail = '';
-        if (callback) {
-            detail = callback(roll) || '';
-        }
-
-        if (Array.isArray(detail)) {
-            lines.push(...detail);
-        } else if (detail) {
-            lines.push(detail);
-        }
-
-        result.innerHTML = lines.join('<br>');
-    }, 1000);
-}
-
-function closeModal() {
-    document.getElementById('dice-modal').classList.remove('show');
-}
 
 // UI Updates
 function refreshGameInterface() {
