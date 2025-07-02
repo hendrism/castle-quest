@@ -1090,6 +1090,26 @@
             </button>
         </main>
 
+        <!-- Developer Panel -->
+        <div id="dev-panel" class="dev-panel">
+            <h3>Developer Panel</h3>
+            <div class="dev-controls">
+                <select id="dev-resource">
+                    <option value="wood">Wood</option>
+                    <option value="stone">Stone</option>
+                    <option value="metal">Metal</option>
+                    <option value="food">Food</option>
+                    <option value="tools">Tools</option>
+                    <option value="gems">Gems</option>
+                </select>
+                <input id="dev-amount" type="number" value="10" style="width:4rem;">
+                <button id="dev-add-btn">Add</button>
+                <button id="dev-sub-btn">Subtract</button>
+            </div>
+            <button id="dev-close-btn" class="upgrade-button" style="margin-top:0.5rem;">Close</button>
+        </div>
+        <button id="dev-toggle-btn" class="dev-toggle">🐞</button>
+
         <!-- Resource Bar -->
         <div id="resource-bar" class="resource-bar">
             <div class="resources-compact">
