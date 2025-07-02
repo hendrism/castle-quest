@@ -9,6 +9,7 @@ export const gameState = {
     rollPenalty: 0,
     season: 'spring',
     explorationsLeft: CONSTANTS.BASE_EXPLORATIONS,
+    isExploring: false,
     resources: {
         wood: 0,
         stone: 0,

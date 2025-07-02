@@ -994,6 +994,7 @@
                 smelters: [],
                 barracks: []
             },
+            items: { luckyCharm: 0 },
             ruler: {
                 name: 'Arthur',
                 age: 20,
@@ -1005,12 +1006,14 @@
             ]
         };
 
+        let exploring = false;
+
         const locations = {
             forest: {
                 name: 'Deep Forest',
                 icon: '🌲',
                 description: 'Rich in wood and wildlife',
-                rewards: '🪵 1-4, 🌾 0-2',
+                rewards: { wood: [1, 4], food: [0, 2] },
                 level: 1,
                 gradient: 'linear-gradient(135deg, #2ecc71, #27ae60)'
             },
@@ -1018,7 +1021,7 @@
                 name: 'Stone Quarry',
                 icon: '⛰️',
                 description: 'Source of stone and metal',
-                rewards: '🗿 1-3, ⚔️ 0-1',
+                rewards: { stone: [1, 3], metal: [0, 1] },
                 level: 1,
                 gradient: 'linear-gradient(135deg, #7f8c8d, #95a5a6)'
             },
@@ -1026,7 +1029,7 @@
                 name: 'Fertile Plains',
                 icon: '🌾',
                 description: 'Food and farming supplies',
-                rewards: '🌾 1-3, 🪵 0-1',
+                rewards: { food: [1, 3], wood: [0, 1] },
                 level: 1,
                 gradient: 'linear-gradient(135deg, #f1c40f, #e67e22)'
             },
@@ -1034,7 +1037,7 @@
                 name: 'Ancient Ruins',
                 icon: '🏛️',
                 description: 'Mysterious treasures await',
-                rewards: '🪵 0-2, 🗿 0-2, ⚔️ 0-2, 🌾 0-1, 💎 0-1',
+                rewards: { wood: [0, 2], stone: [0, 2], metal: [0, 2], food: [0, 1], gems: [0, 1] },
                 level: 2,
                 gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)'
             },
@@ -1042,7 +1045,7 @@
                 name: 'Misty Swamp',
                 icon: '🐸',
                 description: 'Treacherous wetlands rich in herbs',
-                rewards: '🌾 0-2, 🪵 0-1, 🗿 0-1',
+                rewards: { food: [0, 2], wood: [0, 1], stone: [0, 1] },
                 level: 2,
                 gradient: 'linear-gradient(135deg, #16a085, #27ae60)'
             },
@@ -1050,7 +1053,7 @@
                 name: 'High Mountains',
                 icon: '🏔️',
                 description: 'Metal and gems hidden in the peaks',
-                rewards: '🗿 1-3, ⚔️ 1-2, 💎 0-1',
+                rewards: { stone: [1, 3], metal: [1, 2], gems: [0, 1] },
                 level: 3,
                 gradient: 'linear-gradient(135deg, #bdc3c7, #2c3e50)'
             },
@@ -1058,7 +1061,7 @@
                 name: 'Crystal Cavern',
                 icon: '🕳️',
                 description: 'Shimmering crystals line the walls',
-                rewards: '💎 0-2, ⚔️ 0-1',
+                rewards: { gems: [0, 2], metal: [0, 1] },
                 level: 4,
                 gradient: 'linear-gradient(135deg, #34495e, #2c3e50)'
             },
@@ -1066,7 +1069,7 @@
                 name: 'Serene Lake',
                 icon: '🌊',
                 description: 'Plentiful fish and clean water',
-                rewards: '🌾 1-3, 🪵 0-1',
+                rewards: { food: [1, 3], wood: [0, 1] },
                 level: 2,
                 gradient: 'linear-gradient(135deg, #3498db, #2980b9)'
             }
@@ -1423,6 +1426,12 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
+        function formatRewardRanges(rewards) {
+            return Object.entries(rewards)
+                .map(([r, range]) => `${getResourceIcon(r)} ${range[0]}-${range[1]}`)
+                .join(', ');
+        }
+
         function initializeLocations() {
             const locationsGrid = document.getElementById('locations-grid');
             locationsGrid.innerHTML = '';
@@ -1444,9 +1453,10 @@
                 locationCard.style.background = location.gradient;
 
                 const locked = gameState.level < location.level;
-                locationCard.disabled = locked || gameState.explorationsLeft <= 0;
+                locationCard.disabled = locked || gameState.explorationsLeft <= 0 || exploring;
                 if (locked) locationCard.classList.add('locked');
 
+                const rewardStr = formatRewardRanges(location.rewards);
                 locationCard.innerHTML = `
                     <div class="location-header">
                         <div class="location-icon">${location.icon}</div>
@@ -1457,7 +1467,7 @@
                     </div>
                     <div class="location-meta">
                         <span>Level ${location.level}</span>
-                        <div class="location-rewards">${location.rewards}</div>
+                        <div class="location-rewards">${rewardStr}</div>
                     </div>
                 `;
 
@@ -1543,7 +1553,8 @@
             expandedCategories[categoryKey] = category.classList.contains('expanded');
        }
 
-        function exploreLocation(key, location) {
+       function exploreLocation(key, location) {
+            if (exploring) return;
             if (gameState.explorationsLeft <= 0) {
                 addLogEntry('❌ No explorations remaining this month!', 'failure');
                 return;
@@ -1554,7 +1565,7 @@
                 return;
             }
 
-            gameState.explorationsLeft--;
+            exploring = true;
             showDiceRoll((roll) => {
                 let result = '';
                 let type = 'neutral';
@@ -1589,12 +1600,7 @@
                     rewards = getLocationRewards(key, 0.5);
                 }
                 
-                // Apply rewards
-                Object.keys(rewards).forEach(resource => {
-                    if (gameState.resources.hasOwnProperty(resource)) {
-                        gameState.resources[resource] += rewards[resource];
-                    }
-                });
+                applyRewards(rewards);
 
                 // Gain experience based on roll
                 const xpGain = 10 + (roll >= 15 ? 10 : 0);
@@ -1614,26 +1620,28 @@
                 return [
                     `${quality}: ${result}`,
                     rewardText ? `Rewards: ${rewardText}` : 'No rewards gained',
-                    `Explorations remaining: ${gameState.explorationsLeft}`
+                    `Explorations remaining: ${gameState.explorationsLeft - 1}`
                 ];
+            }).then(() => {
+                gameState.explorationsLeft--;
+                exploring = false;
+                updateUI();
+                initializeLocations();
+            }).catch(() => {
+                exploring = false;
             });
         }
         
         function getLocationRewards(locationKey, multiplier) {
-            const baseRewards = {
-                forest: { wood: 2, food: 1 },
-                quarry: { stone: 2, metal: 1 },
-                plains: { food: 2, wood: 1 },
-                ruins: { wood: 1, stone: 1, metal: 1, gems: 0.5 },
-                swamp: { food: 1, wood: 1 },
-                mountains: { stone: 2, metal: 1, gems: 0.5 },
-                cavern: { gems: 1, metal: 1 },
-                lake: { food: 2, wood: 1 }
-            };
-            
-            const base = baseRewards[locationKey] || {};
+            const location = locations[locationKey];
+            if (!location) return {};
+            const base = {};
+            Object.keys(location.rewards).forEach(res => {
+                const [min, max] = location.rewards[res];
+                base[res] = (min + max) / 2; // average for base value
+            });
             const result = {};
-            
+
             Object.keys(base).forEach(resource => {
                 const amount = Math.floor(base[resource] * multiplier);
                 if (amount > 0) {
@@ -1654,6 +1662,15 @@
                 gems: '💎'
             };
             return icons[resource] || resource;
+        }
+
+        function applyRewards(rewards) {
+            Object.entries(rewards).forEach(([resource, amt]) => {
+                if (gameState.resources.hasOwnProperty(resource)) {
+                    const current = gameState.resources[resource] || 0;
+                    gameState.resources[resource] = Math.max(0, current + amt);
+                }
+            });
         }
 
         function canAfford(cost) {
@@ -1838,29 +1855,54 @@
             const dice = document.getElementById('dice');
             const diceFace = document.getElementById('dice-face');
             const result = document.getElementById('roll-result');
-            
+
             modal.classList.add('show');
             dice.classList.add('rolling');
             diceFace.textContent = '?';
             result.textContent = 'Rolling...';
-            
-            setTimeout(() => {
-                dice.classList.remove('rolling');
-                const roll = Math.floor(Math.random() * 20) + 1;
-                diceFace.textContent = roll;
 
-                const lines = [`You rolled ${roll}`];
-                const detail = callback ? callback(roll) : null;
-                if (Array.isArray(detail)) {
-                    lines.push(...detail);
-                } else if (detail) {
-                    lines.push(detail);
-                }
-                if (lines.length === 1) {
-                    lines.push('No effect');
-                }
-                result.innerHTML = lines.join('<br>');
-            }, 1000);
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    dice.classList.remove('rolling');
+                    const baseRoll = Math.floor(Math.random() * 20) + 1;
+                    let roll = baseRoll;
+                    const notes = [];
+
+                    if (gameState.rollPenalty) {
+                        roll = Math.max(1, roll - gameState.rollPenalty);
+                        notes.push(`Food penalty: -${gameState.rollPenalty}`);
+                    }
+                    if (gameState.items && gameState.items.luckyCharm > 0) {
+                        gameState.items.luckyCharm--;
+                        roll = Math.min(20, roll + 2);
+                        notes.push('Lucky Charm: +2');
+                    }
+
+                    diceFace.textContent = roll;
+
+                    const lines = [];
+                    let line = `You rolled ${roll}`;
+                    if (baseRoll !== roll) line += ` (base: ${baseRoll})`;
+                    if (notes.length) line += ` (${notes.join(', ')})`;
+                    lines.push(line);
+
+                    let detail;
+                    if (callback) {
+                        try {
+                            detail = callback(roll);
+                        } catch (err) {
+                            console.error('Callback error:', err);
+                            lines.push('Error processing results');
+                        }
+                    }
+                    if (Array.isArray(detail)) lines.push(...detail);
+                    else if (detail) lines.push(detail);
+                    if (lines.length === 1) lines.push('No effect');
+
+                    result.innerHTML = lines.join('<br>');
+                    resolve(roll);
+                }, 1000);
+            });
         }
 
         // Event Listeners
@@ -1875,6 +1917,7 @@
             // Modal continue button
             document.getElementById('modal-continue').addEventListener('click', () => {
                 document.getElementById('dice-modal').classList.remove('show');
+                exploring = false;
             });
             
             

@@ -219,7 +219,7 @@ class Game {
         this.state = gameState;
     }
 
-    exploreLocation(locationKey) {
+    startExploration(locationKey) {
         exploreLocation(locationKey);
     }
 
@@ -564,6 +564,9 @@ function setupEventListeners() {
 // Fixed exploreLocation function for app.js
 
 async function exploreLocation(locationKey) {
+    if (gameState.isExploring) {
+        return;
+    }
     try {
         if (gameState.explorationsLeft <= 0) {
             throw new Error('No explorations remaining');
@@ -580,26 +583,15 @@ async function exploreLocation(locationKey) {
             return;
         }
 
-        gameState.explorationsLeft--;
-
-        // Update monthly challenge
-        if (gameState.monthlyChallenge.type === 'explore' && gameState.monthlyChallenge.exploreTargets && gameState.monthlyChallenge.exploreTargets.has(locationKey)) {
-            gameState.monthlyChallenge.explored.add(locationKey);
-            gameState.monthlyChallenge.progress = gameState.monthlyChallenge.explored.size;
-        }
-        checkMonthlyChallengeCompletion();
+        gameState.isExploring = true;
 
         // Roll dice and show modal
         await showDiceRoll((roll) => {
             // Calculate the exploration result
             const result = calculateExplorationResult(locationKey, roll);
-            
+
             // Apply rewards immediately within the callback
-            Object.keys(result.rewards).forEach(resource => {
-                if (gameState.resources.hasOwnProperty(resource)) {
-                    gameState.resources[resource] += result.rewards[resource];
-                }
-            });
+            applyRewards(result.rewards);
 
             // Gain XP
             gainXP(result.xp);
@@ -633,14 +625,24 @@ async function exploreLocation(locationKey) {
             return details;
         });
 
+        gameState.explorationsLeft--;
+        if (gameState.monthlyChallenge.type === 'explore' && gameState.monthlyChallenge.exploreTargets && gameState.monthlyChallenge.exploreTargets.has(locationKey)) {
+            gameState.monthlyChallenge.explored.add(locationKey);
+            gameState.monthlyChallenge.progress = gameState.monthlyChallenge.explored.size;
+        }
+        checkMonthlyChallengeCompletion();
+
         // Update UI after dice roll resolves
         debouncedRefreshGameInterface();
         saveGame();
+
+        gameState.isExploring = false;
 
     } catch (error) {
         console.error('Exploration failed:', error);
         addEventLog(`❌ Exploration failed: ${error.message}`, 'failure');
         debouncedRefreshGameInterface();
+        gameState.isExploring = false;
     }
 }
 
@@ -1802,6 +1804,15 @@ function getResourceIcon(resource) {
         gems: '💎'
     };
     return icons[resource] || resource;
+}
+
+function applyRewards(rewards) {
+    Object.entries(rewards).forEach(([resource, amount]) => {
+        if (gameState.resources.hasOwnProperty(resource)) {
+            const current = gameState.resources[resource] || 0;
+            gameState.resources[resource] = Math.max(0, current + amount);
+        }
+    });
 }
 
 function getResourceColor(resource) {
