@@ -561,95 +561,95 @@ function setupEventListeners() {
 }
 
 // Exploration
-// Add this debug version to your app.js to replace the existing exploreLocation function
+// Fixed exploreLocation function for app.js
+
 function exploreLocation(locationKey) {
-try {
-if (gameState.explorationsLeft <= 0) {
-throw new Error(‘No explorations remaining’);
-}
-
-```
-    const location = LOCATIONS[locationKey];
-    if (!location) {
-        throw new Error(`Invalid location: ${locationKey}`);
-    }
-
-    if (gameState.level < (location.requiredLevel || 1)) {
-        addEventLog(`🔒 ${location.name} requires level ${location.requiredLevel}.`, 'failure');
-        debouncedRefreshGameInterface();
-        return;
-    }
-
-    gameState.explorationsLeft--;
-
-    // Update monthly challenge
-    if (gameState.monthlyChallenge.type === 'explore' && gameState.monthlyChallenge.exploreTargets && gameState.monthlyChallenge.exploreTargets.has(locationKey)) {
-        gameState.monthlyChallenge.explored.add(locationKey);
-        gameState.monthlyChallenge.progress = gameState.monthlyChallenge.explored.size;
-    }
-    checkMonthlyChallengeCompletion();
-
-    // Roll dice and show modal
-    showDiceRoll((roll) => {
-        const result = calculateExplorationResult(locationKey, roll);
-        
-        // Apply rewards immediately
-        Object.keys(result.rewards).forEach(resource => {
-            if (gameState.resources.hasOwnProperty(resource)) {
-                gameState.resources[resource] += result.rewards[resource];
-            }
-        });
-
-        // Gain XP
-        gainXP(result.xp);
-
-        // Create reward text for logging
-        const rewardsText = Object.keys(result.rewards)
-            .filter(r => result.rewards[r] !== 0)
-            .map(r => {
-                const amt = result.rewards[r];
-                const icon = getResourceIcon(r);
-                return `${amt > 0 ? '+' : ''}${amt} ${icon}`;
-            })
-            .join(' ');
-
-        // Log the event
-        let logMsg = `🎲 Rolled ${result.roll}: ${result.message}`;
-        if (rewardsText) {
-            logMsg += ` Rewards: ${rewardsText}`;
-        }
-        addEventLog(logMsg, result.type);
-
-        // Refresh UI and save
-        debouncedRefreshGameInterface();
-        saveGame();
-
-        // Return details for the modal
-        const details = [result.message];
-        
-        // Add reward details
-        Object.keys(result.rewards).forEach(r => {
-            const amt = result.rewards[r];
-            if (amt !== 0) {
-                details.push(`${amt > 0 ? '+' : ''}${amt} ${getResourceIcon(r)} ${r}`);
-            }
-        });
-        
-        if (result.xp) {
-            details.push(`+${result.xp} XP`);
+    try {
+        if (gameState.explorationsLeft <= 0) {
+            throw new Error('No explorations remaining');
         }
 
-        return details;
-    });
+        const location = LOCATIONS[locationKey];
+        if (!location) {
+            throw new Error(`Invalid location: ${locationKey}`);
+        }
 
-} catch (error) {
-    console.error('Exploration failed:', error);
-    addEventLog(`❌ Exploration failed: ${error.message}`, 'failure');
+        if (gameState.level < (location.requiredLevel || 1)) {
+            addEventLog(`🔒 ${location.name} requires level ${location.requiredLevel}.`, 'failure');
+            debouncedRefreshGameInterface();
+            return;
+        }
+
+        gameState.explorationsLeft--;
+
+        // Update monthly challenge
+        if (gameState.monthlyChallenge.type === 'explore' && gameState.monthlyChallenge.exploreTargets && gameState.monthlyChallenge.exploreTargets.has(locationKey)) {
+            gameState.monthlyChallenge.explored.add(locationKey);
+            gameState.monthlyChallenge.progress = gameState.monthlyChallenge.explored.size;
+        }
+        checkMonthlyChallengeCompletion();
+
+        // Roll dice and show modal
+        showDiceRoll((roll) => {
+            // Calculate the exploration result
+            const result = calculateExplorationResult(locationKey, roll);
+            
+            // Apply rewards immediately within the callback
+            Object.keys(result.rewards).forEach(resource => {
+                if (gameState.resources.hasOwnProperty(resource)) {
+                    gameState.resources[resource] += result.rewards[resource];
+                }
+            });
+
+            // Gain XP
+            gainXP(result.xp);
+
+            // Create reward text for logging
+            const rewardsText = Object.keys(result.rewards)
+                .filter(r => result.rewards[r] !== 0)
+                .map(r => {
+                    const amt = result.rewards[r];
+                    const icon = getResourceIcon(r);
+                    return `${amt > 0 ? '+' : ''}${amt} ${icon}`;
+                })
+                .join(' ');
+
+            // Log the event
+            let logMsg = `🎲 Rolled ${result.roll}: ${result.message}`;
+            if (rewardsText) {
+                logMsg += ` Rewards: ${rewardsText}`;
+            }
+            addEventLog(logMsg, result.type);
+
+            // Refresh UI immediately after applying changes
+            debouncedRefreshGameInterface();
+            saveGame();
+
+            // Return details for the modal display
+            const details = [result.message];
+            
+            // Add reward details for the modal
+            if (rewardsText) {
+                details.push(`Rewards: ${rewardsText}`);
+            } else {
+                details.push('No rewards gained');
+            }
+            
+            if (result.xp) {
+                details.push(`+${result.xp} XP`);
+            }
+
+            details.push(`Explorations remaining: ${gameState.explorationsLeft}`);
+
+            return details;
+        });
+
+    } catch (error) {
+        console.error('Exploration failed:', error);
+        addEventLog(`❌ Exploration failed: ${error.message}`, 'failure');
+        debouncedRefreshGameInterface();
+    }
 }
-```
-
-}
-
 
 /**
  * Calculates exploration results based on location and dice roll
