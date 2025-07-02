@@ -5,6 +5,17 @@ export const CONSTANTS = {
   SEASON_CYCLE_MONTHS: 4
 };
 
+export const RESOURCE_ICONS = {
+  wood: '🪵',
+  stone: '🗿',
+  metal: '⚔️',
+  food: '🌾',
+  tools: '🔧',
+  gems: '💎'
+};
+
+export const RESOURCE_TYPES = Object.freeze(Object.keys(RESOURCE_ICONS));
+
 export const RESOURCE_COLORS = {
   wood: '#27ae60',
   stone: '#7f8c8d',
