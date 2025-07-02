@@ -1792,17 +1792,18 @@ function updateErrorLogUI() {
 function setupResourceBar() {
     const bar = document.getElementById('resource-bar');
     if (!bar) return;
-    bar.innerHTML = RESOURCE_TYPES.map(r => {
+    const items = RESOURCE_TYPES.map(r => {
         const icon = getResourceIcon(r);
         const name = r.charAt(0).toUpperCase() + r.slice(1);
         const amount = gameState.resources[r];
         return `
-            <div class="resource" data-resource="${r}" title="${name}">
+            <div class="resource-compact" data-resource="${r}" title="${name}">
                 <div class="resource-icon">${icon}</div>
                 <div class="resource-amount" id="bar-${r}">${amount}</div>
-                <div class="resource-production" id="bar-prod-${r}"></div>
+                <div class="resource-prod" id="bar-prod-${r}"></div>
             </div>`;
     }).join('');
+    bar.innerHTML = `<div class="resources-compact">${items}</div>`;
 }
 
 function updateResourceBar() {
@@ -1831,14 +1832,16 @@ function updateResourceBar() {
                 val -= prod.foodDemand || 0;
             }
             if (val > 0) {
-                prodEl.textContent = `↗️ ${val}`;
+                prodEl.textContent = `+${val}`;
+                prodEl.classList.add('positive');
                 prodEl.classList.remove('negative');
             } else if (val < 0) {
-                prodEl.textContent = `↘️ ${Math.abs(val)}`;
+                prodEl.textContent = `${val}`;
+                prodEl.classList.remove('positive');
                 prodEl.classList.add('negative');
             } else {
-                prodEl.textContent = '';
-                prodEl.classList.remove('negative');
+                prodEl.textContent = '0';
+                prodEl.classList.remove('positive', 'negative');
             }
         }
     });
