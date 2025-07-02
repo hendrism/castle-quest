@@ -22,50 +22,45 @@ let roll = baseRoll;
 const notes = [];
 
 ```
+// Apply roll modifiers
 if (gameState.rollPenalty) {
   roll = Math.max(1, roll - gameState.rollPenalty);
-  notes.push(`Food penalty: -${gameState.rollPenalty} = ${roll}`);
+  notes.push(`Food penalty: -${gameState.rollPenalty}`);
 }
 
 if (gameState.items.luckyCharm > 0) {
   gameState.items.luckyCharm--;
   const boosted = Math.min(20, roll + 2);
-  notes.push(`Lucky Charm: +2 = ${boosted}`);
+  notes.push(`Lucky Charm: +2`);
   roll = boosted;
 }
 
 diceFace.textContent = roll;
 
+// Build the initial line
 const lines = [];
-let rollLine = `You rolled a ${roll}.`;
-if (notes.length) {
+let rollLine = `You rolled ${roll}`;
+if (notes.length > 0) {
   rollLine += ` (${notes.join(', ')})`;
 }
 lines.push(rollLine);
 
-// Execute the callback and get details
-let detail = '';
+// Execute callback and get results
 if (callback) {
   try {
-    detail = callback(roll);
-    console.log('Callback returned:', detail); // Debug log
-  } catch (err) {
-    console.error('Dice roll callback error:', err);
-    detail = ['An error occurred'];
+    const callbackResult = callback(roll);
+    if (Array.isArray(callbackResult)) {
+      lines.push(...callbackResult);
+    } else if (callbackResult) {
+      lines.push(callbackResult);
+    }
+  } catch (error) {
+    console.error('Callback error:', error);
+    lines.push('Error processing results');
   }
 }
 
-// Process the callback results
-if (Array.isArray(detail) && detail.length > 0) {
-  lines.push(...detail);
-} else if (detail && typeof detail === 'string') {
-  lines.push(detail);
-} else {
-  // Only add "No effect" if we truly got nothing back
-  lines.push('No additional effects');
-}
-
-console.log('Final lines for modal:', lines); // Debug log
+// Update the modal
 result.innerHTML = lines.join('<br>');
 ```
 
@@ -73,5 +68,8 @@ result.innerHTML = lines.join('<br>');
 }
 
 export function closeModal() {
-document.getElementById(‘dice-modal’).classList.remove(‘show’);
+const modal = document.getElementById(‘dice-modal’);
+if (modal) {
+modal.classList.remove(‘show’);
+}
 }
