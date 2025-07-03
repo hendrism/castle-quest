@@ -4,902 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>🛡️ Dice & Castle</title>
-    <style>
-        /* Reset and Variables */
-        :root {
-            --primary-blue: #3498db;
-            --primary-purple: #8e44ad;
-            --success-green: #27ae60;
-            --warning-orange: #f39c12;
-            --danger-red: #e74c3c;
-            --dark-blue: #2c3e50;
-            --light-gray: #ecf0f1;
-            --white: #ffffff;
-            --shadow: 0 2px 10px rgba(0,0,0,0.1);
-            --shadow-strong: 0 4px 20px rgba(0,0,0,0.15);
-            --border-radius: 12px;
-            --border-radius-small: 8px;
-            --spacing-xs: 0.25rem;
-            --spacing-sm: 0.5rem;
-            --spacing-md: 1rem;
-            --spacing-lg: 1.5rem;
-            --safe-area-top: env(safe-area-inset-top, 0);
-            --safe-area-bottom: env(safe-area-inset-bottom, 0);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--dark-blue);
-            min-height: 100vh;
-            padding-top: var(--safe-area-top);
-            padding-bottom: var(--safe-area-bottom);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        #app {
-            max-width: 428px;
-            margin: 0 auto;
-            background: var(--white);
-            min-height: 100vh;
-            box-shadow: var(--shadow-strong);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Improved Header */
-        header {
-            background: linear-gradient(135deg, rgba(44, 62, 80, 0.98) 0%, rgba(52, 73, 94, 0.98) 100%);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            color: var(--white);
-            padding: var(--spacing-md);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: var(--shadow);
-        }
-
-        .header-content {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-        }
-
-        .header-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .game-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-
-        /* Compact Stats Row */
-        .stats-compact {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .stat-compact {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: var(--border-radius-small);
-            padding: var(--spacing-sm);
-            text-align: center;
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .stat-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            opacity: 0.8;
-            margin-top: 2px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Resources Row */
-        .resources-compact {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: var(--spacing-xs);
-        }
-
-        .resource-compact {
-            background: rgba(0, 0, 0, 0.25);
-            border-radius: var(--border-radius-small);
-            padding: var(--spacing-xs) var(--spacing-sm);
-            display: grid;
-            grid-template-columns: auto 1fr;
-            grid-template-rows: auto auto;
-            align-items: center;
-            gap: 0 var(--spacing-xs);
-            min-height: 32px;
-        }
-
-        .resource-compact .resource-icon {
-            grid-row: span 2;
-        }
-
-        .resource-icon {
-            font-size: 1rem;
-            margin-right: 2px;
-            color: var(--white);
-        }
-
-        .resource-amount {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--white);
-        }
-
-        .resource-prod {
-            color: var(--white);
-        }
-
-        .resource-prod.positive {
-            color: var(--success-green);
-        }
-
-        .resource-prod.negative {
-            color: var(--danger-red);
-        }
-
-        .resource-prod.zero {
-            color: var(--light-gray);
-        }
-
-        /* Expandable Details */
-        .header-details {
-            max-height: none;
-            overflow: visible;
-            opacity: 1;
-            margin-top: var(--spacing-sm);
-        }
-
-        .details-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .detail-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
-        }
-
-        .xp-detail {
-            background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(155, 89, 182, 0.3));
-        }
-
-        .morale-detail {
-            background: linear-gradient(135deg, rgba(46, 204, 113, 0.3), rgba(39, 174, 96, 0.3));
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .level-display {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .level-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-blue);
-        }
-
-        .xp-progress {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .xp-progress::-webkit-progress-bar {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-
-        .xp-progress::-webkit-progress-value {
-            background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
-            border-radius: 4px;
-        }
-
-        .morale-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        /* Main Content */
-        main {
-            padding: var(--spacing-md);
-            padding-bottom: calc(80px + var(--safe-area-bottom));
-        }
-
-        .section {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .section-header {
-            background: linear-gradient(135deg, var(--light-gray) 0%, #ddd 100%);
-            padding: var(--spacing-md);
-            border-bottom: 1px solid #ddd;
-        }
-
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--dark-blue);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .section-content {
-            padding: var(--spacing-md);
-        }
-
-        /* Exploration Section */
-        .exploration-info {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-            padding: var(--spacing-md);
-            border-radius: var(--border-radius-small);
-            margin-bottom: var(--spacing-md);
-            border-left: 4px solid var(--primary-blue);
-        }
-
-        .challenge-text {
-            font-weight: 600;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .explorations-remaining {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .locations-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: var(--spacing-sm);
-        }
-
-        .location-level-heading {
-            font-weight: 700;
-            margin-top: var(--spacing-sm);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .location-card {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
-            color: var(--white);
-            border: none;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .location-card:active {
-            transform: scale(0.98);
-        }
-
-        .location-card:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .location-card.locked {
-            filter: grayscale(100%);
-        }
-
-        .location-card.locked::after {
-            content: '🔒';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            color: rgba(255,255,255,0.8);
-        }
-
-        .location-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
-            pointer-events: none;
-        }
-
-        .location-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .location-icon {
-            font-size: 2rem;
-            margin-right: var(--spacing-md);
-        }
-
-        .location-info {
-            flex: 1;
-        }
-
-        .location-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .location-desc {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .location-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        .location-rewards {
-            background: rgba(0, 0, 0, 0.2);
-            padding: var(--spacing-xs) var(--spacing-sm);
-            border-radius: 20px;
-        }
-
-        /* Settlement Section */
-        .settlement-overview {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .settlement-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: var(--border-radius-small);
-            padding: var(--spacing-md);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-            box-shadow: var(--shadow);
-        }
-
-        .settlement-icon {
-            font-size: 2rem;
-            flex-shrink: 0;
-        }
-
-        .settlement-details {
-            flex: 1;
-        }
-
-        .settlement-name {
-            font-weight: 700;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .settlement-status {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .upgrade-button {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
-            color: var(--white);
-            border: none;
-            border-radius: var(--border-radius-small);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 80px;
-            text-align: center;
-        }
-
-        .upgrade-button:active {
-            transform: scale(0.95);
-        }
-
-        .upgrade-button:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-
-        /* Buildings Section */
-        .buildings-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: var(--spacing-sm);
-        }
-
-        .building-category {
-            background: #f8f9fa;
-            border-radius: var(--border-radius-small);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
-
-        .building-category-header {
-            background: linear-gradient(135deg, var(--dark-blue) 0%, #34495e 100%);
-            color: var(--white);
-            padding: var(--spacing-md);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-        }
-
-        .category-toggle {
-            font-size: 0.8rem;
-            transition: transform 0.3s ease;
-        }
-
-        .building-category.expanded .category-toggle {
-            transform: rotate(180deg);
-        }
-
-        .building-category-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .building-category.expanded .building-category-content {
-            max-height: 500px;
-        }
-
-        .building-list {
-            padding: var(--spacing-md);
-        }
-
-        .building-item {
-            background: var(--white);
-            border-radius: var(--border-radius-small);
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-sm);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--primary-blue);
-        }
-
-        .building-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .building-info {
-            flex: 1;
-        }
-
-        .building-name {
-            font-weight: 600;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .building-stats {
-            font-size: 0.85rem;
-            color: #555;
-            line-height: 1.2;
-        }
-
-        .building-stats div {
-            margin-bottom: 2px;
-        }
-
-        .building-stats div:last-child {
-            margin-bottom: 0;
-        }
-
-        .build-button {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
-            color: var(--white);
-            border: none;
-            border-radius: var(--border-radius-small);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .upgrade-btn {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
-            color: var(--white);
-            border: none;
-            border-radius: var(--border-radius-small);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .upgrade-btn:active {
-            transform: scale(0.95);
-        }
-
-        .upgrade-btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-
-        .build-button:active {
-            transform: scale(0.95);
-        }
-
-        .build-button:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-
-        /* Action Button */
-        .primary-action {
-            background: linear-gradient(135deg, var(--primary-purple) 0%, #9b59b6 100%);
-            color: var(--white);
-            border: none;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-lg);
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin: var(--spacing-lg) 0;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--spacing-sm);
-        }
-
-        .primary-action:active {
-            transform: scale(0.98);
-        }
-
-        .primary-action:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Event Log */
-        .log-container {
-            background: var(--white);
-            border-radius: var(--border-radius-small);
-            max-height: 250px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-        }
-
-        .log-entry {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-
-        .log-entry.success {
-            background: #d4edda;
-            border-left: 3px solid var(--success-green);
-        }
-
-        .log-entry.failure {
-            background: #f8d7da;
-            border-left: 3px solid var(--danger-red);
-        }
-
-        .log-entry.neutral {
-            background: #fff3cd;
-            border-left: 3px solid var(--warning-orange);
-        }
-
-        /* Resource Bar */
-        .resource-bar {
-            position: fixed;
-            bottom: var(--safe-area-bottom);
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 428px;
-            width: 100%;
-            background: rgba(44, 62, 80, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: var(--spacing-md);
-            z-index: 999;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: calc(80px + var(--safe-area-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: var(--white);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--border-radius-small);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            padding: var(--spacing-lg);
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-lg);
-            text-align: center;
-            max-width: 320px;
-            width: 100%;
-            box-shadow: var(--shadow-strong);
-            position: relative;
-        }
-
-        .dice-container {
-            margin: var(--spacing-lg) 0;
-        }
-
-        .dice {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
-            border-radius: var(--border-radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-strong);
-            animation: bounce 0.6s ease-in-out;
-        }
-
-        .dice.rolling {
-            animation: spin 1s ease-in-out;
-        }
-
-        .dice-face {
-            color: var(--white);
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .roll-result {
-            margin: var(--spacing-lg) 0;
-            font-size: 1rem;
-            line-height: 1.5;
-            color: var(--dark-blue);
-        }
-
-        .modal-button {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
-            color: var(--white);
-            border: none;
-            border-radius: var(--border-radius-small);
-            padding: var(--spacing-md) var(--spacing-lg);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .modal-button:active {
-            transform: scale(0.98);
-        }
-
-        .decision-text {
-            margin-bottom: var(--spacing-md);
-            font-size: 1rem;
-            line-height: 1.4;
-        }
-
-        .decision-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-        }
-
-        /* Animations */
-        @keyframes bounce {
-            0%, 20%, 60%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            80% { transform: translateY(-5px); }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(720deg); }
-        }
-
-        /* Utility Classes */
-        .text-center { text-align: center; }
-        .hidden { display: none; }
-        .mt-1 { margin-top: var(--spacing-sm); }
-        .mb-1 { margin-bottom: var(--spacing-sm); }
-
-        /* Debug Panel */
-        #debug-panel {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 9999;
-            background: rgba(0,0,0,0.7);
-            color: #f0f0f0;
-            font-family: monospace;
-            padding: var(--spacing-sm);
-            border: 1px solid #5bc0de;
-            border-radius: var(--border-radius-small);
-            width: 250px;
-        }
-        #debug-panel.collapsed {
-            padding: var(--spacing-xs);
-            width: auto;
-        }
-        #debug-panel.collapsed .debug-content {
-            display: none;
-        }
-        #debug-toggle {
-            background: rgba(0,0,0,0.8);
-            color: white;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            padding: var(--spacing-xs);
-            font-size: 0.8rem;
-        }
-        #debug-panel.collapsed #debug-toggle {
-            width: auto;
-            font-size: 0.75rem;
-            padding: var(--spacing-xs);
-        }
-        #debug-log {
-            height: 120px;
-            overflow-y: auto;
-            background: rgba(255,255,255,0.1);
-            margin-bottom: var(--spacing-sm);
-            white-space: pre-wrap;
-        }
-        .debug-btn {
-            display: block;
-            width: 100%;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 380px) {
-            .stats-compact {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .resources-compact {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .game-title {
-                font-size: 1.2rem;
-            }
-        }
-
-        /* High DPI displays */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            body {
-                text-rendering: optimizeLegibility;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div id="app">
-        <!-- Improved Header -->
+        <!-- Header -->
         <header>
             <div class="header-content">
                 <div class="header-top">
                     <h1 class="game-title">🛡️ Dice & Castle</h1>
+                    <button class="header-toggle" id="header-toggle">
+                        <span class="toggle-icon">▼</span>
+                    </button>
                 </div>
                 
-                <!-- Compact Stats -->
-                <div class="stats-compact">
-                    <div class="stat-compact">
-                        <div class="stat-value" id="month-display">1</div>
-                        <div class="stat-label">Month</div>
+                <!-- Header Summary - Always Visible -->
+                <div class="header-summary" id="header-summary">
+                    <div class="summary-left">
+                        <div class="summary-stats">
+                            <div class="summary-month">Month <span id="month-display">1</span></div>
+                            <div class="summary-level">Level <span id="level-display">1</span></div>
+                        </div>
                     </div>
-                    <div class="stat-compact">
-                        <div class="stat-value" id="season-display">🌸</div>
-                        <div class="stat-label">Season</div>
+                    
+                    <div class="summary-right">
+                        <div class="summary-season" id="season-display">🌸</div>
+                        <div class="summary-resources">
+                            <div class="summary-resource">
+                                <span class="resource-icon">🪵</span>
+                                <span id="bar-wood">0</span>
+                            </div>
+                            <div class="summary-resource">
+                                <span class="resource-icon">🗿</span>
+                                <span id="bar-stone">0</span>
+                            </div>
+                            <div class="summary-resource">
+                                <span class="resource-icon">🌾</span>
+                                <span id="bar-food">10</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-
 
                 <!-- Expandable Details -->
                 <div class="header-details" id="header-details">
-                    <div class="details-grid">
+                    <div class="detail-section">
                         <div class="detail-card xp-detail">
-                            <div class="level-display">
+                            <div class="level-section">
                                 <span class="stat-label">Level</span>
                                 <span class="level-number" id="level-detailed">1</span>
                             </div>
                             <progress class="xp-progress" id="xp-progress" value="0" max="100"></progress>
-                            <div class="text-center">
+                            <div class="xp-amount">
                                 <span id="xp-current">0</span>/<span id="xp-required">100</span> XP
                             </div>
                         </div>
@@ -910,15 +67,15 @@
                         </div>
                     </div>
                     
-                    <div class="detail-card">
+                    <div class="detail-card ruler-detail">
                         <div class="ruler-info">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                            <div class="ruler-name">
                                 👑 <span id="ruler-name">Ruler Name</span>
                             </div>
-                            <div style="font-size: 0.9rem; opacity: 0.8;">
-                                Age <span id="ruler-age">20</span>
+                            <div class="ruler-details">
+                                Age <span id="ruler-age">20</span> • <span id="ruler-years-remaining">20</span> years left
                             </div>
-                            <div style="font-size: 0.85rem; opacity: 0.7; margin-top: 0.25rem;" id="ruler-traits">
+                            <div class="ruler-traits" id="ruler-traits">
                                 Traits: Builder, Explorer
                             </div>
                         </div>
@@ -928,6 +85,23 @@
         </header>
 
         <main>
+            <!-- Monthly Challenge -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🎯 Monthly Challenge</h2>
+                </div>
+                <div class="section-content">
+                    <div class="challenge-info">
+                        <div class="challenge-text" id="daily-challenge-text">
+                            Monthly Challenge: Explore all locations
+                        </div>
+                        <div class="challenge-progress">
+                            Progress: <span id="daily-challenge-progress">0/5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Exploration Section -->
             <div class="section">
                 <div class="section-header">
@@ -935,9 +109,6 @@
                 </div>
                 <div class="section-content">
                     <div class="exploration-info">
-                        <div class="challenge-text" id="challenge-text">
-                            Monthly Challenge: Explore all locations
-                        </div>
                         <div class="explorations-remaining">
                             Explorations: <span id="explorations-left">5</span>/<span id="explorations-max">5</span>
                         </div>
@@ -962,7 +133,7 @@
                                 <div class="settlement-name">Home: <span id="home-level">Camp</span></div>
                                 <div class="settlement-status">Population: <span id="population-count">5</span></div>
                             </div>
-                            <button class="upgrade-button" id="home-upgrade-btn">
+                            <button class="btn-primary" id="home-upgrade-btn">
                                 <span class="upgrade-text">Upgrade</span>
                                 <span class="upgrade-cost"></span>
                             </button>
@@ -974,7 +145,7 @@
                                 <div class="settlement-name">Walls: <span id="walls-level">None</span></div>
                                 <div class="settlement-status">Defense bonus: <span id="wall-bonus">0</span></div>
                             </div>
-                            <button class="upgrade-button" id="walls-upgrade-btn">
+                            <button class="btn-primary" id="walls-upgrade-btn">
                                 <span class="upgrade-text">Build</span>
                                 <span class="upgrade-cost"></span>
                             </button>
@@ -990,12 +161,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="farms-container"></div>
-                                <button class="build-button" id="build-farm-btn">
+                                <button class="btn-primary" id="build-farm-btn">
                                     <span class="build-text">Build Farm</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>🌳 Forester Huts (<span id="forester-count">0</span>/<span id="forester-max">0</span>)</span>
@@ -1003,12 +175,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="foresters-container"></div>
-                                <button class="build-button" id="build-forester-btn">
+                                <button class="btn-primary" id="build-forester-btn">
                                     <span class="build-text">Build Forester Hut</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>⛏️ Quarries (<span id="quarry-count">0</span>/<span id="quarry-max">0</span>)</span>
@@ -1016,12 +189,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="quarries-container"></div>
-                                <button class="build-button" id="build-quarry-btn">
+                                <button class="btn-primary" id="build-quarry-btn">
                                     <span class="build-text">Build Quarry</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>⚒️ Mines (<span id="mine-count">0</span>/<span id="mine-max">0</span>)</span>
@@ -1029,12 +203,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="mines-container"></div>
-                                <button class="build-button" id="build-mine-btn">
+                                <button class="btn-primary" id="build-mine-btn">
                                     <span class="build-text">Build Mine</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>💎 Gem Mines (<span id="gemMine-count">0</span>/<span id="gemMine-max">0</span>)</span>
@@ -1042,12 +217,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="gemMines-container"></div>
-                                <button class="build-button" id="build-gemMine-btn">
+                                <button class="btn-primary" id="build-gemMine-btn">
                                     <span class="build-text">Build Gem Mine</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>🔧 Workshops (<span id="workshop-count">0</span>/<span id="workshop-max">0</span>)</span>
@@ -1055,12 +231,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="workshops-container"></div>
-                                <button class="build-button" id="build-workshop-btn">
+                                <button class="btn-primary" id="build-workshop-btn">
                                     <span class="build-text">Build Workshop</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>🪚 Sawmills (<span id="sawmill-count">0</span>/<span id="sawmill-max">0</span>)</span>
@@ -1068,12 +245,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="sawmills-container"></div>
-                                <button class="build-button" id="build-sawmill-btn">
+                                <button class="btn-primary" id="build-sawmill-btn">
                                     <span class="build-text">Build Sawmill</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>🍞 Granaries (<span id="granary-count">0</span>/<span id="granary-max">0</span>)</span>
@@ -1081,12 +259,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="granaries-container"></div>
-                                <button class="build-button" id="build-granary-btn">
+                                <button class="btn-primary" id="build-granary-btn">
                                     <span class="build-text">Build Granary</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>🔥 Smelters (<span id="smelter-count">0</span>/<span id="smelter-max">0</span>)</span>
@@ -1094,12 +273,13 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="smelters-container"></div>
-                                <button class="build-button" id="build-smelter-btn">
+                                <button class="btn-primary" id="build-smelter-btn">
                                     <span class="build-text">Build Smelter</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
+
                         <div class="building-category expanded">
                             <div class="building-category-header">
                                 <span>🏹 Barracks (<span id="barracks-count">0</span>/<span id="barracks-max">0</span>)</span>
@@ -1107,30 +287,53 @@
                             </div>
                             <div class="building-category-content">
                                 <div class="building-list" id="barracks-container"></div>
-                                <button class="build-button" id="build-barracks-btn">
+                                <button class="btn-primary" id="build-barracks-btn">
                                     <span class="build-text">Build Barracks</span>
                                     <span class="build-cost"></span>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <div class="crafting">
-                        <h3>Crafting</h3>
+
+                    <!-- Research System -->
+                    <div class="research-section">
+                        <h3>🔬 Research</h3>
+                        <div class="research-controls">
+                            <div class="research-status">
+                                Current: <span id="current-research">None</span>
+                                <span id="research-progress"></span>
+                            </div>
+                            <div class="research-input">
+                                <select id="research-select">
+                                    <option value="">Select Research</option>
+                                </select>
+                                <button id="start-research-btn" class="btn-primary">Start Research</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Crafting -->
+                    <div class="crafting-section">
+                        <h3>⚗️ Crafting</h3>
                         <div class="craft-items">
                             <div class="craft-item">
                                 <span class="craft-icon">🍀</span>
-                                <span class="craft-name">Lucky Charm</span>
-                                <span class="craft-owned" id="lucky-charm-count">0</span>
-                                <button class="craft-btn" id="craft-lucky-charm">
-                                    <span class="craft-cost"></span>
+                                <div class="craft-info">
+                                    <span class="craft-name">Lucky Charm</span>
+                                    <span class="craft-owned">Owned: <span id="lucky-charm-count">0</span></span>
+                                </div>
+                                <button class="btn-primary" id="craft-lucky-charm">
+                                    Craft (3🪵 2🗿)
                                 </button>
                             </div>
                             <div class="craft-item">
                                 <span class="craft-icon">📜</span>
-                                <span class="craft-name">Magic Scroll</span>
-                                <span class="craft-owned" id="magic-scroll-count">0</span>
-                                <button class="craft-btn" id="craft-magic-scroll">
-                                    <span class="craft-cost"></span>
+                                <div class="craft-info">
+                                    <span class="craft-name">Magic Scroll</span>
+                                    <span class="craft-owned">Owned: <span id="magic-scroll-count">0</span></span>
+                                </div>
+                                <button class="btn-primary" id="craft-magic-scroll">
+                                    Craft (2🪵 1💎)
                                 </button>
                             </div>
                         </div>
@@ -1147,20 +350,7 @@
                     <div class="log-container" id="event-log">
                         <div id="event-log-content"></div>
                     </div>
-                    <button id="clear-log-btn" class="upgrade-button" style="margin-top: var(--spacing-sm);">Clear Log</button>
-                </div>
-            </div>
-
-            <!-- Error Log Section -->
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">🐞 Error Log</h2>
-                </div>
-                <div class="section-content">
-                    <div class="log-container" id="error-log">
-                        <div id="error-log-content"></div>
-                    </div>
-                    <button id="clear-error-log" class="upgrade-button" style="margin-top: var(--spacing-sm);">Clear Errors</button>
+                    <button id="clear-log-btn" class="btn-secondary">Clear Log</button>
                 </div>
             </div>
 
@@ -1171,63 +361,43 @@
             </button>
         </main>
 
-        <!-- Developer Panel -->
-        <div id="dev-panel" class="dev-panel">
-            <h3>Developer Panel</h3>
-            <div class="dev-controls">
-                <select id="dev-resource">
-                    <option value="wood">Wood</option>
-                    <option value="stone">Stone</option>
-                    <option value="metal">Metal</option>
-                    <option value="food">Food</option>
-                    <option value="tools">Tools</option>
-                    <option value="gems">Gems</option>
-                </select>
-                <input id="dev-amount" type="number" value="10" style="width:4rem;">
-                <button id="dev-add-btn">Add</button>
-                <button id="dev-sub-btn">Subtract</button>
-            </div>
-            <button id="dev-close-btn" class="upgrade-button" style="margin-top:0.5rem;">Close</button>
-        </div>
-        <button id="dev-toggle-btn" class="dev-toggle">🐞</button>
-
-
         <!-- Resource Bar -->
         <div id="resource-bar" class="resource-bar">
             <div class="resources-compact">
                 <div class="resource-compact">
                     <div class="resource-icon">🪵</div>
-                    <div class="resource-amount" id="wood-amount">0</div>
-                    <div class="resource-prod" id="prod-wood"></div>
+                    <div class="resource-amount" id="bar-wood">0</div>
+                    <div class="resource-prod" id="bar-prod-wood"></div>
                 </div>
                 <div class="resource-compact">
                     <div class="resource-icon">🗿</div>
-                    <div class="resource-amount" id="stone-amount">0</div>
-                    <div class="resource-prod" id="prod-stone"></div>
+                    <div class="resource-amount" id="bar-stone">0</div>
+                    <div class="resource-prod" id="bar-prod-stone"></div>
                 </div>
                 <div class="resource-compact">
                     <div class="resource-icon">⚔️</div>
-                    <div class="resource-amount" id="metal-amount">0</div>
-                    <div class="resource-prod" id="prod-metal"></div>
+                    <div class="resource-amount" id="bar-metal">0</div>
+                    <div class="resource-prod" id="bar-prod-metal"></div>
                 </div>
                 <div class="resource-compact">
                     <div class="resource-icon">🌾</div>
-                    <div class="resource-amount" id="food-amount">10</div>
-                    <div class="resource-prod" id="prod-food"></div>
+                    <div class="resource-amount" id="bar-food">10</div>
+                    <div class="resource-prod" id="bar-prod-food"></div>
                 </div>
                 <div class="resource-compact">
                     <div class="resource-icon">🔧</div>
-                    <div class="resource-amount" id="tools-amount">0</div>
-                    <div class="resource-prod" id="prod-tools"></div>
+                    <div class="resource-amount" id="bar-tools">0</div>
+                    <div class="resource-prod" id="bar-prod-tools"></div>
                 </div>
                 <div class="resource-compact">
                     <div class="resource-icon">💎</div>
-                    <div class="resource-amount" id="gems-amount">0</div>
-                    <div class="resource-prod" id="prod-gems"></div>
+                    <div class="resource-amount" id="bar-gems">0</div>
+                    <div class="resource-prod" id="bar-prod-gems"></div>
                 </div>
             </div>
         </div>
 
+        <!-- Toast Notifications -->
         <div id="toast" class="toast"></div>
 
         <!-- Dice Roll Modal -->
@@ -1239,7 +409,7 @@
                     </div>
                 </div>
                 <div class="roll-result" id="roll-result">Rolling...</div>
-                <button class="modal-button" id="modal-continue">Continue</button>
+                <button class="btn-primary" id="modal-continue">Continue</button>
             </div>
         </div>
 
@@ -1248,13 +418,14 @@
             <div class="modal-content">
                 <div class="decision-text" id="decision-text"></div>
                 <div class="decision-buttons">
-                    <button class="modal-button" id="decision-option1"></button>
-                    <button class="modal-button" id="decision-option2"></button>
+                    <button class="btn-primary" id="decision-option1"></button>
+                    <button class="btn-primary" id="decision-option2"></button>
                 </div>
             </div>
         </div>
     </div>
-<script type="module" src="app.js"></script>
-<script type="module" src="debug.js"></script>
+
+    <script type="module" src="app.js"></script>
+    <script type="module" src="debug.js"></script>
 </body>
 </html>
