@@ -80,33 +80,9 @@ header {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* The expand button was removed, but keep the styles in case it's reintroduced. */
 .header-toggle {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--border-radius-small);
-  color: white;
-  padding: var(--spacing-xs);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 32px;
-}
-
-.header-toggle:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
-}
-
-.toggle-icon {
-  transition: transform 0.3s ease;
-  font-size: 0.8rem;
-}
-
-.header-toggle.expanded .toggle-icon {
-  transform: rotate(180deg);
+  display: none;
 }
 
 /* Header Summary */
@@ -169,15 +145,6 @@ header {
   margin-top: var(--spacing-sm);
   padding-top: var(--spacing-sm);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.header-details.expanded {
-  max-height: 500px;
-  opacity: 1;
 }
 
 .detail-section {
