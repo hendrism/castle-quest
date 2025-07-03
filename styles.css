@@ -253,6 +253,27 @@ header {
   margin-bottom: var(--spacing-xs);
 }
 
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.month-detail {
+  background: linear-gradient(135deg, rgba(241, 196, 15, 0.3), rgba(243, 156, 18, 0.3));
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.season-detail {
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(46, 204, 113, 0.3));
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 /* Main Content */
 main {
   padding: var(--spacing-md);

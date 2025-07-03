@@ -17,36 +17,18 @@
                     <!-- Header previously had an expand button here. It was removed to simplify the UI. -->
                 </div>
                 
-                <!-- Header Summary - Always Visible -->
-                <div class="header-summary" id="header-summary">
-                    <div class="summary-left">
-                        <div class="summary-stats">
-                            <div class="summary-month">Month <span id="month-display">1</span></div>
-                            <div class="summary-level">Level <span id="level-display">1</span></div>
-                        </div>
-                    </div>
-                    
-                    <div class="summary-right">
-                        <div class="summary-season" id="season-display">🌸</div>
-                        <div class="summary-resources">
-                            <div class="summary-resource">
-                                <span class="resource-icon">🪵</span>
-                                <span id="bar-wood">0</span>
-                            </div>
-                            <div class="summary-resource">
-                                <span class="resource-icon">🗿</span>
-                                <span id="bar-stone">0</span>
-                            </div>
-                            <div class="summary-resource">
-                                <span class="resource-icon">🌾</span>
-                                <span id="bar-food">10</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Expandable Details -->
+                <!-- Header Stats -->
                 <div class="header-details" id="header-details">
+                    <div class="detail-section">
+                        <div class="detail-card month-detail">
+                            <div class="stat-label">Month</div>
+                            <div class="stat-value" id="month-display">1</div>
+                        </div>
+                        <div class="detail-card season-detail">
+                            <div class="stat-label">Season</div>
+                            <div class="stat-value" id="season-display">🌸</div>
+                        </div>
+                    </div>
                     <div class="detail-section">
                         <div class="detail-card xp-detail">
                             <div class="level-section">
@@ -65,16 +47,18 @@
                         </div>
                     </div>
                     
-                    <div class="detail-card ruler-detail">
-                        <div class="ruler-info">
-                            <div class="ruler-name">
-                                👑 <span id="ruler-name">Ruler Name</span>
-                            </div>
-                            <div class="ruler-details">
-                                Age <span id="ruler-age">20</span> • <span id="ruler-years-remaining">20</span> years left
-                            </div>
-                            <div class="ruler-traits" id="ruler-traits">
-                                Traits: Builder, Explorer
+                    <div class="detail-section">
+                        <div class="detail-card ruler-detail">
+                            <div class="ruler-info">
+                                <div class="ruler-name">
+                                    👑 <span id="ruler-name">Ruler Name</span>
+                                </div>
+                                <div class="ruler-details">
+                                    Age <span id="ruler-age">20</span> • <span id="ruler-years-remaining">20</span> years left
+                                </div>
+                                <div class="ruler-traits" id="ruler-traits">
+                                    Traits: Builder, Explorer
+                                </div>
                             </div>
                         </div>
                     </div>
