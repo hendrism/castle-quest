@@ -1032,10 +1032,17 @@ main {
     gap: var(--spacing-xs);
   }
   
-  .resource-compact {
+.resource-compact {
     padding: var(--spacing-xs);
     font-size: 0.75rem;
-  }
+}
+
+.no-locations {
+  padding: var(--spacing-md);
+  text-align: center;
+  opacity: 0.8;
+  font-style: italic;
+}
   
   .game-title {
     font-size: 1.1rem;
