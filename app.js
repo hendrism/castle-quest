@@ -1388,7 +1388,6 @@ function refreshGameInterface() {
         if (el.rulerName) el.rulerName.textContent = gameState.ruler.name;
         if (el.rulerAge) el.rulerAge.textContent = gameState.ruler.age;
         if (el.rulerTraits) el.rulerTraits.textContent = gameState.ruler.traits.join(', ');
-        uiManager.updateRulerYears(gameState.ruler.yearsRemaining);
     }
 
     // Update resources bar
@@ -2252,24 +2251,30 @@ function setupCollapsibleHeader() {
 
 function updateHeaderSummary() {
     // Top row stats
-    const monthEl = document.getElementById('stat-month');
+    const monthEl = document.getElementById('month-display');
     if (monthEl) monthEl.textContent = gameState.month;
 
-    const levelEl = document.getElementById('stat-level');
+    const levelEl = document.getElementById('level-detailed');
     if (levelEl) levelEl.textContent = gameState.level;
 
-    const moraleEl = document.getElementById('stat-morale');
-    if (moraleEl) moraleEl.textContent = gameState.morale;
+    const moraleEl = document.getElementById('morale-detailed');
+    if (moraleEl) {
+        let face = '😀';
+        if (gameState.morale < 25) face = '😠';
+        else if (gameState.morale < 50) face = '😟';
+        else if (gameState.morale < 75) face = '🙂';
+        moraleEl.textContent = `${face} ${gameState.morale}`;
+    }
 
-    const seasonEl = document.getElementById('stat-season');
+    const seasonEl = document.getElementById('season-display');
     if (seasonEl) seasonEl.textContent = seasons[gameState.season].icon;
 
     // Bottom row resources
-    const woodEl = document.getElementById('res-wood');
-    const stoneEl = document.getElementById('res-stone');
-    const foodEl = document.getElementById('res-food');
-    const toolsEl = document.getElementById('res-tools');
-    const gemsEl = document.getElementById('res-gems');
+    const woodEl = document.getElementById('bar-wood');
+    const stoneEl = document.getElementById('bar-stone');
+    const foodEl = document.getElementById('bar-food');
+    const toolsEl = document.getElementById('bar-tools');
+    const gemsEl = document.getElementById('bar-gems');
 
     if (woodEl) woodEl.textContent = gameState.resources.wood;
     if (stoneEl) stoneEl.textContent = gameState.resources.stone;

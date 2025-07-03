@@ -1,12 +1,12 @@
 export class UIManager {
   constructor() {
     this.elements = {
-      month: document.getElementById('month'),
+      month: document.getElementById('month-display'),
       level: document.getElementById('level'),
       xp: document.getElementById('xp'),
       xpNext: document.getElementById('xp-next'),
-      morale: document.getElementById('morale'),
-      season: document.getElementById('season'),
+      morale: document.getElementById('morale-detailed'),
+      season: document.getElementById('season-display'),
       nextMonthBtn: document.getElementById('next-month-btn'),
       explorationsLeft: document.getElementById('explorations-left'),
       explorationMax: document.getElementById('exploration-max'),
