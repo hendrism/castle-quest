@@ -1,5 +1,14 @@
 import { gameState } from './gameState.js';
 
+function moraleRollModifier() {
+  const m = gameState.morale;
+  if (m >= 90) return 2;
+  if (m >= 80) return 1;
+  if (m <= 15) return -2;
+  if (m <= 30) return -1;
+  return 0;
+}
+
 export function rollDice(sides = 20) {
   return Math.floor(Math.random() * sides) + 1;
 }
@@ -27,6 +36,12 @@ export function showDiceRoll(callback) {
       if (gameState.rollPenalty) {
         roll = Math.max(1, roll - gameState.rollPenalty);
         notes.push(`Food penalty: -${gameState.rollPenalty}`);
+      }
+
+      const moraleMod = moraleRollModifier();
+      if (moraleMod !== 0) {
+        roll = Math.min(20, Math.max(1, roll + moraleMod));
+        notes.push(`Morale: ${moraleMod > 0 ? '+' : ''}${moraleMod}`);
       }
 
       if (gameState.items.luckyCharm > 0) {
