@@ -987,7 +987,7 @@ main {
   }
   
   .detail-section {
-    flex-direction: column;
+    flex-direction: row;
     gap: var(--spacing-sm);
   }
   
