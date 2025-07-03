@@ -766,6 +766,18 @@
             transform: scale(0.98);
         }
 
+        .decision-text {
+            margin-bottom: var(--spacing-md);
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .decision-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
         /* Animations */
         @keyframes bounce {
             0%, 20%, 60%, 100% { transform: translateY(0); }
@@ -1179,6 +1191,17 @@
                 </div>
                 <div class="roll-result" id="roll-result">Rolling...</div>
                 <button class="modal-button" id="modal-continue">Continue</button>
+            </div>
+        </div>
+
+        <!-- Settlement Decision Modal -->
+        <div class="modal" id="decision-modal">
+            <div class="modal-content">
+                <div class="decision-text" id="decision-text"></div>
+                <div class="decision-buttons">
+                    <button class="modal-button" id="decision-option1"></button>
+                    <button class="modal-button" id="decision-option2"></button>
+                </div>
             </div>
         </div>
     </div>
