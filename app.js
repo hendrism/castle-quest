@@ -1676,7 +1676,6 @@ function initGame() {
         updateResearchUI();
         refreshGameInterface();
         setupEventListeners();
-        setupCollapsibleHeader();
         
         console.log('Game initialized successfully!');
     } catch (error) {
