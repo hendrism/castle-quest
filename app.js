@@ -81,18 +81,18 @@ const settlementDecisions = [
         text: 'A nearby village requests wood for rebuilding.',
         options: [
             {
-                text: 'Send aid (-5 wood, +5 morale)',
+                text: 'Send aid (-5 wood, +10 morale)',
                 effect: () => {
                     gameState.resources.wood = Math.max(0, gameState.resources.wood - 5);
-                    increaseMorale(5);
+                    increaseMorale(10);
                     addEventLog('Sent wood to help the village.', 'neutral');
                 }
             },
             {
-                text: 'Refuse (-5 morale, +5 wood)',
+                text: 'Refuse (-10 morale, +5 wood)',
                 effect: () => {
                     gameState.resources.wood += 5;
-                    decreaseMorale(5);
+                    decreaseMorale(10);
                     addEventLog('Refused to help the village.', 'neutral');
                 }
             }
@@ -102,18 +102,18 @@ const settlementDecisions = [
         text: 'Captured bandits await judgment.',
         options: [
             {
-                text: 'Recruit them (+2 population, -5 morale)',
+                text: 'Recruit them (+2 population, -10 morale)',
                 effect: () => {
                     gameState.population += 2;
-                    decreaseMorale(5);
+                    decreaseMorale(10);
                     addEventLog('Recruited bandits into the settlement.', 'neutral');
                 }
             },
             {
-                text: 'Execute them (+5 morale, -1 population)',
+                text: 'Execute them (+10 morale, -1 population)',
                 effect: () => {
                     if (gameState.population > 0) gameState.population -= 1;
-                    increaseMorale(5);
+                    increaseMorale(10);
                     addEventLog('Executed the bandits as a warning.', 'neutral');
                 }
             }
@@ -123,19 +123,19 @@ const settlementDecisions = [
         text: 'Citizens propose a grand festival.',
         options: [
             {
-                text: 'Hold festival (-5 food & wood, +10 morale)',
+                text: 'Hold festival (-10 food & wood, +15 morale)',
                 effect: () => {
-                    gameState.resources.food = Math.max(0, gameState.resources.food - 5);
-                    gameState.resources.wood = Math.max(0, gameState.resources.wood - 5);
-                    increaseMorale(10);
+                    gameState.resources.food = Math.max(0, gameState.resources.food - 10);
+                    gameState.resources.wood = Math.max(0, gameState.resources.wood - 10);
+                    increaseMorale(15);
                     addEventLog('Held a rousing festival for the people.', 'success');
                 }
             },
             {
-                text: 'Cancel plans (+5 food, -5 morale)',
+                text: 'Cancel plans (+5 food, -10 morale)',
                 effect: () => {
                     gameState.resources.food += 5;
-                    decreaseMorale(5);
+                    decreaseMorale(10);
                     addEventLog('Festival cancelled to conserve supplies.', 'neutral');
                 }
             }
@@ -280,6 +280,25 @@ const nightEvents = [
                 return { message: '🐉 The dragon obliterated your walls!', type: 'failure' };
             }
             return { message: `🐉 Dragon attack! Lost ${loss} wood and ${loss} stone.`, type: 'failure' };
+        }
+    },
+    {
+        name: 'Public celebration',
+        type: 'good',
+        effect: (severity) => {
+            const gain = Math.ceil(severity / 4);
+            increaseMorale(gain);
+            return { message: `🎉 A public celebration boosts morale by ${gain}.`, type: 'success' };
+        }
+    },
+    {
+        name: 'Unrest in the streets',
+        type: 'bad',
+        effect: (severity) => {
+            const loss = Math.ceil(severity / 4);
+            decreaseMorale(loss);
+            addMoraleEffect(-1, 3);
+            return { message: `🚨 Unrest shakes the populace. Morale -${loss}.`, type: 'failure' };
         }
     }
 ];
@@ -832,6 +851,7 @@ async function advanceMonth() {
         } else if (eventType === 'failure' || eventType === 'bad') {
             decreaseMorale(5);
         }
+        processMoraleEffects();
 
         // Monthly production from buildings
         const production = calculateMonthlyProduction();
@@ -860,6 +880,7 @@ async function advanceMonth() {
         } else {
             gameState.rollPenalty = 0;
         }
+        adjustMoraleForResources();
 
         if (production.food > 0 || production.wood > 0 || production.stone > 0 || production.metal > 0 || production.tools > 0 || production.gems > 0 || production.woodConsumed > 0 || production.foodDemand > 0) {
             const parts = [];
@@ -926,6 +947,7 @@ async function advanceMonth() {
         addEventLog(`🌅 Month ${gameState.month} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
 
         checkRulerStability();
+        maybeTriggerMoraleEvents();
 
         // Prepare settlement decision for the new month
         pendingDecision = generateSettlementDecision();
@@ -1191,6 +1213,14 @@ function calculateMonthlyProduction() {
     tools = Math.floor(tools * multiplier);
     gems = Math.floor(gems * multiplier);
 
+    const moraleMult = getMoraleProductionMultiplier();
+    food = Math.floor(food * moraleMult);
+    wood = Math.floor(wood * moraleMult);
+    stone = Math.floor(stone * moraleMult);
+    metal = Math.floor(metal * moraleMult);
+    tools = Math.floor(tools * moraleMult);
+    gems = Math.floor(gems * moraleMult);
+
     return { food, wood, stone, metal, tools, gems, woodConsumed, foodDemand };
 }
 
@@ -1315,6 +1345,61 @@ function increaseMorale(amount) {
 function decreaseMorale(amount) {
     gameState.morale = Math.max(0, gameState.morale - amount);
     addEventLog(`😟 Morale -${amount} (now ${gameState.morale})`, 'failure');
+}
+
+function addMoraleEffect(amount, duration) {
+    if (duration > 0 && amount !== 0) {
+        gameState.moraleEffects.push({ amount, duration });
+        const type = amount > 0 ? 'success' : 'failure';
+        addEventLog(`⏳ Morale effect ${amount > 0 ? '+' : ''}${amount} for ${duration} months`, type);
+    }
+}
+
+function processMoraleEffects() {
+    gameState.moraleEffects = gameState.moraleEffects.filter(effect => {
+        if (effect.duration > 0) {
+            if (effect.amount > 0) increaseMorale(effect.amount); else decreaseMorale(-effect.amount);
+            effect.duration--;
+        }
+        return effect.duration > 0;
+    });
+}
+
+function getMoraleProductionMultiplier() {
+    if (gameState.morale >= 90) return 1.15;
+    if (gameState.morale >= 80) return 1.1;
+    if (gameState.morale <= 15) return 0.8;
+    if (gameState.morale <= 30) return 0.9;
+    return 1;
+}
+
+function getMoraleRollModifier() {
+    if (gameState.morale >= 90) return 2;
+    if (gameState.morale >= 80) return 1;
+    if (gameState.morale <= 15) return -2;
+    if (gameState.morale <= 30) return -1;
+    return 0;
+}
+
+function adjustMoraleForResources() {
+    const { food, wood, stone } = gameState.resources;
+    if (food <= 0 || wood <= 0 || stone <= 0) {
+        decreaseMorale(5);
+    }
+    if (food > 30 && wood > 30 && stone > 30) {
+        increaseMorale(2);
+    }
+}
+
+function maybeTriggerMoraleEvents() {
+    const roll = Math.random();
+    if (gameState.morale > 80 && roll < 0.1) {
+        increaseMorale(5);
+        addEventLog('🥳 The people celebrate recent successes!', 'success');
+    } else if (gameState.morale < 50 && roll < 0.1) {
+        decreaseMorale(5);
+        addEventLog('😠 Unrest spreads among the populace.', 'failure');
+    }
 }
 
 function checkRulerStability() {
