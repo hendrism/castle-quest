@@ -121,6 +121,14 @@ function updateExplorationUI() {
         .filter(([key, loc]) => gameState.level >= (loc.requiredLevel || 1))
         .sort((a, b) => (a[1].requiredLevel || 1) - (b[1].requiredLevel || 1));
 
+    if (sorted.length === 0) {
+        const none = document.createElement('div');
+        none.className = 'no-locations';
+        none.textContent = 'No locations discovered yet';
+        grid.appendChild(none);
+        return;
+    }
+
     let currentLevel = null;
     sorted.forEach(([key, loc]) => {
         const level = loc.requiredLevel || 1;
@@ -701,7 +709,11 @@ function buildBuilding(type) {
     if (currentCount >= maxBuildings) return;
     
     const buildCost = adjustCostForTraits(buildingType.buildCost);
-    if (!canAfford(buildCost)) return;
+    if (!canAfford(buildCost)) {
+        addEventLog(`❌ Not enough resources to build ${buildingType.name}.`, 'failure');
+        refreshGameInterface();
+        return;
+    }
 
     spendResources(buildCost);
 
@@ -728,7 +740,11 @@ function upgradeBuilding(type, buildingId) {
     if (!currentLevel.upgradeTo) return;
     
     const upgradeCost = adjustCostForTraits(currentLevel.cost);
-    if (!canAfford(upgradeCost)) return;
+    if (!canAfford(upgradeCost)) {
+        addEventLog(`❌ Not enough resources to upgrade ${BUILDING_TYPES[type].name}.`, 'failure');
+        refreshGameInterface();
+        return;
+    }
 
     spendResources(upgradeCost);
     building.pendingLevel = currentLevel.upgradeTo;
