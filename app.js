@@ -75,6 +75,77 @@ const homeBonuses = {
 
 const homeOrder = ['camp', 'house', 'hall', 'fortress'];
 
+// Monthly settlement decisions presented at the start of each month
+const settlementDecisions = [
+    {
+        text: 'A nearby village requests wood for rebuilding.',
+        options: [
+            {
+                text: 'Send aid (-5 wood, +5 morale)',
+                effect: () => {
+                    gameState.resources.wood = Math.max(0, gameState.resources.wood - 5);
+                    increaseMorale(5);
+                    addEventLog('Sent wood to help the village.', 'neutral');
+                }
+            },
+            {
+                text: 'Refuse (-5 morale, +5 wood)',
+                effect: () => {
+                    gameState.resources.wood += 5;
+                    decreaseMorale(5);
+                    addEventLog('Refused to help the village.', 'neutral');
+                }
+            }
+        ]
+    },
+    {
+        text: 'Captured bandits await judgment.',
+        options: [
+            {
+                text: 'Recruit them (+2 population, -5 morale)',
+                effect: () => {
+                    gameState.population += 2;
+                    decreaseMorale(5);
+                    addEventLog('Recruited bandits into the settlement.', 'neutral');
+                }
+            },
+            {
+                text: 'Execute them (+5 morale, -1 population)',
+                effect: () => {
+                    if (gameState.population > 0) gameState.population -= 1;
+                    increaseMorale(5);
+                    addEventLog('Executed the bandits as a warning.', 'neutral');
+                }
+            }
+        ]
+    },
+    {
+        text: 'Citizens propose a grand festival.',
+        options: [
+            {
+                text: 'Hold festival (-5 food & wood, +10 morale)',
+                effect: () => {
+                    gameState.resources.food = Math.max(0, gameState.resources.food - 5);
+                    gameState.resources.wood = Math.max(0, gameState.resources.wood - 5);
+                    increaseMorale(10);
+                    addEventLog('Held a rousing festival for the people.', 'success');
+                }
+            },
+            {
+                text: 'Cancel plans (+5 food, -5 morale)',
+                effect: () => {
+                    gameState.resources.food += 5;
+                    decreaseMorale(5);
+                    addEventLog('Festival cancelled to conserve supplies.', 'neutral');
+                }
+            }
+        ]
+    }
+];
+
+// Holds the decision to display after closing the dice modal
+let pendingDecision = null;
+
 
 const nightEvents = [
     {
@@ -552,10 +623,20 @@ function setupEventListeners() {
         closeModalBtn.addEventListener('click', () => {
             console.log('Close modal clicked');
             closeModal();
+            if (pendingDecision) {
+                openDecisionModal(pendingDecision);
+                pendingDecision = null;
+            }
         });
     }
     if (modalCloseX) {
-        modalCloseX.addEventListener('click', () => closeModal());
+        modalCloseX.addEventListener('click', () => {
+            closeModal();
+            if (pendingDecision) {
+                openDecisionModal(pendingDecision);
+                pendingDecision = null;
+            }
+        });
     }
 
     document.addEventListener('keydown', (e) => {
@@ -563,6 +644,10 @@ function setupEventListeners() {
             const modal = document.getElementById('dice-modal');
             if (modal && modal.classList.contains('show')) {
                 closeModal();
+                if (pendingDecision) {
+                    openDecisionModal(pendingDecision);
+                    pendingDecision = null;
+                }
             }
         }
     });
@@ -841,6 +926,9 @@ async function advanceMonth() {
         addEventLog(`🌅 Month ${gameState.month} begins. Season: ${seasons[gameState.season].icon} ${seasons[gameState.season].name}`, 'neutral');
 
         checkRulerStability();
+
+        // Prepare settlement decision for the new month
+        pendingDecision = generateSettlementDecision();
 
         // Build detail text for modal
         const details = [];
@@ -2195,6 +2283,37 @@ function adjustResource(resource, amount) {
     const current = gameState.resources[resource] || 0;
     gameState.resources[resource] = Math.max(0, current + amount);
     debouncedRefreshGameInterface();
+}
+
+function generateSettlementDecision() {
+    return settlementDecisions[Math.floor(Math.random() * settlementDecisions.length)];
+}
+
+function openDecisionModal(decision) {
+    const modal = document.getElementById('decision-modal');
+    const textEl = document.getElementById('decision-text');
+    const opt1 = document.getElementById('decision-option1');
+    const opt2 = document.getElementById('decision-option2');
+    if (!modal || !textEl || !opt1 || !opt2) return;
+    textEl.textContent = decision.text;
+    opt1.textContent = decision.options[0].text;
+    opt2.textContent = decision.options[1].text;
+    opt1.onclick = () => {
+        decision.options[0].effect();
+        closeDecisionModal();
+    };
+    opt2.onclick = () => {
+        decision.options[1].effect();
+        closeDecisionModal();
+    };
+    modal.classList.add('show');
+}
+
+function closeDecisionModal() {
+    const modal = document.getElementById('decision-modal');
+    if (modal) modal.classList.remove('show');
+    debouncedRefreshGameInterface();
+    saveGame();
 }
 
 function setupDeveloperPanel() {
