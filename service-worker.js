@@ -1,16 +1,22 @@
 // Update the cache name whenever static assets change so users get the
 // latest files rather than a stale cached version.
-const CACHE_NAME = 'dice-castle-v2';
+const CACHE_NAME = 'dice-castle-v3';
 const urlsToCache = [
-'/',
-'/index.html',
-'/styles.css',
-'/app.js',
-'/gameState.js',
-'/exploration.js',
-'/settlement.js',
-'/ui.js',
-'/manifest.json'
+  '/',
+  '/index.html',
+  '/styles.css',
+  '/app.js',
+  '/constants.js',
+  '/gameState.js',
+  '/dice.js',
+  '/research.js',
+  '/uiManager.js',
+  '/utils.js',
+  '/data/locations.js',
+  '/data/buildings.js',
+  '/data/technologies.js',
+  '/debug.js',
+  '/manifest.json'
 ];
 
 // Install event - cache resources
