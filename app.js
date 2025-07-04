@@ -1,3 +1,4 @@
+// Fixed updateBuildingsUI function with better button state management
 function updateBuildingsUI() {
     const buildingTypes = ['farm', 'forester', 'quarry', 'mine', 'gemMine', 'workshop', 'sawmill', 'granary', 'smelter', 'barracks'];
     
@@ -15,17 +16,19 @@ function updateBuildingsUI() {
             const buildingType = BUILDING_TYPES[type];
             const underConstruction = gameState.settlement.constructionQueue.filter(b => b.type === type).length;
             const currentCount = gameState.settlement[getBuildingKey(type)].length + underConstruction;
+            const buildCost = adjustCostForTraits(buildingType.buildCost);
             
-            buildBtn.disabled = 
-                gameState.level < buildingType.requiredLevel ||
-                !homeAtLeast(buildingType.requiredHome || 'camp') ||
-                (buildingType.requiredTech && !gameState.technologies.includes(buildingType.requiredTech)) ||
-                currentCount >= limit ||
-                !canAfford(adjustCostForTraits(buildingType.buildCost));
+            // Check all requirements
+            const canBuild = 
+                gameState.level >= (buildingType.requiredLevel || 1) &&
+                homeAtLeast(buildingType.requiredHome || 'camp') &&
+                (!buildingType.requiredTech || gameState.technologies.includes(buildingType.requiredTech)) &&
+                currentCount < limit &&
+                canAfford(buildCost);
             
+            buildBtn.disabled = !canBuild;
             buildBtn.title = getRequirementTooltip(type);
             
-            const buildCost = adjustCostForTraits(buildingType.buildCost);
             const costText = formatCost(buildCost);
             
             const buildTextEl = buildBtn.querySelector('.build-text');
@@ -63,6 +66,7 @@ function renderBuildingList(type, container) {
         });
 }
 
+// Enhanced createBuildingElement function with better upgrade button styling
 function createBuildingElement(type, building, index) {
     const buildingType = BUILDING_TYPES[type];
     const currentLevel = buildingType.levels[building.level];
@@ -86,17 +90,26 @@ function createBuildingElement(type, building, index) {
     if (!upgrading && currentLevel.upgradeTo) {
         const btn = document.createElement('button');
         btn.className = 'btn-primary';
-        btn.disabled = !canAfford(adjustCostForTraits(currentLevel.cost));
+        
+        const upgradeCost = adjustCostForTraits(currentLevel.cost);
+        const canUpgrade = canAfford(upgradeCost);
+        
+        btn.disabled = !canUpgrade;
         btn.innerHTML = `
             <span class="upgrade-text">Upgrade to ${buildingType.levels[currentLevel.upgradeTo].name}</span>
-            <span class="upgrade-cost">${formatCost(adjustCostForTraits(currentLevel.cost))}</span>
+            <span class="upgrade-cost">${formatCost(upgradeCost)}</span>
         `;
-        btn.addEventListener('click', () => upgradeBuilding(type, building.id));
+        btn.addEventListener('click', () => {
+            if (!btn.disabled) {
+                upgradeBuilding(type, building.id);
+            }
+        });
         div.appendChild(btn);
     }
 
     return div;
 }
+
 
 function createConstructionElement(type) {
     const buildingType = BUILDING_TYPES[type];
@@ -143,6 +156,11 @@ function updateExplorationUI() {
         const btn = document.createElement('button');
         btn.className = 'location-card location-btn';
         btn.dataset.location = key;
+        
+        // Check if explorations are available
+        const canExplore = gameState.explorationsLeft > 0;
+        btn.disabled = !canExplore;
+        
         btn.innerHTML = `
             <div class="location-header">
                 <div class="location-icon">${loc.icon}</div>
@@ -152,27 +170,30 @@ function updateExplorationUI() {
                 </div>
             </div>
             <div class="location-meta">
-                <span id="${key}-difficulty"></span>
-                <span id="${key}-chance"></span>
+                <span class="location-difficulty"></span>
+                <span class="location-chance"></span>
             </div>
         `;
-        btn.addEventListener('click', () => exploreLocation(key));
+        
+        // Add click event listener
+        btn.addEventListener('click', () => {
+            if (!btn.disabled) {
+                exploreLocation(key);
+            }
+        });
+        
         grid.appendChild(btn);
-    });
-
-    // Apply state for difficulty and chance
-    document.querySelectorAll('.location-btn').forEach(btn => {
-        const loc = LOCATIONS[btn.dataset.location];
-        btn.disabled = gameState.explorationsLeft <= 0;
-
-        const diffEl = document.getElementById(`${btn.dataset.location}-difficulty`);
+        
+        // Update difficulty and chance after adding to DOM
+        const diffEl = btn.querySelector('.location-difficulty');
+        const chanceEl = btn.querySelector('.location-chance');
+        
         if (diffEl) {
             const diff = loc.requiredLevel || 1;
             const stars = '★★★★★'.slice(0, diff).padEnd(5, '☆');
             diffEl.textContent = `Difficulty: ${stars}`;
         }
 
-        const chanceEl = document.getElementById(`${btn.dataset.location}-chance`);
         if (chanceEl) {
             const levelDiff = gameState.level - (loc.requiredLevel || 1);
             let chance = 0.5 + levelDiff * 0.1;
@@ -1149,6 +1170,7 @@ function refreshGameInterface() {
     checkMonthlyChallengeCompletion();
 }
 
+// Enhanced updateSettlementUI function with better button state management
 function updateSettlementUI() {
     // Home upgrade
     const currentHome = homeTypes[gameState.settlement.home];
@@ -1161,6 +1183,7 @@ function updateSettlementUI() {
         const nextHome = homeTypes[currentHome.upgradeTo];
         const homeCost = adjustCostForTraits(currentHome.cost);
         const costText = formatCost(homeCost);
+        const canUpgradeHome = canAfford(homeCost);
 
         if (gameState.settlement.pendingHome) {
             homeUpgradeBtn.querySelector('.upgrade-text').textContent = `Upgrading to ${nextHome.name}...`;
@@ -1169,7 +1192,7 @@ function updateSettlementUI() {
         } else {
             homeUpgradeBtn.querySelector('.upgrade-text').textContent = `Upgrade to ${nextHome.name}`;
             homeUpgradeBtn.querySelector('.upgrade-cost').textContent = costText;
-            homeUpgradeBtn.disabled = !canAfford(homeCost);
+            homeUpgradeBtn.disabled = !canUpgradeHome;
         }
         homeUpgradeBtn.style.display = 'flex';
     } else if (homeUpgradeBtn) {
@@ -1189,10 +1212,11 @@ function updateSettlementUI() {
         const nextWalls = wallTypes[currentWalls.upgradeTo];
         const wallCost = adjustCostForTraits(currentWalls.cost);
         const costText = formatCost(wallCost);
+        const canUpgradeWalls = canAfford(wallCost);
 
         wallsUpgradeBtn.querySelector('.upgrade-text').textContent = `Build ${nextWalls.name} Walls`;
         wallsUpgradeBtn.querySelector('.upgrade-cost').textContent = costText;
-        wallsUpgradeBtn.disabled = !canAfford(wallCost);
+        wallsUpgradeBtn.disabled = !canUpgradeWalls;
         wallsUpgradeBtn.style.display = 'flex';
     } else if (wallsUpgradeBtn) {
         wallsUpgradeBtn.style.display = 'none';
@@ -1215,7 +1239,9 @@ function updateSettlementUI() {
     if (magicScrollEl) magicScrollEl.textContent = gameState.items.magicScroll;
     if (craftLuckyEl) craftLuckyEl.disabled = !canAfford({ wood: 3, stone: 2 });
     if (craftScrollEl) craftScrollEl.disabled = !canAfford({ wood: 2, gems: 1 });
-}// Game state has been moved to its own module for better organization
+}
+
+// Game state has been moved to its own module for better organization
 import { gameState } from './gameState.js';
 import { LOCATIONS } from './data/locations.js';
 import { BUILDING_TYPES } from './data/buildings.js';
@@ -1708,24 +1734,9 @@ function initGame() {
 }
 
 // Event listeners
+/ Enhanced setupEventListeners function
 function setupEventListeners() {
     console.log('Setting up event listeners...');
-
-    // Location exploration
-    const locationBtns = document.querySelectorAll('.location-btn');
-    locationBtns.forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-            btn.style.background = '#e74c3c';
-            btn.style.color = 'white';
-            setTimeout(() => {
-                btn.style.background = '';
-                btn.style.color = '';
-            }, 200);
-
-            const location = btn.dataset.location;
-            exploreLocation(location);
-        });
-    });
 
     // Next month button
     const nextMonthBtn = document.getElementById('next-month-btn');
@@ -1738,11 +1749,19 @@ function setupEventListeners() {
     const wallsUpgradeBtn = document.getElementById('walls-upgrade-btn');
 
     if (homeUpgradeBtn) {
-        homeUpgradeBtn.addEventListener('click', () => upgradeHome());
+        homeUpgradeBtn.addEventListener('click', () => {
+            if (!homeUpgradeBtn.disabled) {
+                upgradeHome();
+            }
+        });
     }
 
     if (wallsUpgradeBtn) {
-        wallsUpgradeBtn.addEventListener('click', () => upgradeWalls());
+        wallsUpgradeBtn.addEventListener('click', () => {
+            if (!wallsUpgradeBtn.disabled) {
+                upgradeWalls();
+            }
+        });
     }
 
     // Building construction buttons
@@ -1754,7 +1773,11 @@ function setupEventListeners() {
     buildingButtons.forEach(type => {
         const btn = document.getElementById(`build-${type}-btn`);
         if (btn) {
-            btn.addEventListener('click', () => buildBuilding(type));
+            btn.addEventListener('click', () => {
+                if (!btn.disabled) {
+                    buildBuilding(type);
+                }
+            });
         }
     });
 
@@ -1764,9 +1787,11 @@ function setupEventListeners() {
 
     if (startResearchBtn) {
         startResearchBtn.addEventListener('click', () => {
-            const key = researchSelect.value;
-            if (startResearch(key)) {
-                updateResearchUI();
+            if (!startResearchBtn.disabled) {
+                const key = researchSelect.value;
+                if (startResearch(key)) {
+                    updateResearchUI();
+                }
             }
         });
     }
@@ -1776,10 +1801,18 @@ function setupEventListeners() {
     const craftScrollBtn = document.getElementById('craft-magic-scroll');
     
     if (craftBtn) {
-        craftBtn.addEventListener('click', () => craftLuckyCharm());
+        craftBtn.addEventListener('click', () => {
+            if (!craftBtn.disabled) {
+                craftLuckyCharm();
+            }
+        });
     }
     if (craftScrollBtn) {
-        craftScrollBtn.addEventListener('click', () => craftMagicScroll());
+        craftScrollBtn.addEventListener('click', () => {
+            if (!craftScrollBtn.disabled) {
+                craftMagicScroll();
+            }
+        });
     }
 
     // Event log controls
